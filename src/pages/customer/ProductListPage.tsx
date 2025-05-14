@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const ProductListPage = () => {
   return (
@@ -68,12 +69,18 @@ const ProductListPage = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="border rounded-lg p-4 shadow-sm">
-                  <div className="h-32 bg-gray-200 rounded mb-2"></div>
-                  <h3 className="text-sm font-semibold">Tên sản phẩm</h3>
-                  <p className="text-blue-600 font-bold">165.000đ/hộp</p>
-                  <p className="text-xs text-gray-500 mb-2">
-                    Hộp 2 vỉ x 10 ống
-                  </p>
+                  <Link
+                    key={i}
+                    to={`/products/${i}`}
+                    className="border rounded-lg p-4 shadow-sm hover:shadow-md transition block"
+                  >
+                    <div className="h-32 bg-gray-200 rounded mb-2"></div>
+                    <h3 className="text-sm font-semibold">Tên sản phẩm</h3>
+                    <p className="text-blue-600 font-bold">165.000đ/hộp</p>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Hộp 2 vỉ x 10 ống
+                    </p>
+                  </Link>
                   <button className="w-full bg-cyan-400 text-white py-1 rounded hover:bg-cyan-500 text-sm">
                     Thêm vào giỏ hàng
                   </button>

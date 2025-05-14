@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/customer/HomePage";
 import Layout from "./components/layouts/CustomerLayout";
 import ProductListPage from "./pages/customer/ProductListPage";
+import ProductDetailPage from "./pages/customer/ProductDetailPage";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -22,6 +23,10 @@ function App() {
             <Route
               path="/products/functional-foods"
               element={<ProductListPage />}
+            />
+            <Route
+              path="/products/:productId"
+              element={<ProductDetailPage />}
             />
           </Routes>
         </Layout>
