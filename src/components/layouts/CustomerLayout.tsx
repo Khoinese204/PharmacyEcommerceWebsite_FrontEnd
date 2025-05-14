@@ -1,3 +1,4 @@
+import Footer from "../common/Footer";
 import Navbar from "../common/Navbar";
 
 function Layout({ children }) {
@@ -5,6 +6,7 @@ function Layout({ children }) {
     <>
       <Navbar />
       <main className="p-6">{children}</main>
+      <Footer />
     </>
   );
 }

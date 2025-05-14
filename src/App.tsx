@@ -3,6 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/customer/HomePage";
 import Layout from "./components/layouts/CustomerLayout";
+import ProductListPage from "./pages/customer/ProductListPage";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -18,6 +19,10 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route
+              path="/products/functional-foods"
+              element={<ProductListPage />}
+            />
           </Routes>
         </Layout>
       </BrowserRouter>
