@@ -8,6 +8,8 @@ import ProductDetailPage from "./pages/customer/ProductDetailPage";
 import CartPage from "./pages/customer/CartPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
 import OrderSuccessPage from "./pages/customer/OrderSuccessPage";
+import OrderDetailPage from "./pages/staff/OrderDetailPage";
+import OrderConfirmPage from "./pages/staff/OrderConfirmPage";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -22,7 +24,7 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<OrderDetailPage />} />
             <Route
               path="/products/functional-foods"
               element={<ProductListPage />}
