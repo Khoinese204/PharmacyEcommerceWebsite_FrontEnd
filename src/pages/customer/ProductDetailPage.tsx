@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 
 const ProductDetailPage = () => {
+  const [activeTab, setActiveTab] = useState("mo-ta");
   return (
     <div className="bg-white text-gray-800">
       {/* Breadcrumb */}
@@ -39,7 +40,7 @@ const ProductDetailPage = () => {
             </span>
           </div>
           <div className="text-left">
-            <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 w-fit text-sm">
+            <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 w-fit mb-6">
               <button className="px-2 text-sm text-gray-700 hover:text-black">
                 −
               </button>
@@ -83,63 +84,150 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      {/* Tabs + content */}
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
-        {/* Tabs sidebar */}
+        {/* Sidebar Tabs */}
         <aside className="space-y-3">
-          <button className="w-full text-left py-2 px-3 rounded bg-blue-100 font-medium text-blue-700">
+          <button
+            onClick={() => setActiveTab("mo-ta")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "mo-ta"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Mô tả sản phẩm
           </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-gray-100">
+          <button
+            onClick={() => setActiveTab("thanh-phan")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "thanh-phan"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Thành phần
           </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-gray-100">
+          <button
+            onClick={() => setActiveTab("cong-dung")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "cong-dung"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Công dụng
           </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-gray-100">
+          <button
+            onClick={() => setActiveTab("cach-dung")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "cach-dung"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Cách dùng
           </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-gray-100">
+          <button
+            onClick={() => setActiveTab("tac-dung-phu")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "tac-dung-phu"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Tác dụng phụ
           </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-gray-100">
+          <button
+            onClick={() => setActiveTab("luu-y")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "luu-y"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Lưu ý
           </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-gray-100">
+          <button
+            onClick={() => setActiveTab("bao-quan")}
+            className={`w-full text-left py-2 px-3 rounded ${
+              activeTab === "bao-quan"
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : "hover:bg-gray-100"
+            }`}
+          >
             Bảo quản
           </button>
         </aside>
 
         {/* Main content */}
         <div className="text-left md:col-span-3">
-          <h2 className="text-base font-semibold mb-2">Mô tả sản phẩm</h2>
-          <p className="mb-4">
-            <strong>
-              Nước súc miệng Pearlie White Fluorinze Anti-bacterial Fluoride
-              750ml
-            </strong>{" "}
-            giúp loại bỏ vi khuẩn gây mùi và mảng bám, tăng cường men răng và
-            giữ hơi thở thơm mát. Sản phẩm thích hợp cho người lớn và trẻ từ 6
-            tuổi trở lên.
-          </p>
+          {activeTab === "mo-ta" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Mô tả sản phẩm</h2>
+              <p className="mb-4">
+                <strong>
+                  Nước súc miệng Pearlie White Fluorinze Anti-bacterial Fluoride
+                  750ml
+                </strong>{" "}
+                giúp loại bỏ vi khuẩn gây mùi và mảng bám, tăng cường men răng
+                và giữ hơi thở thơm mát. Sản phẩm thích hợp cho người lớn và trẻ
+                từ 6 tuổi trở lên.
+              </p>
+              <p className="mb-4">
+                Mảng bám và sâu răng là hai vấn đề răng miệng phổ biến hiện
+                nay...
+              </p>
+            </>
+          )}
 
-          <p className="mb-4">
-            Mảng bám và sâu răng là hai vấn đề răng miệng phổ biến hiện nay. Sản
-            phẩm giúp giảm hình thành mảng bám, sạch khoang miệng, giảm vi khuẩn
-            gây sâu răng và tạo cảm giác dễ chịu khi sử dụng. Ngoài ra, còn có
-            khả năng bảo vệ nướu và hạn chế hơi thở có mùi.
-          </p>
+          {activeTab === "thanh-phan" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Thành phần</h2>
+              <p>- CPC (Cetylpyridinium chloride)</p>
+              <p>- Xylitol</p>
+              <p>- Sodium fluoride, Flavor...</p>
+            </>
+          )}
 
-          <p className="mb-4">
-            Được thiết kế dễ mang đi, mùi dịu nhẹ, công thức CPC và Xylitol hỗ
-            trợ kiểm soát mùi hôi miệng và ngừa vi khuẩn hiệu quả.
-          </p>
+          {activeTab === "cong-dung" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Công dụng</h2>
+              <p>
+                Hỗ trợ tiêu diệt vi khuẩn gây mùi, làm sạch mảng bám, bảo vệ men
+                răng, giữ hơi thở thơm mát.
+              </p>
+            </>
+          )}
 
-          <p className="mb-4">
-            <strong>Hướng dẫn sử dụng:</strong> Súc miệng 10–15ml mỗi lần, giữ
-            trong 20–30 giây rồi nhổ ra. Không nuốt. Không dùng cho trẻ dưới 6
-            tuổi.
-          </p>
+          {activeTab === "cach-dung" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Cách dùng</h2>
+              <p>
+                Súc miệng 10–15ml, giữ trong 20–30 giây rồi nhổ ra. Không nuốt.
+              </p>
+            </>
+          )}
+
+          {activeTab === "tac-dung-phu" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Tác dụng phụ</h2>
+              <p>Hiếm gặp: kích ứng nhẹ nếu dùng quá nhiều lần trong ngày.</p>
+            </>
+          )}
+
+          {activeTab === "luu-y" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Lưu ý</h2>
+              <p>Không dùng cho trẻ dưới 6 tuổi. Không được nuốt.</p>
+            </>
+          )}
+
+          {activeTab === "bao-quan" && (
+            <>
+              <h2 className="text-base font-semibold mb-2">Bảo quản</h2>
+              <p>Bảo quản nơi khô ráo, tránh ánh nắng trực tiếp.</p>
+            </>
+          )}
         </div>
       </div>
     </div>

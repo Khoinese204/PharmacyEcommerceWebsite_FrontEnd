@@ -5,6 +5,9 @@ import HomePage from "./pages/customer/HomePage";
 import Layout from "./components/layouts/CustomerLayout";
 import ProductListPage from "./pages/customer/ProductListPage";
 import ProductDetailPage from "./pages/customer/ProductDetailPage";
+import CartPage from "./pages/customer/CartPage";
+import CheckoutPage from "./pages/customer/CheckoutPage";
+import OrderSuccessPage from "./pages/customer/OrderSuccessPage";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -28,6 +31,9 @@ function App() {
               path="/products/:productId"
               element={<ProductDetailPage />}
             />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/ordersuccess" element={<OrderSuccessPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>
