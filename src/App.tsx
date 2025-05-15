@@ -5,6 +5,8 @@ import HomePage from "./pages/customer/HomePage";
 import Layout from "./components/layouts/CustomerLayout";
 import ProductListPage from "./pages/customer/ProductListPage";
 import ProductDetailPage from "./pages/customer/ProductDetailPage";
+import OrderDetailPage from "./pages/staff/OrderDetailPage";
+import OrderConfirmPage from "./pages/staff/OrderConfirmPage";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -19,7 +21,7 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<OrderDetailPage />} />
             <Route
               path="/products/functional-foods"
               element={<ProductListPage />}
