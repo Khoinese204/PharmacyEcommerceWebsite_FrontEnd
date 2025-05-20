@@ -1,17 +1,23 @@
 import React, { useState } from "react";
+import BreadcrumbTo from "../../components/common/BreadcrumbTo";
+import QuantityButton from "../../components/common/QuantityButton";
+import { useParams } from "react-router-dom";
 
 const ProductDetailPage = () => {
   const [activeTab, setActiveTab] = useState("mo-ta");
+  const { productId } = useParams(); // 👈 Lấy từ URL
+  const breadcrumbItems = [
+    { label: "Trang chủ", path: "/" },
+    { label: "Thực phẩm chức năng", path: "/products/functional-foods" },
+    {
+      label: "Nước súc miệng",
+      path: `/products/functional-foods/${productId}`,
+    },
+  ];
   return (
     <div className="bg-white text-gray-800">
       {/* Breadcrumb */}
-      <div className="bg-cyan-100 text-sm py-3 px-4">
-        <div className="max-w-6xl mx-auto text-left">
-          <span className="text-gray-700">Trang chủ</span> &gt;{" "}
-          <span className="text-gray-700">Chăm sóc cá nhân</span> &gt;{" "}
-          <span className="font-medium">Nước súc miệng</span>
-        </div>
-      </div>
+      <BreadcrumbTo items={breadcrumbItems}></BreadcrumbTo>
 
       {/* Top info */}
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -41,13 +47,7 @@ const ProductDetailPage = () => {
           </div>
           <div className="text-left">
             <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 w-fit mb-6">
-              <button className="px-2 text-sm text-gray-700 hover:text-black">
-                −
-              </button>
-              <span className="mx-2 text-gray-900">1</span>
-              <button className="px-2 text-sm text-gray-700 hover:text-black">
-                +
-              </button>
+              <QuantityButton enabled={true}></QuantityButton>
             </div>
           </div>
 

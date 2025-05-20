@@ -5,10 +5,11 @@ import BreadcrumbBack from "../../components/common/BreadcrumbBack";
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const breadcrumbItems = [{ label: "Tiếp tục mua sắm", path: "/" }];
   return (
     <div className="bg-white min-h-screen text-gray-800">
       {/* Breadcrumb */}
-      <BreadcrumbBack content="Tiếp tục mua sắm" pageTo="/"></BreadcrumbBack>
+      <BreadcrumbBack items={breadcrumbItems}></BreadcrumbBack>
       {/* Cart Items */}
       <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-10">
         <div className="md:col-span-2 space-y-4 text-left">
@@ -28,7 +29,7 @@ export default function CartPage() {
             </div>
             <div className="flex gap-4 items-center">
               <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 w-fit text-sm">
-                <QuantityButton></QuantityButton>
+                <QuantityButton enabled={true}></QuantityButton>
               </div>
               <button className="text-red-500 hover:text-red-700 text-xl">
                 🗑️
@@ -52,7 +53,7 @@ export default function CartPage() {
             </div>
             <div className="flex gap-4 items-center">
               <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 w-fit text-sm">
-                <QuantityButton></QuantityButton>
+                <QuantityButton enabled={true}></QuantityButton>
               </div>
               <button className="text-red-500 hover:text-red-700 text-xl">
                 🗑️

@@ -25,7 +25,7 @@ export default function Navbar() {
 
         {/* Icons */}
         <div className="flex items-center gap-4 text-white text-lg">
-          <Link to="/account">
+          <Link to="/account/orderhistory">
             <FaUser />
           </Link>
           <Link to="/cart">

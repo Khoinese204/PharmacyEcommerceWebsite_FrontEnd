@@ -7,12 +7,10 @@ import BreadcrumbBack from "../../components/common/BreadcrumbBack";
 const CheckoutPage = () => {
   const [voucher, setVoucher] = useState("");
   const navigate = useNavigate();
+  const breadcrumbItems = [{ label: "Quay lại giỏ hàng", path: "/" }];
   return (
     <div className="bg-white text-gray-800">
-      <BreadcrumbBack
-        content="Quay lại giỏ hàng"
-        pageTo="/cart"
-      ></BreadcrumbBack>
+      <BreadcrumbBack items={breadcrumbItems}></BreadcrumbBack>
       {/* Nội dung */}
       <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Thông tin đặt hàng */}

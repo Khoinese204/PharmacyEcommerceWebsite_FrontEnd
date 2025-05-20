@@ -1,16 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import BreadcrumbTo from "../../components/common/BreadcrumbTo";
 
 const ProductListPage = () => {
+  const productId = "12345"; // Example product ID, replace with actual data
+  const breadcrumbItems = [
+    { label: "Trang chủ", path: "/" },
+    { label: "Thực phẩm chức năng", path: "/products/functional-foods" },
+  ];
   return (
     <div className="bg-white text-gray-800">
       {/* Breadcrumb */}
-      <div className="bg-cyan-100 text-sm p-4">
-        <div className="max-w-6xl mx-auto text-left">
-          <span className="text-gray-700">Trang chủ</span> &gt;{" "}
-          <span className="font-medium">Thực phẩm chức năng</span>
-        </div>
-      </div>
+      <BreadcrumbTo items={breadcrumbItems}></BreadcrumbTo>
 
       {/* Header */}
       <div className="max-w-6xl mx-auto py-8 px-4">
@@ -71,7 +72,7 @@ const ProductListPage = () => {
                 <div key={i} className="border rounded-lg p-4 shadow-sm">
                   <Link
                     key={i}
-                    to={`/products/${i}`}
+                    to={`/products/functional-foods/${i}`}
                     className="border rounded-lg p-4 shadow-sm hover:shadow-md transition block"
                   >
                     <div className="h-32 bg-gray-200 rounded mb-2"></div>

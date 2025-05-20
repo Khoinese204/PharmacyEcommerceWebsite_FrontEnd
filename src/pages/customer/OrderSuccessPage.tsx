@@ -11,15 +11,15 @@ export default function OrderSuccessPage() {
   const address = "11 Phan Đăng Lưu, Phường 10, Bình Thạnh, TPHCM";
   const deliveryDate = "thứ 7 (3/5/2025)"; // tính toán ngày giao dự kiến
 
+  const breadcrumbItems = [{ label: "Quay lại giỏ hàng", path: "/cart" }];
+
   return (
     <>
       <div>
-        <BreadcrumbBack
-          content="Quay lại giỏ hàng"
-          pageTo="/cart"
-        ></BreadcrumbBack>
+        <BreadcrumbBack items={breadcrumbItems}></BreadcrumbBack>
       </div>
-      <div className="bg-white min-h-screen py-10">
+      {/* <div className="bg-white min-h-screen py-10"> */}
+      <div className="py-10 bg-white flex items-start justify-center pt-20">
         <div className="max-w-2xl mx-auto text-center p-6 rounded">
           <FaCheckCircle className="text-green-500 text-5xl mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-4 text-[#00b14f] uppercase tracking-wide">
@@ -47,7 +47,7 @@ export default function OrderSuccessPage() {
               QUAY LẠI TRANG CHỦ
             </button>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/account/orderhistory/:orderId")}
               className="bg-cyan-400 text-white py-2 px-6 rounded-lg text-center font-semibold"
             >
               CHI TIẾT ĐƠN HÀNG
