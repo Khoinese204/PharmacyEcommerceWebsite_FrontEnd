@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Chart from "../../components/admin/Chart";
+import Chart from "../../components/admin/RevenueChart";
 import { useNavigate } from "react-router-dom";
 
 const menu = [
