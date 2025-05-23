@@ -25,62 +25,25 @@ import OrderFailPage from "./pages/customer/OrderFailPage";
 import ForgotPasswordPage from "./pages/common/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/common/ResetPasswordPage";
 import ResetPasswordSuccessPage from "./pages/common/ResetPasswordSuccessPage";
+import DashboardPage from "./pages/admin/DashboardPage";
+import CustomerLayout from "./components/layouts/CustomerLayout";
+import AdminLayout from "./components/layouts/AdminLayout";
+import AdminRoutes from "./routes/AdminRoutes";
+import CustomerRoutes from "./routes/CustomerRoutes";
+
+const getUserRole = () => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  return user?.role || "Customer";
+};
 
 function App() {
-  const [count, setCount] = useState(0);
+  const userRole = "Admin"; // ví dụ lấy từ localStorage, JWT, context...
 
   return (
-    <>
-      {/* <div className="bg-green-200 p-8 text-center">
-        <h1 className="text-3xl font-bold text-blue-700">
-          Hello Tailwind đã hoạt động!
-        </h1>
-      </div> */}
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route
-              path="/products/functional-foods"
-              element={<ProductListPage />}
-            />
-            <Route
-              path="/products/functional-foods/:productId"
-              element={<ProductDetailPage />}
-            />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/ordersuccess" element={<OrderSuccessPage />} />
-            <Route path="/orderfail" element={<OrderFailPage />} />
-            <Route
-              path="/account/orderhistory/:orderId"
-              element={<CustomerOrderDetailPage />}
-            />
-            <Route
-              path="/account/orderhistory"
-              element={<OrderHistoryPage />}
-            />
-            <Route path="/account/profile" element={<ProfilePage />} />
-            <Route
-              path="/account/change-password"
-              element={<ChangePasswordForm />}
-            />
-            <Route path="/account/couponcard" element={<CouponCardPage />} />
-            <Route
-              path="/products/:productId"
-              element={<ProductDetailPage />}
-            />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/signup" element={<SignUpForm />} />
-            <Route path="/signupsuccess" element={<SignUpSuccessPage />} />
-            <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-            <Route path="/resetpassword" element={<ResetPasswordPage />} />
-            <Route path="/resetpasswordsuccess" element={<ResetPasswordSuccessPage/>} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
-    </>
+    <BrowserRouter>
+      {/* {userRole === "Admin" && <AdminRoutes />} */}
+      {userRole === "Admin" && <AdminRoutes />}
+    </BrowserRouter>
   );
 }
 
