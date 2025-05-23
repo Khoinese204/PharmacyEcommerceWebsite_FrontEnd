@@ -27,7 +27,6 @@ import ResetPasswordPage from "./pages/common/ResetPasswordPage";
 import ResetPasswordSuccessPage from "./pages/common/ResetPasswordSuccessPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import CustomerLayout from "./components/layouts/CustomerLayout";
-import AdminLayout from "./components/layouts/AdminLayout";
 import AdminRoutes from "./routes/AdminRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
 
