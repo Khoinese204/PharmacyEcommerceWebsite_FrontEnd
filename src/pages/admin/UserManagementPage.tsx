@@ -14,8 +14,8 @@ const menu = [
   { label: "Lịch sử giá", path: "/admin/price-history" },
 ];
 
-export default function DashboardPage() {
-  const [selectedMenu, setSelectedMenu] = useState("Bảng điều khiển");
+export default function UserManagementPage() {
+  const [selectedMenu, setSelectedMenu] = useState("Người dùng");
   const navigate = useNavigate();
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -58,7 +58,7 @@ export default function DashboardPage() {
           {/* Title + Filters */}
           <div className="flex justify-between items-center mb-6 relative z-10">
             <h2 className="text-2xl font-semibold text-gray-800">
-              Bảng điều khiển
+              Quản lý người dùng
             </h2>
             <div className="flex items-center gap-2 text-xs">
               <select className="border rounded px-2 py-1 z-10 relative">
@@ -74,30 +74,6 @@ export default function DashboardPage() {
             </div>
           </div>
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {[
-              { title: "Tổng doanh thu", value: "198.500.000đ" },
-              { title: "Tổng số đơn hàng", value: "1.820" },
-              { title: "Tổng số khách hàng", value: "1.035" },
-              { title: "Tổng số loại sản phẩm tồn kho thấp", value: "5" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl p-4 shadow hover:shadow-md transition"
-              >
-                <p className="text-gray-500">{item.title}</p>
-                <p className="text-xl font-bold text-black">{item.value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Chart */}
-          <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
-            <div className="min-w-[1000px]">
-              <h2 className="text-lg font-semibold mb-4">Doanh thu</h2>
-              <Chart />
-            </div>
-          </div>
         </main>
       </div>
     </div>
