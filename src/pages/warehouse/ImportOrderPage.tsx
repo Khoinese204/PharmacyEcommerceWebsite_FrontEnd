@@ -62,20 +62,8 @@ const OrderConfirmPage = () => {
       <div className="bg-gray-50 min-h-screen w-full">
         <div className="bg-cyan-100 text-sm py-3 px-4 text-gray-700">
           <div className="max-w-6xl mx-auto text-left">
-            <span className="text-gray-700">Nhân viên bán hàng</span> &gt;{" "}
-            <span className="font-medium text-gray-700">Xác nhận đơn hàng</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-700">
-          <div className="bg-white rounded-lg shadow p-4 text-left border">
-            <p><strong>Tên:</strong> Nguyễn Văn A</p>
-            <p><strong>SDT:</strong> 0901234567</p>
-            <p><strong>Địa chỉ:</strong> 123 Nguyễn Huệ, Quận 1, TP.HCM</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-left border">
-            <p><strong>Trạng thái:</strong> Đang xử lý</p>
-            <p><strong>Phương thức thanh toán:</strong> COD</p>
+            <span className="text-gray-700">Nhân viên kho</span> &gt;{" "}
+            <span className="font-medium text-gray-700">Quản lý nhập kho</span>
           </div>
         </div>
 
@@ -132,12 +120,8 @@ const OrderConfirmPage = () => {
 
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Tổng tiền:</span>
-            <span className="font-semibold text-gray-700">
-              {totalAmount.toLocaleString()}đ
-            </span>
             <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm">
-              Xác nhận đơn hàng
+              Thêm đơn hàng
             </button>
           </div>
         </div>
@@ -146,10 +130,11 @@ const OrderConfirmPage = () => {
           <table className="w-full text-sm text-left ">
             <thead className="bg-blue-100 text-gray-800 uppercase">
               <tr>
-                <th className="px-4 py-2">Tên sản phẩm</th>
-                <th className="px-4 py-2">Số lượng</th>
-                <th className="px-4 py-2">Đơn giá</th>
+                <th className="px-4 py-2">Mã đơn hàng</th>
+                <th className="px-4 py-2">Nhà cung cấp</th>
+                <th className="px-4 py-2">Ngày tạo đơn</th>
                 <th className="px-4 py-2">Tổng tiền</th>
+                <th className="px-4 py-2 text-center">Trạng thái</th>
                 <th className="px-4 py-2 text-center">Hành động</th>
               </tr>
             </thead>
