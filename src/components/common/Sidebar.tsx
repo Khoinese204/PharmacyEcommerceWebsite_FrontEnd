@@ -3,7 +3,7 @@ import { FaChartBar, FaBox, FaUser, FaTags, FaClipboardList, FaSignOutAlt, FaHom
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 bg-white min-h-screen shadow-lg fixed left-0 top-0">
+    <aside className="w-64 bg-white min-h-screen shadow-lg fixed left-0 top-0 border-r border-gray-300">
       <div className="px-6 py-4 border-b text-2xl font-bold text-blue-600">
         PrimeCare
       </div>
