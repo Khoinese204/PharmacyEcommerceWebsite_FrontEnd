@@ -18,6 +18,7 @@ const OrderDetailPage = () => {
     const [selectedDate, setSelectedDate] = useState("");
     const [selectedOrderType, setSelectedOrderType] = useState("");
     const [selectedOrderStatus, setSelectedOrderStatus] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
     const orderItems: OrderItem[] = [
         {
         id: "PO-202401",
@@ -70,12 +71,12 @@ const OrderDetailPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-gray-700">
-          <div className="bg-white rounded-lg shadow p-4 text-left">
+          <div className="bg-white rounded-lg shadow p-4 text-left border">
             <p><strong>Tên:</strong> Nguyễn Văn A</p>
             <p><strong>SDT:</strong> 0901234567</p>
             <p><strong>Địa chỉ:</strong> 123 Nguyễn Huệ, Quận 1, TP.HCM</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-left">
+          <div className="bg-white rounded-lg shadow p-4 text-left border">
             <p><strong>Ngày tạo:</strong> 2025-04-26</p>
             <p><strong>Trạng thái:</strong> Đang xử lý</p>
             <p><strong>Phương thức thanh toán:</strong> COD</p>
@@ -84,9 +85,13 @@ const OrderDetailPage = () => {
 
         <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
           <div className="flex flex-wrap gap-2 items-center">
-            <button className="bg-white border px-3 py-2 rounded text-sm flex items-center">
-              <span className="mr-2">🔍</span>
-            </button>
+            <input
+                type="text"
+                placeholder="Tìm tên sản phẩm"
+                className="border px-2 py-1 rounded text-sm text-gray-700 w-35"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+            />
             <select
                 className="border px-2 py-1 rounded text-sm text-gray-700"
                 value={selectedDate}
@@ -126,48 +131,16 @@ const OrderDetailPage = () => {
                     setSelectedOrderStatus("");
                 }}
                 >
-                🔄 Reset Filter
+                🔄 Làm mới
             </button>
 
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm">Tổng tiền:</span>
+            <span className="text-sm text-gray-700">Tổng tiền:</span>
             <span className="font-semibold text-gray-700">
               {totalAmount.toLocaleString()}đ
             </span>
-            {/* {showStatusDropdown ? (
-        <div className="flex items-center gap-2">
-            <select
-                className="border px-2 py-1 rounded text-sm text-gray-700"
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                >
-                <option value="" disabled>Chọn trạng thái</option>
-                <option value="processing">Đang xử lý</option>
-                <option value="shipped">Đã giao</option>
-                <option value="cancelled">Đã hủy</option>
-                </select>
-                <button
-                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
-                onClick={handleUpdateStatus}
-                >
-                Lưu
-                </button>
-                <button
-                className="text-sm text-gray-500"
-                onClick={() => setShowStatusDropdown(false)}
-                >
-                Hủy
-                </button>
-            </div>
-            ) : (
-            <button
-                className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-                onClick={() => setShowStatusDropdown(true)}
-            >
-                Cập nhật trạng thái
-            </button>
-            )} */}
+            {}
 
             <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm">
               Cập nhật trạng thái
@@ -175,9 +148,9 @@ const OrderDetailPage = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto bg-white shadow rounded-lg">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 uppercase">
+        <div className="overflow-x-auto bg-white rounded-lg border">
+          <table className="w-full text-sm text-left ">
+            <thead className="bg-blue-100 text-gray-800 uppercase">
               <tr>
                 <th className="px-4 py-2">Tên sản phẩm</th>
                 <th className="px-4 py-2">Số lượng</th>
