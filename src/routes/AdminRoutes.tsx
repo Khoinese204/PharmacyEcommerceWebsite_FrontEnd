@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import DashboardPage from "../pages/admin/DashboardPage";
 import UserManagementPage from "../pages/admin/UserManagementPage";
+import AddUserPage from "../pages/admin/AddUserPage";
 // ... import các trang khác
 
 export default function AdminRoutes() {
@@ -11,6 +12,7 @@ export default function AdminRoutes() {
         <Route index element={<Navigate to="dashboard" />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UserManagementPage />} />
+        <Route path="users/add" element={<AddUserPage />} />
         {/* ...các route khác */}
       </Route>
     </Routes>
