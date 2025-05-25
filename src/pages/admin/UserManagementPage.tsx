@@ -222,7 +222,10 @@ export default function UserManagementPage() {
           {/* Search bar*/}
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div className="p-6">
-              <SearchBar onSelect={handleSearchSelect} />
+              <SearchBar
+                onSelect={handleSearchSelect}
+                placeholder="Tìm kiếm theo tên người dùng, email, ..."
+              />
             </div>
             {/* Filter Date*/}
             {/* <div className="flex items-center gap-2 text-xs">

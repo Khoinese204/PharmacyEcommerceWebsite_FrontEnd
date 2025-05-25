@@ -6,6 +6,8 @@ import UserFilterBar from "../../components/admin/UserFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import SearchBar from "../../components/admin/SearchBar";
+import MedicineTable from "../../components/admin/MedicineTable";
+import MedicineFilterBar from "../../components/admin/MedicineFilterBar";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -19,143 +21,35 @@ const menu = [
   { label: "Lịch sử giá", path: "/admin/price-history" },
 ];
 
-const mockUsers = [
+const medicines = [
   {
     id: "00001",
-    name: "User 1",
-    email: "user1@example.com",
-    phone: "0186799000",
-    role: "Admin",
-    address: "23 Phan Xích Long",
+    name: "Nước súc miệng",
+    price: 65000,
+    category: "Chăm sóc cá nhân",
+    stock: 10,
   },
   {
     id: "00002",
-    name: "User 2",
-    email: "user2@example.com",
-    phone: "11 May 2024",
-    role: "Sales Staff",
-    address: "New York",
+    name: "Viên uống Immunvita EasyLife",
+    price: 70000,
+    category: "Thực phẩm chức năng",
+    stock: 20,
   },
   {
     id: "00003",
-    name: "User 3",
-    email: "user3@example.com",
-    phone: "0386799002",
-    role: "Warehouse Staff",
-    address: "London",
+    name: "Thuốc Exopadin",
+    price: 60000,
+    category: "Thuốc",
+    stock: 15,
   },
   {
     id: "00004",
-    name: "User 4",
-    email: "user4@example.com",
-    phone: "13 May 2024",
-    role: "Customer",
-    address: "Paris",
+    name: "Thuốc Vomina Plus",
+    price: 100000,
+    category: "Thuốc",
+    stock: 5,
   },
-  {
-    id: "00005",
-    name: "User 5",
-    email: "user5@example.com",
-    phone: "0586799004",
-    role: "Warehouse Staff",
-    address: "Berlin",
-  },
-  {
-    id: "00006",
-    name: "User 6",
-    email: "user6@example.com",
-    phone: "15 May 2024",
-    role: "Warehouse Staff",
-    address: "Tokyo",
-  },
-  {
-    id: "00007",
-    name: "User 7",
-    email: "user7@example.com",
-    phone: "0786799006",
-    role: "Admin",
-    address: "Seoul",
-  },
-  {
-    id: "00008",
-    name: "User 8",
-    email: "user8@example.com",
-    phone: "17 May 2024",
-    role: "Sales Staff",
-    address: "Hanoi",
-  },
-  {
-    id: "00009",
-    name: "User 9",
-    email: "user9@example.com",
-    phone: "0986799008",
-    role: "Warehouse Staff",
-    address: "Bangkok",
-  },
-  {
-    id: "00010",
-    name: "User 10",
-    email: "user10@example.com",
-    phone: "19 May 2024",
-    role: "Customer",
-    address: "Sydney",
-  },
-  {
-    id: "00011",
-    name: "User 11",
-    email: "user11@example.com",
-    phone: "011867990010",
-    role: "Admin",
-    address: "23 Phan Xích Long",
-  },
-  {
-    id: "00012",
-    name: "User 12",
-    email: "user12@example.com",
-    phone: "21 May 2024",
-    role: "Sales Staff",
-    address: "New York",
-  },
-  {
-    id: "00013",
-    name: "User 13",
-    email: "user13@example.com",
-    phone: "013867990012",
-    role: "Admin",
-    address: "London",
-  },
-  {
-    id: "00014",
-    name: "User 14",
-    email: "user14@example.com",
-    phone: "23 May 2024",
-    role: "Sales Staff",
-    address: "Paris",
-  },
-  {
-    id: "00015",
-    name: "User 15",
-    email: "user15@example.com",
-    phone: "015867990014",
-    role: "Warehouse Staff",
-    address: "Berlin",
-  },
-  {
-    id: "00016",
-    name: "User 16",
-    email: "user16@example.com",
-    phone: "25 May 2024",
-    role: "Customer",
-    address: "Tokyo",
-  },
-];
-
-const sampleData = [
-  "Vitamin C",
-  "Canxi",
-  "Sắt",
-  "Thực phẩm chức năng",
-  "Dầu cá Omega 3",
 ];
 
 export default function MedicineManagementPage() {
@@ -167,7 +61,7 @@ export default function MedicineManagementPage() {
   const itemsPerPage = 8; // mỗi trang hiển thị 8 user
 
   // Giới hạn user theo trang
-  const paginatedUsers = mockUsers.slice(
+  const paginated = medicines.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -216,13 +110,16 @@ export default function MedicineManagementPage() {
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
-              items={[{ label: "Danh sách người dùng", path: "/admin/users" }]}
+              items={[{ label: "Danh sách thuốc", path: "/admin/medicines" }]}
             />
           </div>
           {/* Search bar*/}
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div className="p-6">
-              <SearchBar onSelect={handleSearchSelect} />
+              <SearchBar
+                onSelect={handleSearchSelect}
+                placeholder="Tìm kiếm theo tên thuốc, ..."
+              />
             </div>
             {/* Filter Date*/}
             {/* <div className="flex items-center gap-2 text-xs">
@@ -241,25 +138,25 @@ export default function MedicineManagementPage() {
 
           {/* Filter + Thêm người dùng trên cùng 1 dòng */}
           <div className="flex justify-between items-center px-6 mb-4">
-            <UserFilterBar />
+            <MedicineFilterBar />
 
             <button
-              onClick={() => navigate("/admin/users/add")}
+              onClick={() => navigate("/admin/medicines/add")}
               className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
             >
-              Thêm người dùng
+              Thêm thuốc
             </button>
           </div>
 
           {/* User Table */}
           <div className="bg-white p-4 rounded-xl shadow">
-            <UserTable users={paginatedUsers} />
+            <MedicineTable medicines={paginated} />
           </div>
 
           {/* User Table Pagination */}
           <Pagination
             currentPage={currentPage}
-            totalPages={Math.ceil(mockUsers.length / itemsPerPage)}
+            totalPages={Math.ceil(medicines.length / itemsPerPage)}
             onPageChange={(page) => setCurrentPage(page)}
           />
         </main>

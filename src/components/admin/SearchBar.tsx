@@ -2,9 +2,10 @@ import React, { useState } from "react";
 
 interface SearchBarProps {
   onSelect?: (item: string) => void;
+  placeholder: string;
 }
 
-export default function SearchBar({ onSelect }: SearchBarProps) {
+export default function SearchBar({ onSelect, placeholder }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [filtered, setFiltered] = useState<string[]>([]);
@@ -43,7 +44,7 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
     <form onSubmit={handleSubmit} className="relative w-full max-w-md">
       <input
         type="text"
-        placeholder="Tìm kiếm theo tên người dùng, email"
+        placeholder={placeholder}
         value={query}
         onChange={handleChange}
         className="w-200 px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
