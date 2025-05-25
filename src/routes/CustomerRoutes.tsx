@@ -24,6 +24,7 @@ export default function CustomerRoutes() {
   return (
     <CustomerLayout>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route
           path="/products/functional-foods"
           element={<ProductListPage />}
