@@ -6,7 +6,6 @@ function CustomerLayout({ children }) {
     <>
       <Navbar />
       <main className="p-6">{children}</main>
-      <h1>Hello</h1>
       <Footer />
     </>
   );

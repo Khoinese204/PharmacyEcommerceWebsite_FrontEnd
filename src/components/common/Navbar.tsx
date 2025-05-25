@@ -7,9 +7,9 @@ export default function Navbar() {
     <nav className="w-full bg-cyan-400">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center">
+        <Link to="/" className="flex items-center">
           <span className="text-white text-2xl font-bold">PrimeCare</span>
-        </div>
+        </Link>
 
         {/* Search bar */}
         <div className="flex-1 mx-8">

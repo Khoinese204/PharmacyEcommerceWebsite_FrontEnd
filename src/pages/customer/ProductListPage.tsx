@@ -21,7 +21,7 @@ const ProductListPage = () => {
         </p>
 
         {/* Tags */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             "Vitamin & Khoáng chất",
             "Cải thiện chức năng",
@@ -38,12 +38,12 @@ const ProductListPage = () => {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar filter */}
           <aside className="md:col-span-1 hidden md:block">
-            <h2 className="font-semibold text-lg mb-4">Filters</h2>
+            <h2 className="font-semibold text-lg mb-4">Bộ lọc</h2>
             <ul className="space-y-3 text-sm text-gray-700">
               <li>Đối tượng sử dụng</li>
               <li>Giới tính</li>
