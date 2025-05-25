@@ -5,6 +5,7 @@ import UserTable from "../../components/admin/UserTable";
 import UserFilterBar from "../../components/admin/UserFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import SearchBar from "../../components/admin/SearchBar";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -149,6 +150,14 @@ const mockUsers = [
   },
 ];
 
+const sampleData = [
+  "Vitamin C",
+  "Canxi",
+  "Sắt",
+  "Thực phẩm chức năng",
+  "Dầu cá Omega 3",
+];
+
 export default function UserManagementPage() {
   const [selectedMenu, setSelectedMenu] = useState("Người dùng");
   const navigate = useNavigate();
@@ -162,6 +171,11 @@ export default function UserManagementPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleSearchSelect = (item: string) => {
+    console.log("Đã chọn:", item);
+  };
+
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
       {/* Sidebar */}
@@ -205,11 +219,11 @@ export default function UserManagementPage() {
               items={[{ label: "Danh sách người dùng", path: "/admin/users" }]}
             />
           </div>
-          {/* Title*/}
+          {/* Search bar*/}
           <div className="flex justify-between items-center mb-6 relative z-10">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Quản lý người dùng
-            </h2>
+            <div className="p-6">
+              <SearchBar onSelect={handleSearchSelect} />
+            </div>
             {/* Filter Date*/}
             {/* <div className="flex items-center gap-2 text-xs">
               <select className="border rounded px-2 py-1 z-10 relative">
