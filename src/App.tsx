@@ -8,8 +8,8 @@ import ProductDetailPage from "./pages/customer/ProductDetailPage";
 import CartPage from "./pages/customer/CartPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
 import OrderSuccessPage from "./pages/customer/OrderSuccessPage";
-import OrderDetailPage from "./pages/staff/OrderDetailPage";
-import OrderConfirmPage from "./pages/staff/OrderConfirmPage";
+import OrderDetailPage from "./pages/sales/OrderDetailPage";
+import OrderConfirmPage from "./pages/sales/OrderConfirmPage";
 import CustomerOrderDetailPage from "./pages/customer/CustomerOrderDetailPage";
 import OrderHistoryPage from "./pages/customer/OrderHistoryPage";
 import ProfilePage from "./pages/customer/ProfilePage";
@@ -29,6 +29,7 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import CustomerLayout from "./components/layouts/CustomerLayout";
 import AdminRoutes from "./routes/AdminRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
+import SalesRoutes from "./routes/SalesRoutes";
 
 const getUserRole = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -37,11 +38,12 @@ const getUserRole = () => {
 
 function App() {
   const userRole = "Admin"; // ví dụ lấy từ localStorage, JWT, context...
+  const salesRole = "Sales";
 
   return (
     <BrowserRouter>
-      {/* {userRole === "Admin" && <AdminRoutes />} */}
       {userRole === "Admin" && <AdminRoutes />}
+      {salesRole === "Sales" && <SalesRoutes />}
     </BrowserRouter>
   );
 }
