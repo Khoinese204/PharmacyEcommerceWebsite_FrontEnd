@@ -30,20 +30,17 @@ import CustomerLayout from "./components/layouts/CustomerLayout";
 import AdminRoutes from "./routes/AdminRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
 import SalesRoutes from "./routes/SalesRoutes";
-
-const getUserRole = () => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  return user?.role || "Customer";
-};
+import WarehouseRoutes from "./routes/WarehouseRoutes";
 
 function App() {
-  const userRole = "Admin"; // ví dụ lấy từ localStorage, JWT, context...
-  const salesRole = "Sales";
+  const userRole = localStorage.getItem("role") || "Admin"; // thay thế "Admin" bằng role khác để test các route của role đó
 
   return (
     <BrowserRouter>
       {userRole === "Admin" && <AdminRoutes />}
-      {salesRole === "Sales" && <SalesRoutes />}
+      {userRole === "Sales Staff" && <SalesRoutes />}
+      {userRole === "Warehouse Staff" && <WarehouseRoutes />}
+      {userRole === "Customer" && <CustomerRoutes />}
     </BrowserRouter>
   );
 }
