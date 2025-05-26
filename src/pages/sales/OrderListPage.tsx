@@ -126,7 +126,7 @@ export default function OrderListPage() {
             <h2 className="text-2xl font-semibold text-gray-800">Quản lý đơn hàng</h2>
           </div>
 
-          <div className="flex justify-between items-center px-6 mb-4">
+          <div className="flex justify-between items-center mb-4">
             <OrderFilterBar
               searchTerm={searchTerm}
               statusFilter={statusFilter}
