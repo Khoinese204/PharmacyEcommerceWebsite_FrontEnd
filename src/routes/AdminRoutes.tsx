@@ -4,6 +4,8 @@ import UserManagementPage from "../pages/admin/UserManagementPage";
 import AddUserPage from "../pages/admin/AddUserPage";
 import EditUserPage from "../pages/admin/EditUserPage";
 import ViewUserPage from "../pages/admin/ViewUserPage";
+import MedicineManagementPage from "../pages/admin/MedicineMangamentPage";
+import AddMedicinePage from "../pages/admin/AddMedicinePage";
 // ... import các trang khác
 
 export default function AdminRoutes() {
@@ -17,6 +19,8 @@ export default function AdminRoutes() {
         <Route path="users/add" element={<AddUserPage />} />
         <Route path="users/:id" element={<ViewUserPage />} />
         <Route path="users/:id/edit" element={<EditUserPage />} />
+        <Route path="medicines" element={<MedicineManagementPage />} />
+        <Route path="medicines/add" element={<AddMedicinePage />} />
         {/* ...các route khác */}
       </Route>
     </Routes>

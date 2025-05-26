@@ -1,5 +1,6 @@
 import React from "react";
-import ActionButtons from "./ActionButtons";
+import ActionButtons from "./UserActionButtons";
+import UserActionButtons from "./UserActionButtons";
 
 interface User {
   id: string;
@@ -59,7 +60,7 @@ export default function UserTable({ users }: Props) {
                 </span>
               </td>
               <td className="px-4 py-2 text-center">
-                <ActionButtons userId={user.id} />
+                <UserActionButtons userId={user.id} />
               </td>
             </tr>
           ))}
