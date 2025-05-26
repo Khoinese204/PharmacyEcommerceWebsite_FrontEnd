@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/sales/dashboard" },
-  { label: "Danh sách đơn hàng", path: "/sales/listorders" },
+  { label: "Đơn hàng", path: "/sales/orders" },
 ];
 
 export default function DashboardPage() {
