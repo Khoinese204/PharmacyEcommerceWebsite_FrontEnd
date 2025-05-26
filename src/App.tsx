@@ -32,7 +32,7 @@ import SalesRoutes from "./routes/SalesRoutes";
 import WarehouseRoutes from "./routes/WarehouseRoutes";
 
 function App() {
-  const userRole = localStorage.getItem("role") || "Admin"; // thay thế "Admin" bằng role khác để test các route của role đó
+  const userRole = localStorage.getItem("role") || "Sales Staff"; // thay thế "Admin" bằng role khác để test các route của role đó
 
   return (
     <BrowserRouter>

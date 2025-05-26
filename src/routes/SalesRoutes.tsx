@@ -3,7 +3,7 @@ import SalesLayout from "../components/layouts/SalesLayout";
 import SalesDashboardPage from "../pages/sales/SalesDashboardPage";
 import OrderDetailPage from "../pages/sales/OrderDetailPage";
 import OrderListPage from "../pages/sales/OrderListPage";
-
+import EditStatusPage from "../pages/sales/EditStatusPage";
 export default function SalesRoutes() {
   return (
     <SalesLayout>
@@ -12,6 +12,7 @@ export default function SalesRoutes() {
             <Route path="/sales/dashboard" element={<SalesDashboardPage />} />
             <Route path="/sales/orders" element={<OrderListPage />} />
             <Route path="/sales/orders/:orderId" element={<OrderDetailPage />} />
+            <Route path="/sales/orders/:orderId/editStatus" element={<EditStatusPage />} />
         </Routes>
     </SalesLayout>
   );

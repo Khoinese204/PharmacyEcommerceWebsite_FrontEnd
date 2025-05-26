@@ -53,7 +53,7 @@ export default function OrderTable({
               <td className="px-4 py-2 text-center">
                 <ActionButtons
                   viewUrl={`/sales/orders/${order.id}`}
-                  editUrl={`/sales/orders/${order.id}/edit`}
+                  editUrl={`/sales/orders/${order.id}/editStatus`}
                   onDelete={() => console.log("Xóa đơn hàng:", order.id)}
                 />
               </td>
