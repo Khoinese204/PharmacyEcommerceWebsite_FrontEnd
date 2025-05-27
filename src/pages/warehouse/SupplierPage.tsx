@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImportTable from "../../components/warehouse/ImportTable";
-import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
+import SupplierTable, { Supplier } from "../../components/warehouse/SupplierTable";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import { ImportOrder } from "../../components/warehouse/ImportTable";
+import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
+import SupplierFilterBar from "../../components/warehouse/SupplierFilterBar";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -15,66 +15,67 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-const mockImports: ImportOrder[] = [
+const mockSuppliers: Supplier[] = [
   {
-    id: "IMP001",
+    id: "SUP001",
     supplier: "Công ty Dược A",
-    createdAt: "2025-05-01T00:00:00.000Z",
-    totalAmount: 2000000,
-    status: "Đã nhận",
+    contact: "Nguyễn Văn A",
+    phone: 123456789,
+    email: "a@duoc.vn",
+    address: "123 Đường A, Quận 1, TP.HCM",
   },
   {
-    id: "IMP002",
+    id: "SUP002",
     supplier: "Công ty Dược B",
-    createdAt: "2025-05-02T00:00:00.000Z",
-    totalAmount: 1500000,
-    status: "Đã giao",
+    contact: "Trần Thị B",
+    phone: 987654321,
+    email: "b@duoc.vn",
+    address: "456 Đường B, Quận 3, TP.HCM",
   },
   {
-    id: "IMP003",
+    id: "SUP003",
     supplier: "Công ty Dược C",
-    createdAt: "2025-05-03T00:00:00.000Z",
-    totalAmount: 1750000,
-    status: "Chờ xác nhận",
+    contact: "Lê Văn C",
+    phone: 1122334455,
+    email: "c@duoc.vn",
+    address: "789 Đường C, Quận 5, TP.HCM",
   },
   {
-    id: "IMP004",
+    id: "SUP004",
     supplier: "Công ty Dược D",
-    createdAt: "2025-05-04T00:00:00.000Z",
-    totalAmount: 1250000,
-    status: "Đã huỷ",
+    contact: "Phạm Thị D",
+    phone: 5566778899,
+    email: "d@duoc.vn",
+    address: "321 Đường D, Quận 10, TP.HCM",
   },
   {
-    id: "IMP005",
+    id: "SUP005",
     supplier: "Công ty Dược E",
-    createdAt: "2025-05-05T00:00:00.000Z",
-    totalAmount: 2200000,
-    status: "Đang xử lý",
+    contact: "Đặng Văn E",
+    phone: 9988776655,
+    email: "e@duoc.vn",
+    address: "654 Đường E, Quận 2, TP.HCM",
   },
 ];
 
-
-export default function ImportPage() {
-  const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
+export default function SupplierPage() {
+  const [selectedMenu, setSelectedMenu] = useState("Nhà cung cấp");
   const navigate = useNavigate();
-  const [imports, setImports] = useState(mockImports);
+  const [suppliers, setSuppliers] = useState(mockSuppliers);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const filteredImports = imports.filter((imp) => {
-    const matchesSupplier = imp.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter ? imp.status === statusFilter : true;
-    return matchesSupplier && matchesStatus;
-  });
+  const filteredSuppliers = suppliers.filter((sup) =>
+    sup.supplier.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm]);
 
-  const totalPages = Math.ceil(filteredImports.length / itemsPerPage);
-  const paginatedImports = filteredImports.slice(
+  const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+  const paginatedSuppliers = filteredSuppliers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -111,35 +112,24 @@ export default function ImportPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Nhập kho", path: "/inventory/import" }]} />
+            <Breadcrumb items={[{ label: "Nhà cung cấp", path: "/warehouse/supplier" }]} />
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhập kho</h2>
-          </div>
+                      <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhà cung cấp</h2>
+        </div>
+          
+            <div className="flex justify-between items-center mb-4">
+                <SupplierFilterBar
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    onReset={() => {
+                        setSearchTerm("");
+                    }}
+                />
+            </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <ImportFilterBar
-              searchTerm={searchTerm}
-              statusFilter={statusFilter}
-              onSearchChange={setSearchTerm}
-              onStatusChange={setStatusFilter}
-              onReset={() => {
-                setSearchTerm("");
-                setStatusFilter("");
-              }}
-            />
-            <button
-              onClick={() => navigate("/warehouse/import/add")}
-              className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
-            >
-              Nhập hàng
-            </button>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl shadow">
-            <ImportTable orders={paginatedImports} />
-          </div>
+          <SupplierTable suppliers={paginatedSuppliers} />
 
           <Pagination
             currentPage={currentPage}

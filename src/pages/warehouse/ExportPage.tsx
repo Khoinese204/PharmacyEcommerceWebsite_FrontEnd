@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImportTable from "../../components/warehouse/ImportTable";
+import ExportTable, { ExportOrder } from "../../components/warehouse/ExportTable";
 import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import { ImportOrder } from "../../components/warehouse/ImportTable";
+import ExportFilterBar from "../../components/warehouse/ExportFilterBar";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -15,66 +15,65 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-const mockImports: ImportOrder[] = [
+const mockExports: ExportOrder[] = [
   {
     id: "IMP001",
-    supplier: "Công ty Dược A",
-    createdAt: "2025-05-01T00:00:00.000Z",
-    totalAmount: 2000000,
+    receiver: "Kho PrimeCare",
+    phone: "0901123456",
+    address: 1,
     status: "Đã nhận",
   },
   {
     id: "IMP002",
-    supplier: "Công ty Dược B",
-    createdAt: "2025-05-02T00:00:00.000Z",
-    totalAmount: 1500000,
+    receiver: "Kho PrimeCare",
+    phone: "0901123456",
+    address: 2,
     status: "Đã giao",
   },
   {
     id: "IMP003",
-    supplier: "Công ty Dược C",
-    createdAt: "2025-05-03T00:00:00.000Z",
-    totalAmount: 1750000,
+    receiver: "Kho PrimeCare",
+    phone: "0901123456",
+    address: 3,
     status: "Chờ xác nhận",
   },
   {
     id: "IMP004",
-    supplier: "Công ty Dược D",
-    createdAt: "2025-05-04T00:00:00.000Z",
-    totalAmount: 1250000,
+    receiver: "Kho PrimeCare",
+    phone: "0901123456",
+    address: 4,
     status: "Đã huỷ",
   },
   {
     id: "IMP005",
-    supplier: "Công ty Dược E",
-    createdAt: "2025-05-05T00:00:00.000Z",
-    totalAmount: 2200000,
+    receiver: "Kho PrimeCare",
+    phone: "0901123456",
+    address: 5,
     status: "Đang xử lý",
   },
 ];
 
-
-export default function ImportPage() {
-  const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
+export default function ExportPage() {
+  const [selectedMenu, setSelectedMenu] = useState("Xuất kho");
   const navigate = useNavigate();
-  const [imports, setImports] = useState(mockImports);
+  const [exports, setExports] = useState<ExportOrder[]>(mockExports);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const filteredImports = imports.filter((imp) => {
-    const matchesSupplier = imp.supplier.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredExports = exports.filter((imp) => {
+    const matchesReceiver = imp.receiver.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter ? imp.status === statusFilter : true;
-    return matchesSupplier && matchesStatus;
+    return matchesReceiver && matchesStatus;
   });
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
-  const totalPages = Math.ceil(filteredImports.length / itemsPerPage);
-  const paginatedImports = filteredImports.slice(
+  const totalPages = Math.ceil(filteredExports.length / itemsPerPage);
+  const paginatedExports = filteredExports.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -111,15 +110,15 @@ export default function ImportPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Nhập kho", path: "/inventory/import" }]} />
+            <Breadcrumb items={[{ label: "Xuất kho", path: "/warehouse/export" }]} />
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhập kho</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Quản lý xuất kho</h2>
           </div>
 
           <div className="flex justify-between items-center mb-4">
-            <ImportFilterBar
+            <ExportFilterBar
               searchTerm={searchTerm}
               statusFilter={statusFilter}
               onSearchChange={setSearchTerm}
@@ -129,16 +128,10 @@ export default function ImportPage() {
                 setStatusFilter("");
               }}
             />
-            <button
-              onClick={() => navigate("/warehouse/import/add")}
-              className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
-            >
-              Nhập hàng
-            </button>
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow">
-            <ImportTable orders={paginatedImports} />
+            <ExportTable orders={paginatedExports} />
           </div>
 
           <Pagination

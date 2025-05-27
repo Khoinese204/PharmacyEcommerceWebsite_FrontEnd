@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Eye, Pencil, Trash2 } from "lucide-react"; // Thư viện icon hiện đại
 
 interface Props {
   viewUrl: string;
   editUrl?: string;
   onDelete?: () => void;
+  customEditAction?: () => void; // 👈 thêm dòng này
 }
 
-export default function ActionButtons({ viewUrl, editUrl, onDelete }: Props) {
+export default function ActionButtons({ viewUrl, editUrl, onDelete, customEditAction }: Props) {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -20,7 +22,11 @@ export default function ActionButtons({ viewUrl, editUrl, onDelete }: Props) {
     <>
       <div className="flex justify-center gap-1 items-center">
         <button onClick={() => navigate(viewUrl)}>👁️</button>
-        {editUrl && <button onClick={() => navigate(editUrl)}>✏️</button>}
+        {customEditAction ? (
+          <button onClick={customEditAction}>✏️</button>
+        ) : (
+          editUrl && <button onClick={() => navigate(editUrl)}>✏️</button>
+        )}
         {onDelete && <button onClick={() => setShowConfirm(true)}>🗑️</button>}
       </div>
 

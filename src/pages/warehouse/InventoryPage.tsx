@@ -53,7 +53,7 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 8;
 
   const filtered = inventory.filter((item) => {
     const matchesName = item.productName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -103,7 +103,7 @@ export default function InventoryPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Quản lý kho", path: "/warehouse/inventory" }]} />
+            <Breadcrumb items={[{ label: "Kho", path: "/warehouse/inventory" }]} />
           </div>
 
           <div className="flex justify-between items-center mb-6 relative z-10">
@@ -124,7 +124,16 @@ export default function InventoryPage() {
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow">
-            <InventoryTable inventoryItems={paginated} />
+            <InventoryTable
+                inventoryItems={paginated}
+                onUpdateItem={(updatedItem) => {
+                    setInventory((prev) =>
+                    prev.map((item) =>
+                        item.batchNumber === updatedItem.batchNumber ? updatedItem : item
+                    )
+                    );
+                }}
+            />
           </div>
 
           <Pagination
