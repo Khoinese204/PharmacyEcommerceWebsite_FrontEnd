@@ -9,7 +9,6 @@ import CartPage from "./pages/customer/CartPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
 import OrderSuccessPage from "./pages/customer/OrderSuccessPage";
 import OrderDetailPage from "./pages/sales/OrderDetailPage";
-import OrderConfirmPage from "./pages/sales/OrderConfirmPage";
 import CustomerOrderDetailPage from "./pages/customer/CustomerOrderDetailPage";
 import OrderHistoryPage from "./pages/customer/OrderHistoryPage";
 import ProfilePage from "./pages/customer/ProfilePage";

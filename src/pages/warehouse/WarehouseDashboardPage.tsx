@@ -1,11 +1,15 @@
 import { useState } from "react";
-import OrderChart from "../../components/admin/OrderChart";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import LowStockChart from "../../components/admin/LowStockChart";
 
 const menu = [
-  { label: "Bảng điều khiển", path: "/sales/dashboard" },
-  { label: "Đơn hàng", path: "/sales/orders" },
+  { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
+  { label: "Kho", path: "/warehouse/inventory" },
+  { label: "Nhập kho", path: "/warehouse/import" },
+  { label: "Xuất kho", path: "/warehouse/export" },
+  { label: "Nhà cung cấp", path: "/warehouse/supplier" },
+  { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
 export default function DashboardPage() {
@@ -47,7 +51,7 @@ export default function DashboardPage() {
             />
             <div>
               <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên bán hàng</p>
+              <p className="text-xs text-gray-500">Nhân viên kho</p>
             </div>
           </div>
         </header>
@@ -75,10 +79,9 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
-              { title: "Đơn hàng đang chờ xác nhận", value: "15" },
-              { title: "Đơn hàng đang xử lý", value: "24" },
-              { title: "Đơn hàng đã vận chuyển", value: "10" },
-              { title: "Đơn hàng đã giao", value: "82" },
+              { title: "Tổng loại thuốc trong kho", value: "12500" },
+              { title: "Loại thuốc sắp hết hàng", value: "320" },
+              { title: "Loại thuốc hết hạn", value: "15" },
             ].map((item, index) => (
               <div
                 key={index}
@@ -93,8 +96,8 @@ export default function DashboardPage() {
           {/* Chart */}
           <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
             <div className="min-w-[1000px]">
-              <h2 className="text-lg font-semibold mb-4">Đơn hàng</h2>
-              <OrderChart />
+              <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hàng</h2>
+              <LowStockChart />
             </div>
           </div>
         </main>
