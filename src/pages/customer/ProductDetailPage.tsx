@@ -2,10 +2,117 @@ import React, { useState } from "react";
 import BreadcrumbTo from "../../components/common/BreadcrumbTo";
 import QuantityButton from "../../components/common/QuantityButton";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useCart } from "./CartContext";
+
+const allProducts = [
+  {
+    id: 1,
+    name: "Vitamin C 500mg",
+    image: "/images/products/product1.jpg",
+    originalPrice: 165000,
+    discountedPrice: 165000,
+    unit: "hộp",
+    brand: "VitaHealth",
+  },
+  {
+    id: 2,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product2.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+    brand: "Vinamilk",
+  },
+  {
+    id: 3,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product3.jpg",
+    originalPrice: 200000,
+    discountedPrice: 200000,
+    unit: "lon",
+    brand: "Vinamilk",
+  },
+  {
+    id: 4,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product4.jpg",
+    originalPrice: 200000,
+    discountedPrice: 200000,
+    unit: "lon",
+    brand: "Nutifood",
+  },
+  {
+    id: 5,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product5.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+    brand: "Nutifood",
+  },
+  {
+    id: 6,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product6.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+    brand: "TH True Milk",
+  },
+  {
+    id: 7,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product7.jpg",
+    originalPrice: 180000,
+    discountedPrice: 180000,
+    unit: "lon",
+    brand: "TH True Milk",
+  },
+  {
+    id: 8,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product8.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+    brand: "Abbott",
+  },
+  {
+    id: 9,
+    name: "Sữa tăng đề kháng extra",
+    image: "/images/products/product9.jpg",
+    originalPrice: 210000,
+    discountedPrice: 190000,
+    unit: "lon",
+    brand: "Abbott",
+  },
+  {
+    id: 10,
+    name: "Sữa tăng đề kháng extra",
+    image: "/images/products/product10.jpg",
+    originalPrice: 210000,
+    discountedPrice: 190000,
+    unit: "lon",
+    brand: "Nestlé",
+  },
+  {
+    id: 11,
+    name: "Sữa tăng đề kháng extra",
+    image: "/images/products/product11.jpg",
+    originalPrice: 210000,
+    discountedPrice: 190000,
+    unit: "lon",
+    brand: "Nestlé",
+  },
+];
 
 const ProductDetailPage = () => {
   const [activeTab, setActiveTab] = useState("mo-ta");
   const { productId } = useParams(); // 👈 Lấy từ URL
+  const product = allProducts.find((p) => p.id === Number(productId));
+  if (!product) return <div>Không tìm thấy sản phẩm</div>;
+  const { addToCart, isInCart } = useCart(); // ✅ khai báo ở đây
   const breadcrumbItems = [
     { label: "Trang chủ", path: "/" },
     { label: "Thực phẩm chức năng", path: "/products/functional-foods" },
@@ -23,9 +130,9 @@ const ProductDetailPage = () => {
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
           <img
-            src="/product-mouthwash.jpg"
+            src="/images/products/product3.jpg"
             alt="Nước súc miệng"
-            className="w-full rounded-lg shadow-md"
+            className="w-full max-w-sm max-h-[800px] object-contain rounded-lg shadow-md"
           />
         </div>
 
@@ -46,8 +153,31 @@ const ProductDetailPage = () => {
             </span>
           </div>
           <div className="text-left">
-            <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 w-fit mb-6">
-              <QuantityButton enabled={true}></QuantityButton>
+            <div className="flex items-center space-x-4 mb-6">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isInCart(product.id)) {
+                    // here
+                    toast.error("Sản phẩm đã tồn tại trong giỏ hàng!", {
+                      position: "top-center",
+                    });
+                    return;
+                  }
+                  addToCart({
+                    id: product.id,
+                    name: product.name,
+                    image: product.image,
+                    unit: product.unit,
+                    price: product.discountedPrice,
+                    originalPrice: product.originalPrice,
+                  });
+                  toast.success("Đã thêm vào giỏ hàng!");
+                }}
+                className="bg-cyan-500 hover:bg-cyan-600 text-white text-sm px-4 py-2 rounded-full"
+              >
+                Thêm vào giỏ hàng
+              </button>
             </div>
           </div>
 

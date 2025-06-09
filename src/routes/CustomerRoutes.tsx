@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "../pages/customer/HomePage";
 import OrderHistoryPage from "../pages/customer/OrderHistoryPage";
 import CustomerLayout from "../components/layouts/CustomerLayout";
-import ProductListPage from "../pages/customer/ProductListPage";
+import ProductListPage from "../pages/customer/FunctionalFoodProductListPage";
 import ProductDetailPage from "../pages/customer/ProductDetailPage";
 import CartPage from "../pages/customer/CartPage";
 import CheckoutPage from "../pages/customer/CheckoutPage";
@@ -19,6 +19,9 @@ import ForgotPasswordPage from "../pages/common/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/common/ResetPasswordPage";
 import ResetPasswordSuccessPage from "../pages/common/ResetPasswordSuccessPage";
 import CustomerOrderDetailPage from "../pages/customer/CustomerOrderDetailPage";
+import FunctionalFoodProductListPage from "../pages/customer/FunctionalFoodProductListPage";
+import DrugProductListPage from "../pages/customer/DrugProductListPage";
+import PersonalCareProductListPage from "../pages/customer/PersonalCareProductListPage";
 
 export default function CustomerRoutes() {
   return (
@@ -26,11 +29,16 @@ export default function CustomerRoutes() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
-          path="/products/functional-foods"
-          element={<ProductListPage />}
+          path="/functional-foods"
+          element={<FunctionalFoodProductListPage />}
+        />
+        <Route path="/drugs" element={<DrugProductListPage />} />
+        <Route
+          path="/personal-care"
+          element={<PersonalCareProductListPage />}
         />
         <Route
-          path="/products/functional-foods/:productId"
+          path="/functional-foods/:productId"
           element={<ProductDetailPage />}
         />
         <Route path="/cart" element={<CartPage />} />
@@ -55,6 +63,7 @@ export default function CustomerRoutes() {
         <Route path="/signupsuccess" element={<SignUpSuccessPage />} />
         <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
+        
         <Route
           path="/resetpasswordsuccess"
           element={<ResetPasswordSuccessPage />}

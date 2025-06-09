@@ -6,6 +6,13 @@ import EditUserPage from "../pages/admin/EditUserPage";
 import ViewUserPage from "../pages/admin/ViewUserPage";
 import MedicineManagementPage from "../pages/admin/MedicineMangamentPage";
 import AddMedicinePage from "../pages/admin/AddMedicinePage";
+import CategoryManagementPage from "../pages/admin/CategoryManagementPage";
+import CouponManagementPage from "../pages/admin/CouponManagementPage";
+import WarehouseManagementPage from "../pages/admin/WarehouseManagementPage";
+import RevenueManagementPage from "../pages/admin/RevenueManagementPage";
+import CustomerManagementPage from "../pages/admin/CustomerManagementPage";
+import PriceHistoryPage from "../pages/admin/PriceHistoryPage";
+import ProductPriceHistoryPage from "../pages/admin/ProductPriceHistoryPage";
 // ... import các trang khác
 
 export default function AdminRoutes() {
@@ -21,7 +28,15 @@ export default function AdminRoutes() {
         <Route path="users/:id/edit" element={<EditUserPage />} />
         <Route path="medicines" element={<MedicineManagementPage />} />
         <Route path="medicines/add" element={<AddMedicinePage />} />
+
         {/* ...các route khác */}
+        <Route path="categories" element={<CategoryManagementPage />} />
+        <Route path="coupons" element={<CouponManagementPage />} />
+        <Route path="warehouse" element={<WarehouseManagementPage />} />
+        <Route path="revenue" element={<RevenueManagementPage />} />
+        <Route path="customers" element={<CustomerManagementPage />} />
+        <Route path="price-history" element={<PriceHistoryPage />} />
+        <Route path="price-history/:id" element={<ProductPriceHistoryPage />} />
       </Route>
     </Routes>
   );
