@@ -1,23 +1,123 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Product from "../../components/common/Product";
+
+const allProducts = [
+  {
+    id: 1,
+    name: "Vitamin C 500mg",
+    image: "/images/products/product1.jpg",
+    originalPrice: 165000,
+    discountedPrice: 165000,
+    unit: "hộp",
+  },
+  {
+    id: 2,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product2.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+  },
+  {
+    id: 3,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product3.jpg",
+    originalPrice: 200000,
+    discountedPrice: 200000,
+    unit: "lon",
+  },
+  {
+    id: 4,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product4.jpg",
+    originalPrice: 200000,
+    discountedPrice: 200000,
+    unit: "lon",
+  },
+  {
+    id: 5,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product5.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+  },
+  {
+    id: 6,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product6.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+  },
+  {
+    id: 7,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product7.jpg",
+    originalPrice: 180000,
+    discountedPrice: 180000,
+    unit: "lon",
+  },
+  {
+    id: 8,
+    name: "Sữa tăng đề kháng",
+    image: "/images/products/product8.jpg",
+    originalPrice: 200000,
+    discountedPrice: 180000,
+    unit: "lon",
+  },
+  {
+    id: 9,
+    name: "Sữa tăng đề kháng extra",
+    image: "/images/products/product9.jpg",
+    originalPrice: 210000,
+    discountedPrice: 190000,
+    unit: "lon",
+  },
+  {
+    id: 10,
+    name: "Sữa tăng đề kháng extra",
+    image: "/images/products/product10.jpg",
+    originalPrice: 210000,
+    discountedPrice: 190000,
+    unit: "lon",
+  },
+  {
+    id: 11,
+    name: "Sữa tăng đề kháng extra",
+    image: "/images/products/product11.jpg",
+    originalPrice: 210000,
+    discountedPrice: 190000,
+    unit: "lon",
+  },
+];
 
 const HomePage = () => {
+  const [visibleCount, setVisibleCount] = useState(8);
+
+  const handleShowMore = () => {
+    if (visibleCount < allProducts.length) {
+      setVisibleCount((prev) => prev + 4);
+    }
+  };
+
+  const visibleProducts = allProducts.slice(0, visibleCount);
+
   return (
     <div className="bg-white">
       {/* Banner section */}
-      <div className="relative">
-        <img
-          src="/banner.jpg"
-          alt="Banner"
-          className="w-full object-cover h-[400px]"
-        />
+      <div
+        className="relative h-[400px] bg-center bg-cover max-w-screen-xl mx-auto"
+        style={{ backgroundImage: "url(/images/Banner.jpg)" }}
+      >
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-cyan-500 bg-opacity-80 text-white p-6 rounded-xl text-center">
-            <p className="text-sm font-medium tracking-wide">
+          <div className="text-center drop-shadow-md">
+            <p className="text-sm font-medium tracking-wide text-blue-900">
               EFFECTIVE MEDICINE, NEW MEDICINE EVERYDAY
             </p>
-            <h1 className="text-3xl font-extrabold mt-2">
-              WELCOME TO PRIMECARE
+            <h1 className="text-4xl font-extrabold mt-2 text-white drop-shadow-md">
+              Welcome to PrimeCare
             </h1>
           </div>
         </div>
@@ -32,21 +132,24 @@ const HomePage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           {[
-            { img: "/category1.jpg", label: "Thuốc", path: "/category/drugs" },
             {
-              img: "/category2.jpg",
-              label: "Thực phẩm chức năng",
-              path: "/products/functional-foods",
+              img: "/images/category1.webp",
+              label: "Thuốc",
+              path: "drugs",
             },
             {
-              img: "/category3.jpg",
+              img: "/images/category2.jpg",
+              label: "Thực phẩm chức năng",
+              path: "functional-foods",
+            },
+            {
+              img: "/images/category3.jpg",
               label: "Chăm sóc cá nhân",
-              path: "/category/personal-care",
+              path: "personal-care",
             },
           ].map((cat, idx) => (
             <div key={idx} className="flex flex-col items-center">
               <Link
-                key={idx}
                 to={cat.path}
                 className="flex flex-col items-center hover:opacity-90 transition"
               >
@@ -68,36 +171,18 @@ const HomePage = () => {
           Best Selling Products
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
-            >
-              <img
-                src={`/product${i + 1}.jpg`}
-                alt="Product"
-                className="h-40 w-full object-contain mb-3"
-              />
-              <p className="text-sm font-medium text-gray-800 mb-1">
-                Tên sản phẩm demo
-              </p>
-              <p className="text-blue-700 font-bold text-sm mb-1">
-                165.000đ/hộp
-              </p>
-              <p className="text-xs text-gray-500 mb-2">Hộp 2 vỉ x 10 ống</p>
-              <button className="bg-cyan-500 hover:bg-cyan-600 text-white text-sm py-1 px-4 rounded-full">
-                Thêm vào giỏ hàng
-              </button>
-            </div>
-          ))}
-        </div>
+        <Product products={visibleProducts} />
 
-        <div className="text-center mt-8">
-          <button className="text-cyan-600 hover:underline font-medium">
-            Xem thêm
-          </button>
-        </div>
+        {visibleCount < allProducts.length && (
+          <div className="text-center mt-8">
+            <button
+              onClick={handleShowMore}
+              className="text-cyan-600 hover:underline font-medium"
+            >
+              Xem thêm
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

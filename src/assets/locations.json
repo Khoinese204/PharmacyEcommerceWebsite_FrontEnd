@@ -1,0 +1,24 @@
+[
+  {
+    "name": "TP. Hồ Chí Minh",
+    "districts": [
+      {
+        "name": "Quận 1",
+        "wards": ["Phường Bến Nghé", "Phường Bến Thành", "Phường Cô Giang"]
+      },
+      {
+        "name": "Quận 3",
+        "wards": ["Phường 1", "Phường 2", "Phường 3"]
+      }
+    ]
+  },
+  {
+    "name": "Hà Nội",
+    "districts": [
+      {
+        "name": "Ba Đình",
+        "wards": ["Phúc Xá", "Trúc Bạch", "Vĩnh Phúc"]
+      }
+    ]
+  }
+]

@@ -1,13 +1,17 @@
+import { CartProvider } from "../../pages/customer/CartContext";
 import Footer from "../common/Footer";
 import Navbar from "../common/Navbar";
 
-function CustomerLayout({ children }) {
+
+function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <Navbar />
-      <main className="p-6">{children}</main>
-      <Footer />
-    </>
+    <CartProvider>
+      <>
+        <Navbar />
+        <main className="">{children}</main>
+        <Footer />
+      </>
+    </CartProvider>
   );
 }
 

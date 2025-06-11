@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import AutoTextarea from "../../components/admin/AutoTextarea";
 
 export default function AddMedicinePage() {
   const navigate = useNavigate();
@@ -86,6 +87,7 @@ export default function AddMedicinePage() {
             />
           </div>
           <h2 className="text-left text-xl font-semibold mb-4">Thêm thuốc</h2>
+          <AutoTextarea></AutoTextarea>
           <form></form>
         </main>
       </div>
