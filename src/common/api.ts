@@ -6,7 +6,11 @@ export async function fetchMedicines(categoryId: number) {
   console.log("🧪 API response:", response.data);
   const rawData = response.data;
 
-  return rawData.map((item: any) => ({
+  const filteredData = rawData.filter(
+    (item: any) => item.categoryId === categoryId
+  );
+
+  return filteredData.map((item: any) => ({
     id: item.id,
     name: item.name,
     image: `/images/products/${item.imageUrl}`, // 👈 Sửa chỗ này
