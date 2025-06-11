@@ -3,7 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/customer/HomePage";
 import Layout from "./components/layouts/CustomerLayout";
-import ProductListPage from "./pages/customer/ProductListPage";
+import ProductListPage from "./pages/customer/FunctionalFoodProductListPage";
 import ProductDetailPage from "./pages/customer/ProductDetailPage";
 import CartPage from "./pages/customer/CartPage";
 import CheckoutPage from "./pages/customer/CheckoutPage";
@@ -30,16 +30,38 @@ import AdminRoutes from "./routes/AdminRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
 import SalesRoutes from "./routes/SalesRoutes";
 import WarehouseRoutes from "./routes/WarehouseRoutes";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const userRole = localStorage.getItem("role") || "Warehouse Staff"; // thay thế "Admin" bằng role khác để test các route của role đó
+  const role = localStorage.getItem("role") || "Customer";
+
+  const renderRoutesByRole = () => {
+    switch (role) {
+      case "Admin":
+        return <AdminRoutes />;
+      case "Sales Staff":
+        return <SalesRoutes />;
+      case "Warehouse Staff":
+        return <WarehouseRoutes />;
+      case "Customer":
+      default:
+        return <CustomerRoutes />;
+    }
+  };
 
   return (
     <BrowserRouter>
-      {userRole === "Admin" && <AdminRoutes />}
-      {userRole === "Sales Staff" && <SalesRoutes />}
-      {userRole === "Warehouse Staff" && <WarehouseRoutes />}
-      {userRole === "Customer" && <CustomerRoutes />}
+      {renderRoutesByRole()}
+      <ToastContainer
+        position="top-center"
+        autoClose={1500}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </BrowserRouter>
   );
 }

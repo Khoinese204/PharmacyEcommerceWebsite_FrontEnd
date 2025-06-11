@@ -7,6 +7,7 @@ import ImportDetailPage from "../pages/warehouse/ImportDetailPage";
 import SupplierPage from "../pages/warehouse/SupplierPage";
 import ExportPage from "../pages/warehouse/ExportPage";
 import AddImportPage from "../pages/warehouse/AddImportPage";
+import AddSupplierPage from "../pages/warehouse/AddSupplierPage";
 
 export default function WarehouseRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function WarehouseRoutes() {
         <Route path="/warehouse/import/add" element={<AddImportPage />} />
         <Route path="/warehouse/import/:orderId" element={<ImportDetailPage />} />
         <Route path="/warehouse/supplier" element={<SupplierPage />} />
+        <Route path="/warehouse/supplier/add" element={<AddSupplierPage />} />
         <Route path="/warehouse/export" element={<ExportPage />} />
       </Routes>
     </WarehouseLayout>

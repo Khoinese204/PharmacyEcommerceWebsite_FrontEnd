@@ -1,4 +1,4 @@
-// src/pages/customer/OrderSuccessPage.tsx
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaEye, FaEyeSlash } from "react-icons/fa";

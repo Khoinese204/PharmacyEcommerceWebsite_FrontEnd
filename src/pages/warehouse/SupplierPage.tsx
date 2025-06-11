@@ -108,7 +108,7 @@ export default function SupplierPage() {
               <p className="text-xs text-gray-500">Nhân viên kho</p>
             </div>
           </div>
-        </header>
+        </header> 
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
@@ -127,6 +127,12 @@ export default function SupplierPage() {
                         setSearchTerm("");
                     }}
                 />
+                <button
+                    onClick={() => navigate("/warehouse/supplier/add")}
+                    className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
+                >
+                    Thêm nhà cung cấp
+                </button>
             </div>
 
           <SupplierTable suppliers={paginatedSuppliers} />
