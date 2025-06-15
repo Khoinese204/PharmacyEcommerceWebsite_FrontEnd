@@ -53,7 +53,7 @@ export default function Product({ products }: ProductProps) {
                 )}
               </div>
 
-              <p className="text-sm font-medium text-gray-800 mb-1">
+              <p className="text-sm font-medium text-gray-800 mb-1 line-clamp-2">
                 {product.name}
               </p>
 

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import BreadcrumbTo from "../../components/common/BreadcrumbTo";
 import Product from "../../components/common/Product";
+import { fetchMedicines } from "../../common/api";
 
 const allProducts = [
   {
@@ -106,6 +107,17 @@ const allProducts = [
 ];
 
 const PersonalCareProductListPage = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await fetchMedicines(3);
+      setProducts(result);
+    };
+
+    fetchData();
+  }, []);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [visibleCount, setVisibleCount] = useState(8);
   const [priceRange, setPriceRange] = useState<string>("");
@@ -135,10 +147,10 @@ const PersonalCareProductListPage = () => {
     setVisibleCount((prev) => prev + 4);
   };
 
-  const brands = Array.from(new Set(allProducts.map((p) => p.brand)));
+  const brands = Array.from(new Set(products.map((p) => p.brand)));
 
   // 🧠 Lọc theo giá & thương hiệu
-  const filteredProducts = allProducts.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const matchPrice =
       (priceRange === "under-100" && product.discountedPrice < 100000) ||
       (priceRange === "100-300" &&

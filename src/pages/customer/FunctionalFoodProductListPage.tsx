@@ -111,7 +111,7 @@ const FunctionalFoodProductListPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await fetchMedicines(1);
+      const result = await fetchMedicines(2);
       setProducts(result);
     };
 
