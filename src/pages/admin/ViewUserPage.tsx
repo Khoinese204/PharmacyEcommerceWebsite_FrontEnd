@@ -26,6 +26,7 @@ export default function ViewUserPage() {
     console.log("Form submitted:", formData);
     // Thực hiện gọi API tại đây nếu cần
   };
+  
 
   const menu = [
     { label: "Bảng điều khiển", path: "/admin/dashboard" },

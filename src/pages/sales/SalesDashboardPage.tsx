@@ -1,7 +1,8 @@
 import { useState } from "react";
 import OrderChart from "../../components/admin/OrderChart";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { FaUser } from "react-icons/fa";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/sales/dashboard" },
@@ -18,37 +19,31 @@ export default function DashboardPage() {
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {menu.map((item, idx) => {
-            const isActive = location.pathname === item.path;
-            return (
-                <button
-                key={idx}
-                onClick={() => navigate(item.path)}
-                className={`block w-full text-left px-3 py-2 rounded transition ${
-                    isActive
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-700 hover:bg-blue-50"
-                }`}
-                >
-                {item.label}
-                </button>
-            );
+          const isActive = location.pathname === item.path;
+          return (
+            <button
+              key={idx}
+              onClick={() => navigate(item.path)}
+              className={`block w-full text-left px-3 py-2 rounded transition ${
+                isActive
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 hover:bg-blue-50"
+              }`}
+            >
+              {item.label}
+            </button>
+          );
         })}
-
       </aside>
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img
-              src="/avatar.jpg"
-              alt="Avatar"
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên bán hàng</p>
-            </div>
+          {/* Icon nằm sát phải */}
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/sales/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 

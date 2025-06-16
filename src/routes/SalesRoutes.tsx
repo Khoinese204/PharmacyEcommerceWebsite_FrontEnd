@@ -4,16 +4,18 @@ import SalesDashboardPage from "../pages/sales/SalesDashboardPage";
 import OrderDetailPage from "../pages/sales/OrderDetailPage";
 import OrderListPage from "../pages/sales/OrderListPage";
 import EditStatusPage from "../pages/sales/EditStatusPage";
+import SalesAccountPage from "../pages/sales/SalesAccountPage";
 export default function SalesRoutes() {
   return (
-    <SalesLayout>
-        <Routes>
-            <Route path="/" element={<Navigate to="/sales/dashboard" />} />
-            <Route path="/sales/dashboard" element={<SalesDashboardPage />} />
-            <Route path="/sales/orders" element={<OrderListPage />} />
-            <Route path="/sales/orders/:orderId" element={<OrderDetailPage />} />
-            <Route path="/sales/orders/:orderId/editStatus" element={<EditStatusPage />} />
-        </Routes>
-    </SalesLayout>
+    // <SalesLayout>
+    <Routes>
+      <Route index element={<Navigate to="dashboard" />} />
+      <Route path="/account" element={<SalesAccountPage />} />
+      <Route path="/dashboard" element={<SalesDashboardPage />} />
+      <Route path="/orders" element={<OrderListPage />} />
+      <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+      <Route path="/orders/:orderId/editStatus" element={<EditStatusPage />} />
+    </Routes>
+    // </SalesLayout>
   );
 }

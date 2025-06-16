@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Chart from "../../components/admin/RevenueChart";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import UserTable from "../../components/admin/UserTable";
 import UserFilterBar from "../../components/admin/UserFilterBar";
 import Pagination from "../../components/admin/TablePagination";
@@ -8,6 +8,7 @@ import Breadcrumb from "../../components/admin/Breadcrumb";
 import SearchBar from "../../components/admin/SearchBar";
 import MedicineTable from "../../components/admin/MedicineTable";
 import MedicineFilterBar from "../../components/admin/MedicineFilterBar";
+import { FaUser } from "react-icons/fa";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -93,16 +94,11 @@ export default function MedicineManagementPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img
-              src="/avatar.jpg"
-              alt="Avatar"
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Admin</p>
-            </div>
+          {/* Icon nằm sát phải */}
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/admin/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 

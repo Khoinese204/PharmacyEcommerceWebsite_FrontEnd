@@ -1,58 +1,62 @@
-import { useState } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/customer/HomePage";
-import Layout from "./components/layouts/CustomerLayout";
-import ProductListPage from "./pages/customer/FunctionalFoodProductListPage";
-import ProductDetailPage from "./pages/customer/ProductDetailPage";
-import CartPage from "./pages/customer/CartPage";
-import CheckoutPage from "./pages/customer/CheckoutPage";
-import OrderSuccessPage from "./pages/customer/OrderSuccessPage";
-import OrderDetailPage from "./pages/sales/OrderDetailPage";
-import CustomerOrderDetailPage from "./pages/customer/CustomerOrderDetailPage";
-import OrderHistoryPage from "./pages/customer/OrderHistoryPage";
-import ProfilePage from "./pages/customer/ProfilePage";
-import ChangePasswordForm from "./pages/customer/ChangePasswordForm";
-import CouponCardPage from "./pages/customer/CouponCardPage";
-import LoginPage from "./pages/common/LoginForm";
-import SignUpPage from "./pages/common/SignUpForm";
-import LoginForm from "./pages/common/LoginForm";
-import SignUpForm from "./pages/common/SignUpForm";
-import AuthPage from "./pages/common/AuthPage";
-import SignUpSuccessPage from "./pages/common/SignUpSuccessPage";
-import OrderFailPage from "./pages/customer/OrderFailPage";
-import ForgotPasswordPage from "./pages/common/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/common/ResetPasswordPage";
-import ResetPasswordSuccessPage from "./pages/common/ResetPasswordSuccessPage";
-import DashboardPage from "./pages/admin/DashboardPage";
-import CustomerLayout from "./components/layouts/CustomerLayout";
-import AdminRoutes from "./routes/AdminRoutes";
-import CustomerRoutes from "./routes/CustomerRoutes";
-import SalesRoutes from "./routes/SalesRoutes";
-import WarehouseRoutes from "./routes/WarehouseRoutes";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function App() {
-  const role = localStorage.getItem("role") || "Customer";
+import AuthRoutes from "./routes/AuthRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
+import SalesRoutes from "./routes/SalesRoutes";
+import WarehouseRoutes from "./routes/WarehouseRoutes";
+import CustomerRoutes from "./routes/CustomerRoutes";
 
-  const renderRoutesByRole = () => {
+function App() {
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user.role;
+
+  const getDefaultRedirect = () => {
     switch (role) {
       case "Admin":
-        return <AdminRoutes />;
-      case "Sales Staff":
-        return <SalesRoutes />;
-      case "Warehouse Staff":
-        return <WarehouseRoutes />;
+        return "/admin/dashboard";
+      case "Sales":
+        return "/sales/dashboard";
+      case "Warehouse":
+        return "/warehouse/dashboard";
       case "Customer":
+        return "/";
       default:
-        return <CustomerRoutes />;
+        return "/auth";
     }
   };
 
   return (
     <BrowserRouter>
-      {renderRoutesByRole()}
+      <Routes>
+        {!token ? (
+          <>
+            <Route path="/auth/*" element={<AuthRoutes />} />
+            <Route path="*" element={<Navigate to="/auth" />} />
+          </>
+        ) : (
+          <>
+            {role === "Admin" && (
+              <Route path="/admin/*" element={<AdminRoutes />} />
+            )}
+            {role === "Sales" && (
+              <Route path="/sales/*" element={<SalesRoutes />} />
+            )}
+            {role === "Warehouse" && (
+              <Route path="/warehouse/*" element={<WarehouseRoutes />} />
+            )}
+            {role === "Customer" && (
+              <Route path="/*" element={<CustomerRoutes />} />
+            )}
+
+            {/* Catch-all: nếu vào path không đúng thì tự động chuyển đúng trang theo role */}
+            <Route path="*" element={<Navigate to={getDefaultRedirect()} />} />
+          </>
+        )}
+      </Routes>
+
       <ToastContainer
         position="top-center"
         autoClose={1500}
