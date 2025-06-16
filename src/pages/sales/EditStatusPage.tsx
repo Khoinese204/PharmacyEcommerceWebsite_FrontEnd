@@ -86,6 +86,7 @@ export default function EditStatusPage() {
               >
                 <option value="chờ xác nhận">Chờ xác nhận</option>
                 <option value="đang xử lý">Đang xử lý</option>
+                <option value="đang gói hàng">Đang gói hàng</option>
                 <option value="đang giao">Đang giao hàng</option>
                 <option value="đang giao">Đã giao</option>
                 <option value="hoàn thành">Hoàn thành</option>

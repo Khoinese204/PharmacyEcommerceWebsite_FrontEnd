@@ -34,7 +34,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const role = localStorage.getItem("role") || "Customer";
+  const role = localStorage.getItem("role") || "Sales Staff"; // Default to Sales Staff if no role is found
 
   const renderRoutesByRole = () => {
     switch (role) {

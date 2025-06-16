@@ -2,10 +2,10 @@ import React from "react";
 import ActionButtons from "./ActionButtons";
 
 interface Order {
-  id: string;
+  id: string; // Ví dụ: ORD001
   customer: string;
   total: number;
-  status: string;
+  status: string; // tiếng Việt
 }
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
   isConfirmMode?: boolean;
   selectedOrders?: string[];
   onSelectOrder?: (orderId: string) => void;
+  onOrdersChange?: (newOrders: Order[]) => void; 
 }
 
 export default function OrderTable({
@@ -20,6 +21,7 @@ export default function OrderTable({
   isConfirmMode = false,
   selectedOrders = [],
   onSelectOrder,
+  onOrdersChange,
 }: Props) {
   return (
     <div className="bg-white rounded-xl shadow overflow-x-auto">
@@ -40,7 +42,9 @@ export default function OrderTable({
             <tr key={order.id} className="border-t hover:bg-gray-50">
               <td className="px-4 py-2">{order.id}</td>
               <td className="px-4 py-2">{order.customer}</td>
-              <td className="px-4 py-2">{order.total}</td>
+              <td className="px-4 py-2">
+                {order.total.toLocaleString("vi-VN")} ₫
+              </td>
               <td className="px-4 py-2">
                 <span
                   className={`px-2 py-1 rounded text-xs font-medium ${getStatusStyle(
@@ -52,20 +56,29 @@ export default function OrderTable({
               </td>
               <td className="px-4 py-2 text-center">
                 <ActionButtons
-                  viewUrl={`/sales/orders/${order.id}`}
-                  editUrl={`/sales/orders/${order.id}/editStatus`}
+                  viewUrl={`/sales/orders/${parseInt(order.id.replace("ORD", ""))}`}
+                  orderId={parseInt(order.id.replace("ORD", ""))}
+                  currentStatus={mapStatusToCode(order.status)}
                   onDelete={() => console.log("Xóa đơn hàng:", order.id)}
+                  onStatusUpdateSuccess={(newStatusCode) => {
+                    const updated = orders.map((o) =>
+                      o.id === order.id
+                        ? { ...o, status: convertStatus(newStatusCode) }
+                        : o
+                    );
+                    onOrdersChange?.(updated);
+                  }}
                 />
               </td>
               {isConfirmMode && (
                 <td className="px-4 py-2 text-center">
-                  {order.status === "Chờ xác nhận" ? (
+                  {order.status === "Chờ xác nhận" && (
                     <input
                       type="checkbox"
                       checked={selectedOrders.includes(order.id)}
                       onChange={() => onSelectOrder?.(order.id)}
                     />
-                  ) : null}
+                  )}
                 </td>
               )}
             </tr>
@@ -76,12 +89,17 @@ export default function OrderTable({
   );
 }
 
+
 function getStatusStyle(status: string) {
   switch (status) {
     case "Chờ xác nhận":
       return "bg-yellow-100 text-yellow-600";
-    case "Đang xử lý":
+    case "Đã xác nhận":
+      return "bg-cyan-100 text-cyan-600";
+    case "Đang đóng gói":
       return "bg-blue-100 text-blue-600";
+    case "Đã đóng gói":
+      return "bg-indigo-100 text-indigo-600";
     case "Đang giao hàng":
       return "bg-purple-100 text-purple-600";
     case "Đã giao":
@@ -96,3 +114,34 @@ function getStatusStyle(status: string) {
       return "bg-slate-100 text-slate-600";
   }
 }
+
+function mapStatusToCode(status: string): string {
+  switch (status) {
+    case "Chờ xác nhận": return "PENDING";
+    case "Đã xác nhận": return "CONFIRMED";
+    case "Đang đóng gói": return "PACKING";
+    case "Đã đóng gói": return "PACKED";
+    case "Đang giao hàng": return "DELIVERING";
+    case "Đã giao": return "DELIVERED";
+    case "Đã hủy": return "CANCELLED";
+    case "Giao hàng thất bại": return "FAIL_DELIVERY";
+    case "Đã hoàn tiền": return "REFUNDED";
+    default: return "UNKNOWN";
+  }
+}
+
+function convertStatus(statusCode: string): string {
+  switch (statusCode) {
+    case "PENDING": return "Chờ xác nhận";
+    case "CONFIRMED": return "Đã xác nhận";
+    case "PACKING": return "Đang đóng gói";
+    case "PACKED": return "Đã đóng gói";
+    case "DELIVERING": return "Đang giao hàng";
+    case "DELIVERED": return "Đã giao";
+    case "CANCELLED": return "Đã hủy";
+    case "FAIL_DELIVERY": return "Giao hàng thất bại";
+    case "REFUNDED": return "Đã hoàn tiền";
+    default: return statusCode;
+  }
+}
+

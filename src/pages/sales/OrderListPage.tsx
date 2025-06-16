@@ -4,29 +4,19 @@ import OrderTable from "../../components/sales/OrderTable";
 import OrderFilterBar from "../../components/sales/OrderFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import axios from "axios";
+
+// ✅ Kiểu dữ liệu cho đơn hàng
+interface Order {
+  id: string;
+  customer: string;
+  total: number;
+  status: string;
+}
 
 const menu = [
   { label: "Bảng điều khiển", path: "/sales/dashboard" },
   { label: "Đơn hàng", path: "/sales/orders" },
-];
-
-const mockOrders = [
-  { id: "ORD001", customer: "Nguyễn Văn A", status: "Chờ xác nhận", total: 250000 },
-  { id: "ORD002", customer: "Trần Thị B", status: "Đang xử lý", total: 460000 },
-  { id: "ORD003", customer: "Lê Văn C", status: "Đã giao", total: 125000 },
-  { id: "ORD004", customer: "Phạm Thị D", status: "Đã huỷ", total: 300000 },
-  { id: "ORD005", customer: "Đỗ Văn E", status: "Chờ xác nhận", total: 88000 },
-  { id: "ORD006", customer: "Nguyễn Thị F", status: "Đang xử lý", total: 540000 },
-  { id: "ORD007", customer: "Trương Văn G", status: "Đã giao", total: 110000 },
-  { id: "ORD008", customer: "Mai Thị H", status: "Chờ xác nhận", total: 220000 },
-  { id: "ORD009", customer: "Huỳnh Văn I", status: "Đã huỷ", total: 190000 },
-  { id: "ORD010", customer: "Phan Thị K", status: "Đã giao", total: 310000 },
-  { id: "ORD011", customer: "Ngô Văn L", status: "Đang xử lý", total: 175000 },
-  { id: "ORD012", customer: "Lý Thị M", status: "Chờ xác nhận", total: 400000 },
-  { id: "ORD013", customer: "Tô Văn N", status: "Đã giao", total: 99000 },
-  { id: "ORD014", customer: "Hồ Thị O", status: "Đang xử lý", total: 280000 },
-  { id: "ORD015", customer: "Bùi Văn P", status: "Chờ xác nhận", total: 350000 },
-  { id: "ORD016", customer: "Dương Thị Q", status: "Đã giao", total: 120000 },
 ];
 
 export default function OrderListPage() {
@@ -34,31 +24,44 @@ export default function OrderListPage() {
   const navigate = useNavigate();
   const [isConfirmMode, setIsConfirmMode] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
-  const [orders, setOrders] = useState(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Lọc
+  // Lọc dữ liệu
   const filteredOrders = orders.filter((order) => {
     const matchesName = order.customer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter ? order.status === statusFilter : true;
     return matchesName && matchesStatus;
   });
 
-  // Reset trang khi filter thay đổi
+  // Gọi API và map dữ liệu
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+    axios.get("/api/orders")
+      .then(res => {
+        const apiOrders: Order[] = res.data.map((order: any) => ({
+          id: `ORD${String(order.orderId).padStart(3, '0')}`,
+          customer: order.customer,
+          status: convertStatus(order.status),
+          total: order.totalPrice,
+        }));
+        setOrders(apiOrders);
+      })
+      .catch(err => {
+        console.error("Lỗi khi tải đơn hàng:", err);
+      });
+  }, []);
 
-  // Phân trang trên kết quả đã lọc
+  // Phân trang
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = filteredOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  // Chọn checkbox
   const toggleSelectOrder = (orderId: string) => {
     setSelectedOrders((prev) =>
       prev.includes(orderId)
@@ -67,18 +70,33 @@ export default function OrderListPage() {
     );
   };
 
+  // ✅ Xác nhận đơn hàng
   const confirmOrders = () => {
     const updated = orders.map((order) =>
       selectedOrders.includes(order.id) && order.status === "Chờ xác nhận"
-        ? { ...order, status: "Đang xử lý" }
+        ? { ...order, status: "Đã xác nhận" }
         : order
     );
+
     setOrders(updated);
     setSelectedOrders([]);
     setIsConfirmMode(false);
+
     console.log("Đã xác nhận đơn hàng:", selectedOrders);
+
+    // ✅ Gửi cập nhật lên backend
+    selectedOrders.forEach((id) => {
+    const realId = parseInt(id.replace("ORD", ""));
+    axios.put(`/api/orders/${realId}/status`, {
+      orderId: realId,
+      newStatus: "CONFIRMED",
+      updatedByUserId: 2, // hoặc ID thực tế của nhân viên bán hàng đang đăng nhập
+      note: "Xác nhận từ frontend"
+    }).catch(err => console.error("Lỗi khi xác nhận đơn hàng:", err));
+  });
   };
 
+  // Xử lý nút xác nhận
   const handleConfirmClick = () => {
     if (!isConfirmMode) {
       setIsConfirmMode(true);
@@ -154,6 +172,7 @@ export default function OrderListPage() {
               isConfirmMode={isConfirmMode}
               selectedOrders={selectedOrders}
               onSelectOrder={toggleSelectOrder}
+              onOrdersChange={setOrders}
             />
           </div>
 
@@ -166,4 +185,29 @@ export default function OrderListPage() {
       </div>
     </div>
   );
+}
+
+function convertStatus(status: string): string {
+  switch (status) {
+    case "PENDING":
+      return "Chờ xác nhận";
+    case "CONFIRMED":
+      return "Đã xác nhận";
+    case "PACKING":
+      return "Đang đóng gói";
+    case "PACKED":
+      return "Đã đóng gói";
+    case "DELIVERING":
+      return "Đang giao hàng";
+    case "COMPLETED":
+      return "Đã giao";
+    case "CANCELLED":
+      return "Đã hủy";
+    case "FAIL_DELIVERY":
+      return "Giao hàng thất bại";
+    case "REFUNDED":
+      return "Đã hoàn tiền";
+    default:
+      return status;
+  }
 }
