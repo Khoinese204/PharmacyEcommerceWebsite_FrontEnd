@@ -13,9 +13,10 @@ type ProductType = {
 
 type ProductProps = {
   products: ProductType[];
+  categoryPath: string; // <-- thêm dòng này
 };
 
-export default function Product({ products }: ProductProps) {
+export default function Product({ products, categoryPath }: ProductProps) {
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   return (
@@ -37,7 +38,7 @@ export default function Product({ products }: ProductProps) {
           >
             {/* ⛳ Phần click để xem chi tiết */}
             <div
-              onClick={() => navigate(`/functional-foods/${product.id}`)}
+              onClick={() => navigate(`/${categoryPath}/${product.id}`)}
               className="cursor-pointer"
             >
               <div className="relative mb-3">

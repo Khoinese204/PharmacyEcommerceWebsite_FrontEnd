@@ -9,7 +9,6 @@ interface UserSidebarProps {
 const menuItems = [
   { label: "Thông tin cá nhân", path: "/account/profile" },
   { label: "Lịch sử đơn hàng", path: "/account/orderhistory" },
-  { label: "Mã giảm giá", path: "/account/couponcard" },
   { label: "Đăng xuất", path: "/account/logout" }, // special case
 ];
 

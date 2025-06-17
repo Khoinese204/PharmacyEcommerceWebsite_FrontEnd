@@ -20,3 +20,9 @@ export async function fetchMedicines(categoryId: number) {
     brand: item.brandOrigin,
   }));
 }
+
+export const fetchMedicineById = async (id: number) => {
+  const response = await axios.get(`/api/medicines/${id}`);
+  console.log("🧪 Medicine detail:", response.data);
+  return response.data; // ✅ FIXED
+};

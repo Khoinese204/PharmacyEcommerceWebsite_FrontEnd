@@ -1,49 +1,35 @@
-export type CartItem = {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice: number;
-  quantity: number;
-};
-
-export type CartSummary = {
-  totalOriginal: number;
-  totalDiscounted: number;
-  totalDiscount: number;
-  voucherDiscount: number;
-  shippingFee: number;
-  finalTotal: number;
-};
-
 export function calculateCartSummary(
   selectedItems: number[],
-  cart: CartItem[],
-  voucherDiscount = 0
-): CartSummary {
-  const selected = cart.filter((item) => selectedItems.includes(item.id));
+  cart: any[],
+  voucherDiscount: number,
+  shippingDiscount: number = 0 // ✅ thêm mặc định nếu chưa có
+) {
+  const selectedCart = cart.filter((item) => selectedItems.includes(item.id));
 
-  const totalOriginal = selected.reduce(
+  const totalOriginal = selectedCart.reduce(
     (sum, item) => sum + item.originalPrice * item.quantity,
     0
   );
 
-  const totalDiscounted = selected.reduce(
+  const totalPrice = selectedCart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
-  const totalDiscount = totalOriginal - totalDiscounted;
+  const totalDiscount = totalOriginal - totalPrice;
 
-  const shippingFee = totalDiscounted >= 500000 ? 0 : 30000;
-
-  const finalTotal = totalDiscounted + shippingFee - voucherDiscount;
+  const finalTotal = Math.max(
+    0,
+    totalPrice - voucherDiscount - shippingDiscount
+  );
 
   return {
+    selectedCart,
     totalOriginal,
-    totalDiscounted,
+    totalPrice,
     totalDiscount,
     voucherDiscount,
-    shippingFee,
+    shippingFee: shippingDiscount,
     finalTotal,
   };
 }

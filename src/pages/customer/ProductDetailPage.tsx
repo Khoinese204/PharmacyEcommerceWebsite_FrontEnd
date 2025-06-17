@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BreadcrumbTo from "../../components/common/BreadcrumbTo";
 import QuantityButton from "../../components/common/QuantityButton";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "./CartContext";
+import { fetchMedicineById } from "../../common/api";
 
 const allProducts = [
   {
@@ -110,17 +111,52 @@ const allProducts = [
 const ProductDetailPage = () => {
   const [activeTab, setActiveTab] = useState("mo-ta");
   const { productId } = useParams(); // 👈 Lấy từ URL
-  const product = allProducts.find((p) => p.id === Number(productId));
-  if (!product) return <div>Không tìm thấy sản phẩm</div>;
+  const location = useLocation();
+  const categoryPath = location.pathname.split("/")[1]; // "drugs" | "functional-foods" | ...
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+
+  // const getDetailContent = (type: string): string => {
+  //   return (
+  //     product?.details.find((d) => d.type === type)?.content ||
+  //     "Không có dữ liệu"
+  //   );
+  // };
+
   const { addToCart, isInCart } = useCart(); // ✅ khai báo ở đây
+  const categoryLabels: Record<string, string> = {
+    drugs: "Thuốc",
+    "functional-foods": "Thực phẩm chức năng",
+    "personal-care": "Chăm sóc cá nhân",
+  };
+
   const breadcrumbItems = [
     { label: "Trang chủ", path: "/" },
-    { label: "Thực phẩm chức năng", path: "/products/functional-foods" },
     {
-      label: "Nước súc miệng",
-      path: `/products/functional-foods/${productId}`,
+      label: categoryLabels[categoryPath] || "Sản phẩm",
+      path: `/${categoryPath}`,
+    },
+    {
+      label: product
+        ? product.name.split(" ").slice(0, 3).join(" ") + "..."
+        : "Chi tiết sản phẩm",
+      path: `/${categoryPath}/${productId}`,
     },
   ];
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const data = await fetchMedicineById(Number(productId));
+        setProduct(data);
+      } catch (error: any) {
+        console.error("❌ Error fetching product:", error.message);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
+
+  if (!product) return <div>Không tìm thấy sản phẩm</div>;
+
   return (
     <div className="bg-white text-gray-800">
       {/* Breadcrumb */}
@@ -130,8 +166,8 @@ const ProductDetailPage = () => {
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
           <img
-            src="/images/products/product3.jpg"
-            alt="Nước súc miệng"
+            src={`/images/products/${product!.imageUrl}`}
+            alt={product!.name}
             className="w-full max-w-sm max-h-[800px] object-contain rounded-lg shadow-md"
           />
         </div>
@@ -141,15 +177,16 @@ const ProductDetailPage = () => {
             style={{ fontSize: "30px" }}
             className="font-semibold mb-2 leading-snug text-left"
           >
-            Nước súc miệng Pearlie White Fluorinze Anti-bacterial Fluoride 750ml
-            chống lại vi khuẩn gây mảng bám sâu răng
+            {product!.name}
           </h1>
           <div className="text-left mb-4">
-            <span className="line-through text-gray-400 text-sm mr-2">
-              168.000đ
-            </span>
+            {product!.price !== product!.originalPrice && (
+              <span className="line-through text-gray-400 text-sm mr-2">
+                {product!.originalPrice.toLocaleString("vi-VN")}đ
+              </span>
+            )}
             <span className="text-blue-600 font-bold text-lg">
-              132.000đ/chai
+              {product!.price.toLocaleString("vi-VN")}đ/{product!.unit}
             </span>
           </div>
           <div className="text-left">
@@ -157,20 +194,19 @@ const ProductDetailPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (isInCart(product.id)) {
-                    // here
+                  if (isInCart(product!.id)) {
                     toast.error("Sản phẩm đã tồn tại trong giỏ hàng!", {
                       position: "top-center",
                     });
                     return;
                   }
                   addToCart({
-                    id: product.id,
-                    name: product.name,
-                    image: product.image,
-                    unit: product.unit,
-                    price: product.discountedPrice,
-                    originalPrice: product.originalPrice,
+                    id: product!.id,
+                    name: product!.name,
+                    image: `/images/products/${product.imageUrl}`, // ✅ đảm bảo có path
+                    unit: product!.unit,
+                    price: product!.price,
+                    originalPrice: product!.originalPrice,
                   });
                   toast.success("Đã thêm vào giỏ hàng!");
                 }}
@@ -185,179 +221,79 @@ const ProductDetailPage = () => {
             <tbody>
               <tr>
                 <td className="pr-4 py-1">Chọn đơn vị tính:</td>
-                <td>Chai</td>
+                <td>{product!.unit}</td>
               </tr>
               <tr>
                 <td className="pr-4 py-1">Danh mục:</td>
-                <td>Nước súc miệng</td>
+                <td>{categoryLabels[categoryPath] || "Sản phẩm"}</td>
               </tr>
               <tr>
                 <td className="pr-4 py-1">Mô tả ngắn:</td>
-                <td>
-                  Sản phẩm giúp loại bỏ vi khuẩn gây mùi, giữ hơi thở thơm mát
-                </td>
+                <td>{product!.shortDescription}</td>
               </tr>
               <tr>
                 <td className="pr-4 py-1">Xuất xứ:</td>
-                <td>Singapore</td>
+                <td>{product!.countryOfManufacture}</td>
               </tr>
               <tr>
                 <td className="pr-4 py-1">Nhà sản xuất:</td>
-                <td>CORLISON</td>
+                <td>{product!.manufacturer}</td>
               </tr>
               <tr>
-                <td className="pr-4 py-1">Nước sản xuất:</td>
-                <td>Singapore</td>
+                <td className="pr-4 py-1">Thương hiệu:</td>
+                <td>{product!.brandOrigin}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
+      {/* Tabs */}
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
-        {/* Sidebar Tabs */}
         <aside className="space-y-3">
-          <button
-            onClick={() => setActiveTab("mo-ta")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "mo-ta"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Mô tả sản phẩm
-          </button>
-          <button
-            onClick={() => setActiveTab("thanh-phan")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "thanh-phan"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Thành phần
-          </button>
-          <button
-            onClick={() => setActiveTab("cong-dung")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "cong-dung"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Công dụng
-          </button>
-          <button
-            onClick={() => setActiveTab("cach-dung")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "cach-dung"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Cách dùng
-          </button>
-          <button
-            onClick={() => setActiveTab("tac-dung-phu")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "tac-dung-phu"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Tác dụng phụ
-          </button>
-          <button
-            onClick={() => setActiveTab("luu-y")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "luu-y"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Lưu ý
-          </button>
-          <button
-            onClick={() => setActiveTab("bao-quan")}
-            className={`w-full text-left py-2 px-3 rounded ${
-              activeTab === "bao-quan"
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Bảo quản
-          </button>
+          {[
+            { key: "mo-ta", label: "Mô tả sản phẩm", type: "DESCRIPTION" },
+            { key: "thanh-phan", label: "Thành phần", type: "INGREDIENT" },
+            { key: "cong-dung", label: "Công dụng", type: "EFFECT" },
+            { key: "cach-dung", label: "Cách dùng", type: "USAGE" },
+            { key: "tac-dung-phu", label: "Tác dụng phụ", type: "SIDE_EFFECT" },
+            { key: "luu-y", label: "Lưu ý", type: "NOTE" },
+            { key: "bao-quan", label: "Bảo quản", type: "STORAGE" },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`w-full text-left py-2 px-3 rounded ${
+                activeTab === tab.key
+                  ? "bg-blue-100 text-blue-700 font-medium"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </aside>
 
-        {/* Main content */}
-        <div className="text-left md:col-span-3">
-          {activeTab === "mo-ta" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Mô tả sản phẩm</h2>
-              <p className="mb-4">
-                <strong>
-                  Nước súc miệng Pearlie White Fluorinze Anti-bacterial Fluoride
-                  750ml
-                </strong>{" "}
-                giúp loại bỏ vi khuẩn gây mùi và mảng bám, tăng cường men răng
-                và giữ hơi thở thơm mát. Sản phẩm thích hợp cho người lớn và trẻ
-                từ 6 tuổi trở lên.
-              </p>
-              <p className="mb-4">
-                Mảng bám và sâu răng là hai vấn đề răng miệng phổ biến hiện
-                nay...
-              </p>
-            </>
-          )}
-
-          {activeTab === "thanh-phan" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Thành phần</h2>
-              <p>- CPC (Cetylpyridinium chloride)</p>
-              <p>- Xylitol</p>
-              <p>- Sodium fluoride, Flavor...</p>
-            </>
-          )}
-
-          {activeTab === "cong-dung" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Công dụng</h2>
-              <p>
-                Hỗ trợ tiêu diệt vi khuẩn gây mùi, làm sạch mảng bám, bảo vệ men
-                răng, giữ hơi thở thơm mát.
-              </p>
-            </>
-          )}
-
-          {activeTab === "cach-dung" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Cách dùng</h2>
-              <p>
-                Súc miệng 10–15ml, giữ trong 20–30 giây rồi nhổ ra. Không nuốt.
-              </p>
-            </>
-          )}
-
-          {activeTab === "tac-dung-phu" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Tác dụng phụ</h2>
-              <p>Hiếm gặp: kích ứng nhẹ nếu dùng quá nhiều lần trong ngày.</p>
-            </>
-          )}
-
-          {activeTab === "luu-y" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Lưu ý</h2>
-              <p>Không dùng cho trẻ dưới 6 tuổi. Không được nuốt.</p>
-            </>
-          )}
-
-          {activeTab === "bao-quan" && (
-            <>
-              <h2 className="text-base font-semibold mb-2">Bảo quản</h2>
-              <p>Bảo quản nơi khô ráo, tránh ánh nắng trực tiếp.</p>
-            </>
-          )}
+        <div className="text-left md:col-span-3 whitespace-pre-line">
+          {[
+            { key: "mo-ta", title: "Mô tả sản phẩm", type: "DESCRIPTION" },
+            { key: "thanh-phan", title: "Thành phần", type: "INGREDIENT" },
+            { key: "cong-dung", title: "Công dụng", type: "EFFECT" },
+            { key: "cach-dung", title: "Cách dùng", type: "USAGE" },
+            { key: "tac-dung-phu", title: "Tác dụng phụ", type: "SIDE_EFFECT" },
+            { key: "luu-y", title: "Lưu ý", type: "NOTE" },
+            { key: "bao-quan", title: "Bảo quản", type: "STORAGE" },
+          ]
+            .filter((tab) => tab.key === activeTab)
+            .map((tab) => (
+              <div key={tab.key}>
+                <h2 className="text-base font-semibold mb-2">{tab.title}</h2>
+                <p>
+                  {product!.details.find((d) => d.type === tab.type)?.content ??
+                    "Không có dữ liệu"}
+                </p>
+              </div>
+            ))}
         </div>
       </div>
     </div>

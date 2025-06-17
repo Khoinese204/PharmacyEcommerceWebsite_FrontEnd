@@ -171,7 +171,7 @@ const HomePage = () => {
           Best Selling Products
         </h2>
 
-        <Product products={visibleProducts} />
+        <Product products={visibleProducts} categoryPath="functional-foods" />
 
         {visibleCount < allProducts.length && (
           <div className="text-center mt-8">

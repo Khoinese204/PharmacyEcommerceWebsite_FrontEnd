@@ -107,7 +107,7 @@ const allProducts = [
 ];
 
 const FunctionalFoodProductListPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductDisplay[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -272,7 +272,7 @@ const FunctionalFoodProductListPage = () => {
               </div>
             </div>
 
-            <Product products={visibleProducts} />
+            <Product products={visibleProducts} categoryPath="functional-foods" />
 
             {visibleCount < sortedProducts.length && (
               <div className="text-center mt-8">

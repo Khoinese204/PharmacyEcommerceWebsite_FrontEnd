@@ -37,6 +37,11 @@ export default function CustomerRoutes() {
           path="functional-foods/:productId"
           element={<ProductDetailPage />}
         />
+        <Route path="drugs/:productId" element={<ProductDetailPage />} />
+        <Route
+          path="personal-care/:productId"
+          element={<ProductDetailPage />}
+        />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="ordersuccess" element={<OrderSuccessPage />} />
