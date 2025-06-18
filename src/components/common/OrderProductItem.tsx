@@ -36,14 +36,23 @@ const OrderProductItem: React.FC<Props> = ({ item }) => {
       </div>
 
       <div className="flex flex-col gap-2 items-end">
-        <Link
+        {/* <Link
           to={`/products/${item.id}`}
           className="text-xs text-blue-700 hover:underline"
         >
           Xem chi tiết
-        </Link>
+        </Link> */}
         <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1 text-sm">
-          <QuantityButton enabled={false}></QuantityButton>
+          <QuantityButton
+            enabled={false}
+            quantity={0}
+            onIncrement={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+            onDecrement={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+          ></QuantityButton>
         </div>
       </div>
     </div>

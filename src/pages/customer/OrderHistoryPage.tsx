@@ -17,9 +17,9 @@ interface Order {
 }
 
 const tabs = [
-  { label: "Đang xử lý", value: "processing" },
-  { label: "Đã đóng gói", value: "packed" },
-  { label: "Đang vận chuyển", value: "shipping" },
+  { label: "Chờ xác nhận", value: "processing" },
+  { label: "Đang đóng gói", value: "packing" },
+  { label: "Đang giao hàng", value: "delivering" },
   { label: "Đã giao hàng", value: "delivered" },
   { label: "Đã huỷ", value: "cancelled" },
 ];

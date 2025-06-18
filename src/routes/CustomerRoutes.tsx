@@ -21,6 +21,7 @@ import CustomerOrderDetailPage from "../pages/customer/CustomerOrderDetailPage";
 import FunctionalFoodProductListPage from "../pages/customer/FunctionalFoodProductListPage";
 import DrugProductListPage from "../pages/customer/DrugProductListPage";
 import PersonalCareProductListPage from "../pages/customer/PersonalCareProductListPage";
+import PaymentTransferPage from "../pages/customer/PaymentTransferPage";
 
 export default function CustomerRoutes() {
   return (
@@ -63,6 +64,11 @@ export default function CustomerRoutes() {
           path="resetpasswordsuccess"
           element={<ResetPasswordSuccessPage />}
         />
+
+        <Route
+          path="checkout/payment-transfer"
+          element={<PaymentTransferPage />}
+        ></Route>
       </Routes>
     </CustomerLayout>
   );

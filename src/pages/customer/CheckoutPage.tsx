@@ -159,7 +159,7 @@ const CheckoutPage = () => {
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (
       !paymentMethod ||
       !customerName.trim() ||
@@ -175,40 +175,115 @@ const CheckoutPage = () => {
       return;
     }
 
-    const orderId = "DH" + Math.floor(Math.random() * 1000000);
-    const orderDate = new Date().toLocaleString("vi-VN");
     const fullAddress = `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedCity}`;
-    const expectedDate = "thứ 7 (3/5/2025)";
+    const storedUser = localStorage.getItem("user");
+    const userId = storedUser ? JSON.parse(storedUser).id : null;
 
-    const newOrder = {
-      id: orderId,
-      name: customerName,
-      phone: customerPhone,
-      address: fullAddress,
-      total: summary.finalTotal,
-      date: orderDate,
-      status: "processing",
-      paymentMethod,
+    // ✅ Nếu là BANK_TRANSFER thì điều hướng sang /payment-transfer
+    if (paymentMethod === "bank") {
+      navigate("/checkout/payment-transfer", {
+        state: {
+          selectedItems,
+          appliedPromotions,
+          voucherDiscount,
+          shippingDiscount,
+          total: summary.finalTotal,
+          customerName,
+          customerPhone,
+          selectedCity,
+          selectedDistrict,
+          selectedWard,
+          specificAddress,
+          note,
+          appliedShippingPromo,
+        },
+      });
+      return;
+    }
+
+    // ✅ Nếu là COD thì call API luôn
+    const orderRequest = {
+      userId,
+      items: cart
+        .filter((item) => selectedItems.includes(item.id))
+        .map((item) => ({
+          medicineId: item.id,
+          quantity: item.quantity,
+        })),
+      totalPrice: summary.finalTotal,
+      voucherDiscount,
+      shippingDiscount,
+      paymentMethod: "COD",
+      shippingInfo: {
+        recipientName: customerName,
+        phone: customerPhone,
+        province: selectedCity,
+        district: selectedDistrict,
+        ward: selectedWard,
+        addressDetail: specificAddress,
+        note,
+      },
+      promotionIds: appliedPromotions,
+      shippingPromotionId: appliedShippingPromo,
     };
 
-    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    localStorage.setItem(
-      "orders",
-      JSON.stringify([newOrder, ...existingOrders])
-    );
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderRequest),
+      });
 
-    navigate("/ordersuccess", {
-      state: {
-        orderId,
-        name: customerName,
-        phone: customerPhone,
-        address: fullAddress,
-        total: summary.finalTotal,
-        paymentMethod,
-        expectedDate,
-      },
-    });
+      if (!res.ok) throw new Error("Đặt hàng thất bại");
+
+      const orderResponse = await res.json();
+
+      navigate("/ordersuccess", {
+        state: {
+          orderId: orderResponse.orderId,
+          name: customerName,
+          phone: customerPhone,
+          address: fullAddress,
+          total: summary.finalTotal,
+          paymentMethod,
+          expectedDate: orderResponse.expectedDeliveryDate,
+        },
+      });
+    } catch (err) {
+      toast.error("Đặt hàng thất bại, vui lòng thử lại.");
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    if (location.state) {
+      const {
+        selectedItems,
+        appliedPromotions,
+        voucherDiscount,
+        shippingDiscount,
+        customerName,
+        customerPhone,
+        selectedCity,
+        selectedDistrict,
+        selectedWard,
+        specificAddress,
+        note,
+      } = location.state;
+
+      if (selectedItems) setSelectedItems(selectedItems);
+      if (appliedPromotions) setAppliedPromotions(appliedPromotions);
+      if (voucherDiscount) setVoucherDiscount(voucherDiscount);
+      if (shippingDiscount) setShippingDiscount(shippingDiscount);
+      if (customerName) setCustomerName(customerName);
+      if (customerPhone) setCustomerPhone(customerPhone);
+      if (selectedCity) setSelectedCity(selectedCity);
+      if (selectedDistrict) setSelectedDistrict(selectedDistrict);
+      if (selectedWard) setSelectedWard(selectedWard);
+      if (specificAddress) setSpecificAddress(specificAddress);
+      if (note) setNote(note);
+    }
+  }, [location.state]);
 
   return (
     <div className="bg-white text-gray-800">

@@ -52,16 +52,8 @@ export default function OrderDetailPage() {
       time: "10:00 AM 6/5/2025",
     },
     {
-      label: "Hoàn tất đóng gói",
-      time: "2:00 PM 5/5/2025",
-    },
-    {
       label: "Đang đóng gói",
       time: "6:30 AM 4/5/2025",
-    },
-    {
-      label: "Đang xử lý",
-      time: "9:00 PM 2/5/2025",
     },
     {
       label: "Chờ xác nhận",
