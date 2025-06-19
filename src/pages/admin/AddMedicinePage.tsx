@@ -1,67 +1,140 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import AutoTextarea from "../../components/admin/AutoTextarea";
 
 export default function AddMedicinePage() {
   const navigate = useNavigate();
-  const [selectedMenu, setSelectedMenu] = useState("Người dùng");
-  const [formData, setFormData] = useState({
+
+  const [medicine, setMedicine] = useState({
     name: "",
-    email: "",
-    phone: "",
-    address: "",
-    password: "",
-    role: "Admin",
+    unit: "",
+    originalPrice: "",
+    discountPercent: "0",
+    vatPercent: "10",
+    brandOrigin: "",
+    manufacturer: "",
+    countryOfManufacture: "",
+    imageUrl: "",
+    categoryId: "",
+    shortDescription: "",
   });
+
+  const [finalPrice, setFinalPrice] = useState("0");
+  const [details, setDetails] = useState([
+    { type: "INGREDIENT", content: "" },
+    { type: "EFFECT", content: "" },
+    { type: "USAGE", content: "" },
+    { type: "SIDE_EFFECT", content: "" },
+    { type: "NOTE", content: "" },
+    { type: "STORAGE", content: "" },
+    { type: "DESCRIPTION", content: "" },
+  ]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setMedicine((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleDetailChange = (index: number, content: string) => {
+    const updated = [...details];
+    updated[index].content = content;
+    setDetails(updated);
+  };
+
+  const fetchFinalPriceFromBackend = async () => {
+    try {
+      const res = await fetch("/api/pricing/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          originalPrice: parseFloat(medicine.originalPrice) || 0,
+          discountPercent: parseFloat(medicine.discountPercent) || 0,
+          vatPercent: parseFloat(medicine.vatPercent) || 0,
+        }),
+      });
+      const data = await res.json();
+      console.log("✅ Giá sau khi được tính là:", data.finalPrice);
+      setFinalPrice(data.finalPrice.toFixed(0));
+    } catch (err) {
+      console.error("Failed to fetch price:", err);
+      setFinalPrice("0");
+    }
+  };
+
+  useEffect(() => {
+    if (medicine.originalPrice) {
+      fetchFinalPriceFromBackend();
+    }
+  }, [medicine.originalPrice, medicine.discountPercent, medicine.vatPercent]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Thực hiện gọi API tại đây nếu cần
-  };
 
-  const menu = [
-    { label: "Bảng điều khiển", path: "/admin/dashboard" },
-    { label: "Người dùng", path: "/admin/users" },
-    { label: "Thuốc", path: "/admin/medicines" },
-    { label: "Danh mục thuốc", path: "/admin/categories" },
-    { label: "Mã giảm giá", path: "/admin/coupons" },
-    { label: "Kho", path: "/admin/warehouse" },
-    { label: "Doanh thu", path: "/admin/revenue" },
-    { label: "Khách hàng", path: "/admin/customers" },
-    { label: "Lịch sử giá", path: "/admin/price-history" },
-  ];
+    const payload = {
+      ...medicine,
+      originalPrice: parseFloat(medicine.originalPrice),
+      price: parseFloat(finalPrice),
+      discountPercent: parseFloat(medicine.discountPercent),
+      vatPercent: parseFloat(medicine.vatPercent),
+      categoryId: parseInt(medicine.categoryId),
+      details,
+    };
+
+    try {
+      const res = await fetch("/api/admin/medicines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        alert("Thêm thuốc thành công!");
+        navigate("/admin/medicines");
+      } else {
+        alert("Thêm thuốc thất bại!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi kết nối đến server");
+    }
+  };
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
       {/* Sidebar */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
-        {menu.map((item, idx) => (
+        {[
+          "Bảng điều khiển",
+          "Người dùng",
+          "Thuốc",
+          "Danh mục thuốc",
+          "Mã giảm giá",
+          "Kho",
+          "Doanh thu",
+          "Khách hàng",
+          "Lịch sử giá",
+        ].map((label, idx) => (
           <button
             key={idx}
-            onClick={() => navigate(item.path)} // chuyển trang
+            onClick={() =>
+              navigate(`/admin/${label.toLowerCase().replace(/\s+/g, "-")}`)
+            }
             className={`block w-full text-left px-3 py-2 rounded transition ${
-              selectedMenu === item.label
+              label === "Thuốc"
                 ? "bg-blue-500 text-white"
                 : "text-gray-700 hover:bg-blue-50"
             }`}
           >
-            {item.label}
+            {label}
           </button>
         ))}
       </aside>
+
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-2 text-sm">
             <img
@@ -76,19 +149,131 @@ export default function AddMedicinePage() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="mb-2">
-            <Breadcrumb
-              items={[
-                { label: "Danh sách thuốc", path: "/admin/medicines" },
-                { label: "Thêm thuốc" },
-              ]}
-            />
-          </div>
-          <h2 className="text-left text-xl font-semibold mb-4">Thêm thuốc</h2>
-          <AutoTextarea></AutoTextarea>
-          <form></form>
+          <Breadcrumb
+            items={[
+              { label: "Danh sách thuốc", path: "/admin/medicines" },
+              { label: "Thêm thuốc" },
+            ]}
+          />
+          <h2 className="text-xl font-semibold mb-4">Thêm thuốc</h2>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                name="name"
+                value={medicine.name}
+                onChange={handleChange}
+                placeholder="Tên thuốc"
+                className="input"
+              />
+              <input
+                name="unit"
+                value={medicine.unit}
+                onChange={handleChange}
+                placeholder="Đơn vị (Hộp, Viên...)"
+                className="input"
+              />
+              <input
+                name="originalPrice"
+                value={medicine.originalPrice}
+                onChange={handleChange}
+                placeholder="Giá gốc"
+                type="number"
+                className="input"
+              />
+              <select
+                name="discountPercent"
+                value={medicine.discountPercent}
+                onChange={handleChange}
+                className="input"
+              >
+                {[0, 5, 10, 15, 20, 25, 30].map((p) => (
+                  <option key={p} value={p}>
+                    Giảm {p}%
+                  </option>
+                ))}
+              </select>
+              <select
+                name="vatPercent"
+                value={medicine.vatPercent}
+                onChange={handleChange}
+                className="input"
+              >
+                {[0, 5, 10].map((v) => (
+                  <option key={v} value={v}>
+                    VAT {v}%
+                  </option>
+                ))}
+              </select>
+              <input
+                value={finalPrice}
+                disabled
+                placeholder="Giá bán (tính từ backend)"
+                className="input font-bold text-blue-600"
+              />
+              <input
+                name="brandOrigin"
+                value={medicine.brandOrigin}
+                onChange={handleChange}
+                placeholder="Thương hiệu"
+                className="input"
+              />
+              <input
+                name="manufacturer"
+                value={medicine.manufacturer}
+                onChange={handleChange}
+                placeholder="Nhà sản xuất"
+                className="input"
+              />
+              <input
+                name="countryOfManufacture"
+                value={medicine.countryOfManufacture}
+                onChange={handleChange}
+                placeholder="Nơi sản xuất"
+                className="input"
+              />
+              <input
+                name="imageUrl"
+                value={medicine.imageUrl}
+                onChange={handleChange}
+                placeholder="URL hình ảnh"
+                className="input"
+              />
+              <input
+                name="categoryId"
+                value={medicine.categoryId}
+                onChange={handleChange}
+                placeholder="ID danh mục"
+                className="input"
+              />
+              <input
+                name="shortDescription"
+                value={medicine.shortDescription}
+                onChange={handleChange}
+                placeholder="Mô tả ngắn"
+                className="input col-span-2"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {details.map((detail, idx) => (
+                <textarea
+                  key={idx}
+                  value={detail.content}
+                  onChange={(e) => handleDetailChange(idx, e.target.value)}
+                  placeholder={detail.type}
+                  className="p-2 border rounded h-20"
+                />
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Lưu thuốc
+            </button>
+          </form>
         </main>
       </div>
     </div>
