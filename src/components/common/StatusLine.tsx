@@ -1,17 +1,48 @@
-export default function StatusLine() {
+// src/components/common/StatusLine.tsx
+import React from "react";
+
+interface StatusLineProps {
+  orderCode: string;
+  totalAmount: number;
+  orderDate: string;
+  expectedDeliveryDate: string;
+  totalItems: number;
+}
+
+export default function StatusLine({
+  orderCode,
+  totalAmount,
+  orderDate,
+  expectedDeliveryDate,
+  totalItems,
+}: StatusLineProps) {
+  const formattedOrderDate = new Date(orderDate).toLocaleString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+
+  const formattedDelivery = new Date(expectedDeliveryDate).toLocaleDateString(
+    "vi-VN"
+  );
+
   return (
     <div className="text-left bg-yellow-50 border rounded-lg p-4 flex justify-between items-center mt-5">
-      {/* Bên trái: Mã đơn hàng và thời gian */}
       <div>
-        <p className="text-sm text-black font-semibold">Mã đơn hàng #123456</p>
+        <p className="text-sm text-black font-semibold">
+          Mã đơn hàng #{orderCode}
+        </p>
         <p className="text-xs text-gray-500">
-          5 sản phẩm ・ Đơn hàng đã đặt vào 7:32 PM 2/5/2025 ・ Dự kiến giao
-          hàng: 7/5/2025
+          {totalItems} sản phẩm ・ Đơn hàng đã đặt vào {formattedOrderDate} ・
+          Dự kiến giao hàng: {formattedDelivery}
         </p>
       </div>
-
-      {/* Bên phải: Tổng tiền */}
-      <p className="text-cyan-500 font-semibold text-base">714.000đ</p>
+      <p className="text-cyan-500 font-semibold text-base">
+        {totalAmount.toLocaleString()}đ
+      </p>
     </div>
   );
 }

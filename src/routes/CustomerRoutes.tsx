@@ -48,7 +48,7 @@ export default function CustomerRoutes() {
         <Route path="ordersuccess" element={<OrderSuccessPage />} />
         <Route path="orderfail" element={<OrderFailPage />} />
         <Route
-          path="account/orderhistory/:orderId"
+          path="/account/orderhistory/:id"
           element={<CustomerOrderDetailPage />}
         />
         <Route path="account/orderhistory" element={<OrderHistoryPage />} />

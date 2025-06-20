@@ -14,11 +14,12 @@ export default function AddMedicinePage() {
     brandOrigin: "",
     manufacturer: "",
     countryOfManufacture: "",
-    imageUrl: "",
     categoryId: "",
     shortDescription: "",
   });
 
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [finalPrice, setFinalPrice] = useState("0");
   const [details, setDetails] = useState([
     { type: "INGREDIENT", content: "" },
@@ -55,7 +56,6 @@ export default function AddMedicinePage() {
         }),
       });
       const data = await res.json();
-      console.log("✅ Giá sau khi được tính là:", data.finalPrice);
       setFinalPrice(data.finalPrice.toFixed(0));
     } catch (err) {
       console.error("Failed to fetch price:", err);
@@ -72,21 +72,20 @@ export default function AddMedicinePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      ...medicine,
-      originalPrice: parseFloat(medicine.originalPrice),
-      price: parseFloat(finalPrice),
-      discountPercent: parseFloat(medicine.discountPercent),
-      vatPercent: parseFloat(medicine.vatPercent),
-      categoryId: parseInt(medicine.categoryId),
-      details,
-    };
+    const formData = new FormData();
+    Object.entries(medicine).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    formData.append("price", finalPrice);
+    formData.append("details", JSON.stringify(details));
+    if (selectedImage) {
+      formData.append("image", selectedImage);
+    }
 
     try {
-      const res = await fetch("/api/admin/medicines", {
+      const res = await fetch("/api/admin/medicines/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (res.ok) {
@@ -103,7 +102,6 @@ export default function AddMedicinePage() {
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
-      {/* Sidebar */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {[
@@ -133,7 +131,6 @@ export default function AddMedicinePage() {
         ))}
       </aside>
 
-      {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-2 text-sm">
@@ -170,7 +167,7 @@ export default function AddMedicinePage() {
                 name="unit"
                 value={medicine.unit}
                 onChange={handleChange}
-                placeholder="Đơn vị (Hộp, Viên...)"
+                placeholder="Đơn vị"
                 className="input"
               />
               <input
@@ -208,7 +205,7 @@ export default function AddMedicinePage() {
               <input
                 value={finalPrice}
                 disabled
-                placeholder="Giá bán (tính từ backend)"
+                placeholder="Giá bán (backend)"
                 className="input font-bold text-blue-600"
               />
               <input
@@ -233,13 +230,6 @@ export default function AddMedicinePage() {
                 className="input"
               />
               <input
-                name="imageUrl"
-                value={medicine.imageUrl}
-                onChange={handleChange}
-                placeholder="URL hình ảnh"
-                className="input"
-              />
-              <input
                 name="categoryId"
                 value={medicine.categoryId}
                 onChange={handleChange}
@@ -253,6 +243,30 @@ export default function AddMedicinePage() {
                 placeholder="Mô tả ngắn"
                 className="input col-span-2"
               />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setSelectedImage(file);
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () =>
+                      setPreviewUrl(reader.result as string);
+                    reader.readAsDataURL(file);
+                  } else {
+                    setPreviewUrl(null);
+                  }
+                }}
+                className="input col-span-2"
+              />
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="h-32 w-32 object-contain border mt-2 rounded shadow"
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

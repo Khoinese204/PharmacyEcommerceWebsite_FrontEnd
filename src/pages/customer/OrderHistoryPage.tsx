@@ -1,10 +1,8 @@
-// src/pages/customer/OrderHistoryPage.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserSidebar from "../../components/common/UserSidebar";
 import BreadcrumbTo from "../../components/common/BreadcrumbTo";
 
-// Định nghĩa kiểu dữ liệu cho đơn hàng
 interface Order {
   id: string;
   total: number;
@@ -17,14 +15,14 @@ interface Order {
 }
 
 const tabs = [
-  { label: "Chờ xác nhận", value: "processing" },
-  { label: "Đang đóng gói", value: "packing" },
-  { label: "Đang giao hàng", value: "delivering" },
-  { label: "Đã giao hàng", value: "delivered" },
-  { label: "Đã huỷ", value: "cancelled" },
+  { label: "Chờ xác nhận", value: "PENDING" },
+  { label: "Đang đóng gói", value: "PACKING" },
+  { label: "Đang giao hàng", value: "DELIVERING" },
+  { label: "Đã giao hàng", value: "DELIVERED" },
+  { label: "Đã huỷ", value: "CANCELLED" },
 ];
 
-const order_tabs = [
+const orderTabs = [
   { label: "Mới nhất", value: "latest" },
   { label: "Cũ nhất", value: "oldest" },
 ];
@@ -36,25 +34,48 @@ const breadcrumbItems = [
 
 export default function OrderHistoryPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("processing");
+  const [activeTab, setActiveTab] = useState("PENDING");
   const [sortOrder, setSortOrder] = useState("latest");
   const [orders, setOrders] = useState<Order[]>([]);
-
   const [visibleCount, setVisibleCount] = useState(5);
-  // Load orders từ localStorage
+
   useEffect(() => {
-    const storedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    setOrders(storedOrders);
+    const fetchOrders = async () => {
+      const user = localStorage.getItem("user");
+      const userId = user ? JSON.parse(user).id : null;
+
+      if (!userId) return;
+
+      try {
+        const res = await fetch(`/api/orders/user/${userId}`);
+        const data = await res.json();
+
+        const mappedOrders: Order[] = data.map((o: any) => ({
+          id: o.orderCode,
+          total: o.totalPrice,
+          date: o.orderDate,
+          status: o.status,
+          name: "",
+          phone: "",
+          address: "",
+          paymentMethod: "",
+        }));
+
+        setOrders(mappedOrders);
+      } catch (err) {
+        console.error("Lỗi khi tải đơn hàng", err);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
-  // Sắp xếp đơn hàng
   const sortedOrders = [...orders].sort((a, b) => {
     const dateA = new Date(a.date).getTime();
     const dateB = new Date(b.date).getTime();
     return sortOrder === "latest" ? dateB - dateA : dateA - dateB;
   });
 
-  // Lọc theo trạng thái
   const filteredOrders = sortedOrders.filter(
     (order) => order.status === activeTab
   );
@@ -64,10 +85,8 @@ export default function OrderHistoryPage() {
       <BreadcrumbTo items={breadcrumbItems} />
 
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-        {/* Sidebar */}
         <UserSidebar activePath="/account/orderhistory" />
 
-        {/* Main content */}
         <div className="md:col-span-3 space-y-6">
           <h1 className="font-semibold text-black text-lg">Lịch sử đơn hàng</h1>
 
@@ -94,7 +113,7 @@ export default function OrderHistoryPage() {
           <div className="flex items-center text-sm">
             <span className="text-gray-500 mr-2">Sắp xếp theo:</span>
             <div className="flex space-x-3">
-              {order_tabs.map((tab) => (
+              {orderTabs.map((tab) => (
                 <button
                   key={tab.value}
                   onClick={() => setSortOrder(tab.value)}
@@ -128,7 +147,7 @@ export default function OrderHistoryPage() {
                       <p>
                         Giá trị đơn:{" "}
                         <span className="font-bold">
-                          {order.total.toLocaleString()}đ
+                          {order.total?.toLocaleString()}đ
                         </span>
                       </p>
                       <p>
@@ -138,7 +157,9 @@ export default function OrderHistoryPage() {
                     </div>
                     <button
                       onClick={() =>
-                        navigate(`/account/orderhistory/${order.id}`)
+                        navigate(
+                          `/account/orderhistory/${order.id.replace("DH", "")}`
+                        )
                       }
                       className="text-blue-500 hover:underline"
                     >
@@ -149,6 +170,8 @@ export default function OrderHistoryPage() {
               </div>
             )}
           </div>
+
+          {/* Xem thêm */}
           {filteredOrders.length > visibleCount && (
             <div className="flex justify-center mt-6">
               <button

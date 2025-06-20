@@ -1,4 +1,6 @@
-import React from "react";
+// src/pages/customer/OrderDetailPage.tsx
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import OrderProductList from "../../components/common/OrderProductList";
 import OrderProgress from "../../components/common/OrderProgress";
 import ActivityHistory from "../../components/common/ActivityHistory";
@@ -6,82 +8,105 @@ import ReceiverInfo from "../../components/common/ReceiverInfo";
 import OrderSummary from "../../components/common/OrderSummary";
 import StatusLine from "../../components/common/StatusLine";
 import BreadcrumbTo from "../../components/common/BreadcrumbTo";
-import Breadcrumbs from "../../components/common/BreadcrumbTo";
 
-export default function OrderDetailPage() {
+export default function CustomerOrderDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const [order, setOrder] = useState<any>(null);
+
+  useEffect(() => {
+    if (id) {
+      fetch(`/api/orders/${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Fetched order:", data);
+          setOrder(data);
+        })
+        .catch((err) => console.error("Lỗi tải chi tiết đơn hàng:", err));
+    }
+  }, [id]);
+
+  if (!order) return <p className="text-center mt-10">Đang tải...</p>;
+
   const breadcrumbItems = [
-    { label: "Cá nhân", path: "/profile" },
+    { label: "Cá nhân", path: "/account/profile" },
     { label: "Lịch sử đơn hàng", path: "/account/orderhistory" },
-    { label: "Chi tiết đơn hàng", path: "/account/orderhistory/123456" },
+    { label: `Chi tiết đơn hàng`, path: `/account/orderhistory/${id}` },
   ];
-  const productItems = [
-    {
-      id: 1,
-      name: "Ibuprofen",
-      unit: "Lọ",
-      image: "/ibuprofen.jpg",
-      originalPrice: 165000,
-      discountedPrice: 132000,
-      quantity: 2,
-    },
-    {
-      id: 2,
-      name: "Bioderma",
-      unit: "Chai",
-      image: "/bioderma.jpg",
-      originalPrice: 180000,
-      discountedPrice: 150000,
-      quantity: 3,
-    },
-  ];
-  const currentStep = 2;
-  const receiverInfo = {
-    name: "Nguyễn Văn A",
-    phone: "0901234567",
-    address: "123 Đường ABC, Quận 1, TPHCM",
-    note: "Giao hàng trước 5 giờ chiều",
-  };
 
-  const history = [
-    {
-      label: "Đã giao hàng",
-      time: "11:00 AM 7/5/2025",
-    },
-    {
-      label: "Đang giao hàng",
-      time: "10:00 AM 6/5/2025",
-    },
-    {
-      label: "Đang đóng gói",
-      time: "6:30 AM 4/5/2025",
-    },
-    {
-      label: "Chờ xác nhận",
-      time: "7:32 PM 2/5/2025",
-      active: true,
-    },
-  ];
+  const currentStepIndex = [
+    "PENDING",
+    "PACKING",
+    "DELIVERING",
+    "DELIVERED",
+  ].indexOf(order.status);
+
+  const productItems = order.items.map((item: any, index: number) => ({
+    id: index, // ✅ thêm id (nếu API không trả về sẵn)
+    name: item.medicineName,
+    unit: item.unit,
+    image: item.imageUrl,
+    originalPrice: item.originalPrice,
+    discountedPrice: item.unitPrice,
+    quantity: item.quantity,
+  }));
+
+  const receiver = order.customerInfo;
+  const summary = order.summary;
+
+  const history = order.statusLogs
+    .slice()
+    .reverse()
+    .map((log: any) => ({
+      label:
+        log.status === "PENDING"
+          ? "Chờ xác nhận"
+          : log.status === "PACKING"
+          ? "Đang đóng gói"
+          : log.status === "DELIVERING"
+          ? "Đang giao hàng"
+          : log.status === "DELIVERED"
+          ? "Đã giao hàng"
+          : log.status,
+      time: log.time,
+      active: order.status === log.status,
+    }));
 
   return (
     <>
-      <Breadcrumbs items={breadcrumbItems} />
+      <BreadcrumbTo items={breadcrumbItems} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {/* Cột trái: OrderSummary + ReceiverInfo */}
         <div className="space-y-6 order-1 md:order-none">
-          <OrderSummary />
+          <OrderSummary
+            total={summary.totalPrice}
+            discount={summary.discount}
+            voucher={summary.voucherDiscount}
+            shipping={summary.shippingFee}
+            final={summary.finalTotal}
+            method={order.payment.method}
+          />
           <ReceiverInfo
-            name={receiverInfo.name}
-            phone={receiverInfo.phone}
-            address={receiverInfo.address}
-            note={receiverInfo.note}
+            name={receiver.fullName}
+            phone={receiver.phone}
+            address={receiver.address}
+            note={receiver.note}
           />
         </div>
 
-        {/* Cột phải (chiếm 2 cột): ProductList + StatusLine + Progress + History */}
+        {/* Cột phải: Danh sách sản phẩm + trạng thái */}
         <div className="md:col-span-2 space-y-4 order-0 md:order-none">
           <OrderProductList items={productItems} />
-          <StatusLine />
-          <OrderProgress currentStep={0} />
+          <StatusLine
+            orderCode={order.orderCode}
+            totalAmount={summary.finalTotal}
+            orderDate={order.orderDate}
+            expectedDeliveryDate={order.expectedDeliveryDate}
+            totalItems={productItems.reduce(
+              (sum, item) => sum + item.quantity,
+              0
+            )}
+          />
+          <OrderProgress currentStep={currentStepIndex} />
           <ActivityHistory history={history} />
         </div>
       </div>

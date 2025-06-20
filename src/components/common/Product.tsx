@@ -49,7 +49,7 @@ export default function Product({ products, categoryPath }: ProductProps) {
                 />
                 {isDiscounted && (
                   <span className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-br-md">
-                    -{discountPercent}%
+                    Khuyến mãi
                   </span>
                 )}
               </div>

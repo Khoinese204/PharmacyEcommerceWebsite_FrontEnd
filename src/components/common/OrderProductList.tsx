@@ -1,3 +1,4 @@
+// src/components/common/OrderProductList.tsx
 import React from "react";
 import OrderProductItem from "./OrderProductItem";
 
@@ -12,7 +13,7 @@ type Product = {
 };
 
 type Props = {
-  items: Product[];
+  items: Product[]; // ✅ đúng tên prop là "items"
 };
 
 const OrderProductList: React.FC<Props> = ({ items }) => {
