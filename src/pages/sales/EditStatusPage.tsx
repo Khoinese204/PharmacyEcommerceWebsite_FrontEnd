@@ -85,13 +85,10 @@ export default function EditStatusPage() {
                 className="w-full border rounded px-3 py-2 bg-gray-50"
               >
                 <option value="chờ xác nhận">Chờ xác nhận</option>
-                <option value="đang xử lý">Đang xử lý</option>
                 <option value="đang gói hàng">Đang gói hàng</option>
                 <option value="đang giao">Đang giao hàng</option>
                 <option value="đang giao">Đã giao</option>
-                <option value="hoàn thành">Hoàn thành</option>
                 <option value="đã hủy">Đã hủy</option>
-                <option value="hoàn thành">Đã hoàn tiền</option>
               </select>
             </div>
 

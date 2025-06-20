@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import OrderTable from "../../components/sales/OrderTable";
 import OrderFilterBar from "../../components/sales/OrderFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import axios from "axios";
+import { FaUser } from "react-icons/fa";
 
 // ✅ Kiểu dữ liệu cho đơn hàng
 interface Order {
@@ -74,7 +75,7 @@ export default function OrderListPage() {
   const confirmOrders = () => {
     const updated = orders.map((order) =>
       selectedOrders.includes(order.id) && order.status === "Chờ xác nhận"
-        ? { ...order, status: "Đã xác nhận" }
+        ? { ...order, status: "Đang đóng gói" }
         : order
     );
 
@@ -89,7 +90,7 @@ export default function OrderListPage() {
     const realId = parseInt(id.replace("ORD", ""));
     axios.put(`/api/orders/${realId}/status`, {
       orderId: realId,
-      newStatus: "CONFIRMED",
+      newStatus: "PACKING", // Hoặc trạng thái phù hợp
       updatedByUserId: 2, // hoặc ID thực tế của nhân viên bán hàng đang đăng nhập
       note: "Xác nhận từ frontend"
     }).catch(err => console.error("Lỗi khi xác nhận đơn hàng:", err));
@@ -125,13 +126,13 @@ export default function OrderListPage() {
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên bán hàng</p>
-            </div>
+          {/* Icon nằm sát phải */}
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/sales/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 
@@ -191,22 +192,14 @@ function convertStatus(status: string): string {
   switch (status) {
     case "PENDING":
       return "Chờ xác nhận";
-    case "CONFIRMED":
-      return "Đã xác nhận";
     case "PACKING":
       return "Đang đóng gói";
-    case "PACKED":
-      return "Đã đóng gói";
     case "DELIVERING":
       return "Đang giao hàng";
-    case "COMPLETED":
+    case "DELIVERED":
       return "Đã giao";
     case "CANCELLED":
       return "Đã hủy";
-    case "FAIL_DELIVERY":
-      return "Giao hàng thất bại";
-    case "REFUNDED":
-      return "Đã hoàn tiền";
     default:
       return status;
   }

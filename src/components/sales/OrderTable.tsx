@@ -94,22 +94,14 @@ function getStatusStyle(status: string) {
   switch (status) {
     case "Chờ xác nhận":
       return "bg-yellow-100 text-yellow-600";
-    case "Đã xác nhận":
-      return "bg-cyan-100 text-cyan-600";
     case "Đang đóng gói":
       return "bg-blue-100 text-blue-600";
-    case "Đã đóng gói":
-      return "bg-indigo-100 text-indigo-600";
     case "Đang giao hàng":
       return "bg-purple-100 text-purple-600";
     case "Đã giao":
       return "bg-green-100 text-green-600";
     case "Đã hủy":
       return "bg-red-100 text-red-600";
-    case "Giao hàng thất bại":
-      return "bg-orange-100 text-orange-600";
-    case "Đã hoàn tiền":
-      return "bg-gray-100 text-gray-600";
     default:
       return "bg-slate-100 text-slate-600";
   }
@@ -118,14 +110,10 @@ function getStatusStyle(status: string) {
 function mapStatusToCode(status: string): string {
   switch (status) {
     case "Chờ xác nhận": return "PENDING";
-    case "Đã xác nhận": return "CONFIRMED";
     case "Đang đóng gói": return "PACKING";
-    case "Đã đóng gói": return "PACKED";
     case "Đang giao hàng": return "DELIVERING";
     case "Đã giao": return "DELIVERED";
     case "Đã hủy": return "CANCELLED";
-    case "Giao hàng thất bại": return "FAIL_DELIVERY";
-    case "Đã hoàn tiền": return "REFUNDED";
     default: return "UNKNOWN";
   }
 }
@@ -133,14 +121,10 @@ function mapStatusToCode(status: string): string {
 function convertStatus(statusCode: string): string {
   switch (statusCode) {
     case "PENDING": return "Chờ xác nhận";
-    case "CONFIRMED": return "Đã xác nhận";
     case "PACKING": return "Đang đóng gói";
-    case "PACKED": return "Đã đóng gói";
     case "DELIVERING": return "Đang giao hàng";
     case "DELIVERED": return "Đã giao";
     case "CANCELLED": return "Đã hủy";
-    case "FAIL_DELIVERY": return "Giao hàng thất bại";
-    case "REFUNDED": return "Đã hoàn tiền";
     default: return statusCode;
   }
 }

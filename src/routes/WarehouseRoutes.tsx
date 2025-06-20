@@ -9,6 +9,7 @@ import ExportPage from "../pages/warehouse/ExportPage";
 import AddImportPage from "../pages/warehouse/AddImportPage";
 import AccountPage from "../pages/admin/AdminAccountPage";
 import WarehouseAccountPage from "../pages/warehouse/WarehouseAccountPage";
+import AddSupplierPage from "../pages/warehouse/AddSupplierPage";
 
 export default function WarehouseRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function WarehouseRoutes() {
       <Route path="/import/add" element={<AddImportPage />} />
       <Route path="/import/:orderId" element={<ImportDetailPage />} />
       <Route path="/supplier" element={<SupplierPage />} />
+      <Route path="/supplier/add" element={<AddSupplierPage />} />
       <Route path="/export" element={<ExportPage />} />
     </Routes>
     // </WarehouseLayout>

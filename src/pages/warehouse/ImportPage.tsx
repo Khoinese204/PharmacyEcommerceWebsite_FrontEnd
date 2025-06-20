@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImportTable from "../../components/warehouse/ImportTable";
+import axios from "axios";
+
+import ImportTable, { ImportOrder } from "../../components/warehouse/ImportTable";
 import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import { ImportOrder } from "../../components/warehouse/ImportTable";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -15,54 +16,33 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-const mockImports: ImportOrder[] = [
-  {
-    id: "IMP001",
-    supplier: "Công ty Dược A",
-    createdAt: "2025-05-01T00:00:00.000Z",
-    totalAmount: 2000000,
-    status: "Đã nhận",
-  },
-  {
-    id: "IMP002",
-    supplier: "Công ty Dược B",
-    createdAt: "2025-05-02T00:00:00.000Z",
-    totalAmount: 1500000,
-    status: "Đã giao",
-  },
-  {
-    id: "IMP003",
-    supplier: "Công ty Dược C",
-    createdAt: "2025-05-03T00:00:00.000Z",
-    totalAmount: 1750000,
-    status: "Chờ xác nhận",
-  },
-  {
-    id: "IMP004",
-    supplier: "Công ty Dược D",
-    createdAt: "2025-05-04T00:00:00.000Z",
-    totalAmount: 1250000,
-    status: "Đã huỷ",
-  },
-  {
-    id: "IMP005",
-    supplier: "Công ty Dược E",
-    createdAt: "2025-05-05T00:00:00.000Z",
-    totalAmount: 2200000,
-    status: "Đang xử lý",
-  },
-];
-
-
 export default function ImportPage() {
   const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
   const navigate = useNavigate();
-  const [imports, setImports] = useState(mockImports);
+  const [imports, setImports] = useState<ImportOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // ✅ Gọi API lấy danh sách đơn nhập
+  useEffect(() => {
+    axios
+      .get("/api/import")
+      .then((res) => {
+        const mapped: ImportOrder[] = res.data.map((item: any) => ({
+          id: `IMP${String(item.id).padStart(3, "0")}`, // Format mã đơn
+          supplier: item.supplierName,
+          createdAt: item.createdAt,
+          totalAmount: item.totalPrice,
+          status: convertStatus(item.status),
+        }));
+        setImports(mapped);
+      })
+      .catch((err) => console.error("Lỗi khi tải danh sách đơn nhập:", err));
+  }, []);
+
+  // ✅ Lọc dữ liệu
   const filteredImports = imports.filter((imp) => {
     const matchesSupplier = imp.supplier.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter ? imp.status === statusFilter : true;
@@ -111,7 +91,7 @@ export default function ImportPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Nhập kho", path: "/inventory/import" }]} />
+            <Breadcrumb items={[{ label: "Nhập kho", path: "/warehouse/import" }]} />
           </div>
 
           <div className="flex justify-between items-center mb-6">
@@ -150,4 +130,22 @@ export default function ImportPage() {
       </div>
     </div>
   );
+}
+
+// ✅ Chuyển trạng thái từ enum -> tiếng Việt
+function convertStatus(status: string): string {
+  switch (status) {
+    case "PENDING":
+      return "Chờ xác nhận";
+    case "RECEIVED":
+      return "Đã nhận";
+    case "PROCESSING":
+      return "Đang xử lý";
+    case "DELIVERED":
+      return "Đã giao";
+    case "CANCELLED":
+      return "Đã hủy";
+    default:
+      return status;
+  }
 }
