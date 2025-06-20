@@ -1,108 +1,36 @@
-import React, { useState } from "react";
+// src/pages/HomePage.tsx
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Product from "../../components/common/Product";
+import RandomProduct from "../../components/common/RandomProduct";
 
-const allProducts = [
-  {
-    id: 1,
-    name: "Vitamin C 500mg",
-    image: "/images/products/product1.jpg",
-    originalPrice: 165000,
-    discountedPrice: 165000,
-    unit: "hộp",
-  },
-  {
-    id: 2,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product2.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-  },
-  {
-    id: 3,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product3.jpg",
-    originalPrice: 200000,
-    discountedPrice: 200000,
-    unit: "lon",
-  },
-  {
-    id: 4,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product4.jpg",
-    originalPrice: 200000,
-    discountedPrice: 200000,
-    unit: "lon",
-  },
-  {
-    id: 5,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product5.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-  },
-  {
-    id: 6,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product6.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-  },
-  {
-    id: 7,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product7.jpg",
-    originalPrice: 180000,
-    discountedPrice: 180000,
-    unit: "lon",
-  },
-  {
-    id: 8,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product8.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-  },
-  {
-    id: 9,
-    name: "Sữa tăng đề kháng extra",
-    image: "/images/products/product9.jpg",
-    originalPrice: 210000,
-    discountedPrice: 190000,
-    unit: "lon",
-  },
-  {
-    id: 10,
-    name: "Sữa tăng đề kháng extra",
-    image: "/images/products/product10.jpg",
-    originalPrice: 210000,
-    discountedPrice: 190000,
-    unit: "lon",
-  },
-  {
-    id: 11,
-    name: "Sữa tăng đề kháng extra",
-    image: "/images/products/product11.jpg",
-    originalPrice: 210000,
-    discountedPrice: 190000,
-    unit: "lon",
-  },
-];
+interface ProductDto {
+  id: number;
+  name: string;
+  imageUrl: string;
+  originalPrice: number;
+  discountedPrice: number; // <-- ✅ thêm dòng này
+  unit: string;
+}
 
-const HomePage = () => {
+export default function HomePage() {
+  const [products, setProducts] = useState<ProductDto[]>([]);
   const [visibleCount, setVisibleCount] = useState(8);
 
+  useEffect(() => {
+    fetch("/api/medicines/best-selling")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch(() => console.error("Không thể tải danh sách sản phẩm bán chạy"));
+  }, []);
+
   const handleShowMore = () => {
-    if (visibleCount < allProducts.length) {
+    if (visibleCount < products.length) {
       setVisibleCount((prev) => prev + 4);
     }
   };
 
-  const visibleProducts = allProducts.slice(0, visibleCount);
+  const visibleProducts = products.slice(0, visibleCount);
 
   return (
     <div className="bg-white">
@@ -132,11 +60,7 @@ const HomePage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           {[
-            {
-              img: "/images/category1.webp",
-              label: "Thuốc",
-              path: "drugs",
-            },
+            { img: "/images/category1.webp", label: "Thuốc", path: "drugs" },
             {
               img: "/images/category2.jpg",
               label: "Thực phẩm chức năng",
@@ -170,10 +94,18 @@ const HomePage = () => {
         <h2 className="text-2xl font-bold text-center text-blue-700 mb-8">
           Best Selling Products
         </h2>
+        <RandomProduct
+          products={visibleProducts.map((p) => ({
+            id: p.id,
+            name: p.name,
+            image: `/images/products/${p.imageUrl}`,
+            originalPrice: p.originalPrice ?? 0,
+            discountedPrice: p.discountedPrice ?? p.originalPrice ?? 0, // <-- SỬA ở đây
+            unit: p.unit,
+          }))}
+        />
 
-        <Product products={visibleProducts} categoryPath="functional-foods" />
-
-        {visibleCount < allProducts.length && (
+        {visibleCount < products.length && (
           <div className="text-center mt-8">
             <button
               onClick={handleShowMore}
@@ -186,6 +118,4 @@ const HomePage = () => {
       </section>
     </div>
   );
-};
-
-export default HomePage;
+}

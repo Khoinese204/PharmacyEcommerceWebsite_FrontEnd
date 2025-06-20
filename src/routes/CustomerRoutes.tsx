@@ -22,6 +22,7 @@ import FunctionalFoodProductListPage from "../pages/customer/FunctionalFoodProdu
 import DrugProductListPage from "../pages/customer/DrugProductListPage";
 import PersonalCareProductListPage from "../pages/customer/PersonalCareProductListPage";
 import PaymentTransferPage from "../pages/customer/PaymentTransferPage";
+import RandomProductDetailPage from "../pages/customer/RandomProductDetailPage";
 
 export default function CustomerRoutes() {
   return (
@@ -69,6 +70,8 @@ export default function CustomerRoutes() {
           path="checkout/payment-transfer"
           element={<PaymentTransferPage />}
         ></Route>
+
+        <Route path="/:productId" element={<RandomProductDetailPage />} />
       </Routes>
     </CustomerLayout>
   );

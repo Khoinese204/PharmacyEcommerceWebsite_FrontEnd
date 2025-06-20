@@ -56,7 +56,9 @@ export default function OrderSuccessPage() {
               QUAY LẠI TRANG CHỦ
             </button>
             <button
-              onClick={() => navigate(`/account/orderhistory/${orderId}`)}
+              onClick={() =>
+                navigate(`/account/orderhistory/${orderId.replace("DH", "")}`)
+              }
               className="bg-cyan-400 text-white py-2 px-6 rounded-lg"
             >
               CHI TIẾT ĐƠN HÀNG

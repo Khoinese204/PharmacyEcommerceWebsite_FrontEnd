@@ -196,6 +196,7 @@ const CheckoutPage = () => {
           specificAddress,
           note,
           appliedShippingPromo,
+          cart, // ✅ THÊM DÒNG NÀY
         },
       });
       return;
@@ -233,7 +234,7 @@ const CheckoutPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderRequest),
       });
-
+      console.log("Đặt hàng với userId =", userId, orderRequest);
       if (!res.ok) throw new Error("Đặt hàng thất bại");
 
       const orderResponse = await res.json();

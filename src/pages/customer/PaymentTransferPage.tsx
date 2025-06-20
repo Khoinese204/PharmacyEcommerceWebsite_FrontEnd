@@ -6,7 +6,6 @@ import { useCart } from "./CartContext";
 const PaymentTransferPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart } = useCart();
 
   const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : null;
@@ -24,7 +23,8 @@ const PaymentTransferPage = () => {
     selectedWard,
     specificAddress,
     note,
-    appliedShippingPromo, // ✅ bổ sung dòng này
+    appliedShippingPromo,
+    cart, // ✅ bổ sung dòng này
   } = location.state || {};
 
   const handleConfirmTransfer = async () => {
@@ -32,13 +32,12 @@ const PaymentTransferPage = () => {
 
     const orderRequest = {
       userId,
-      items: selectedItems.map((itemId: number) => {
-        const item = cart.find((p) => p.id === itemId);
-        return {
-          medicineId: item?.id,
-          quantity: item?.quantity,
-        };
-      }),
+      items: cart
+        .filter((item) => selectedItems.includes(item.id))
+        .map((item) => ({
+          medicineId: item.id,
+          quantity: item.quantity,
+        })),
       totalPrice: total,
       voucherDiscount: voucherDiscount,
       shippingDiscount: shippingDiscount,
@@ -63,7 +62,8 @@ const PaymentTransferPage = () => {
         body: JSON.stringify(orderRequest),
       });
 
-      if (!res.ok) throw new Error("Failed to place order");
+      console.log("Đặt hàng với userId =", userId, orderRequest);
+      if (!res.ok) throw new Error("Đặt hàng thất bại");
 
       const response = await res.json();
 
@@ -74,11 +74,12 @@ const PaymentTransferPage = () => {
           phone: customerPhone,
           address: fullAddress,
           total,
-          paymentMethod: "bank",
+          paymentMethod: "BANK_TRANSFER",
           expectedDate: response.expectedDeliveryDate,
         },
       });
     } catch (err) {
+      console.log("Đặt hàng với userId =", userId, orderRequest);
       console.error("Đặt hàng thất bại:", err);
       toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
     }
