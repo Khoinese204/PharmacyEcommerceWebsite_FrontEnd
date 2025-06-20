@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 
 export default function AddSupplierPage() {
@@ -8,32 +9,25 @@ export default function AddSupplierPage() {
 
   const [formData, setFormData] = useState({
     name: "",
-    contactPerson: "",
-    phone: "",
-    email: "",
+    contactInfo: "", // Gộp người liên hệ, số điện thoại, email
     address: "",
   });
-
-  useEffect(() => {
-    // Fake data (có thể thay thế bằng gọi API nếu cần)
-    setFormData({
-      name: "Công ty Dược phẩm Minh Châu",
-      contactPerson: "Nguyễn Văn A",
-      phone: "0912345678",
-      email: "minhchau@duocpham.vn",
-      address: "123 Lý Thường Kiệt, Q.10, TP.HCM",
-    });
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Dữ liệu nhà cung cấp:", formData);
-    // Gọi API tạo nhà cung cấp tại đây nếu cần
+    try {
+      await axios.post("/api/suppliers", formData);
+      alert("Tạo nhà cung cấp thành công!");
+      navigate("/warehouse/supplier");
+    } catch (error) {
+      console.error("Lỗi khi tạo nhà cung cấp:", error);
+      alert("Tạo nhà cung cấp thất bại.");
+    }
   };
 
   const menu = [
@@ -65,9 +59,8 @@ export default function AddSupplierPage() {
         ))}
       </aside>
 
-      {/* Main Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-2 text-sm">
             <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
@@ -78,7 +71,6 @@ export default function AddSupplierPage() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
@@ -108,39 +100,13 @@ export default function AddSupplierPage() {
               />
             </div>
 
-            {/* Người liên hệ */}
+            {/* Thông tin liên hệ */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Người liên hệ</label>
+              <label className="block text-sm font-medium mb-1">Thông tin liên hệ</label>
               <input
                 type="text"
-                name="contactPerson"
-                value={formData.contactPerson}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
-              />
-            </div>
-
-            {/* Số điện thoại */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Số điện thoại</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
+                name="contactInfo"
+                value={formData.contactInfo}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2 bg-gray-50"
                 required

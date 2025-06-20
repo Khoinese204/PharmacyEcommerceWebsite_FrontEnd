@@ -1,92 +1,111 @@
-// src/pages/sales/OrderDetailPage.tsx
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import OrderDetailFilterBar from "../../components/sales/OrderDetailFilterBar";
 import OrderDetailTable, { OrderDetail } from "../../components/sales/OrderDetailTable";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import { FaUser } from "react-icons/fa";
 
+// ---------------------- INTERFACES ----------------------
 interface OrderItemResponse {
-  id: string;
-  medicineName: string; // ✅ sửa lại cho đúng tên field từ backend
+  medicineName: string;
   quantity: number;
   unitPrice: number;
 }
 
-interface OrderResponse {
-  id: number;
-  createdAt: string;
-  status: string;
-  paymentMethod: string;
-  customer: {
-    name: string;
-    phone: string;
-    address: string;
-  };
+interface CustomerInfoResponse {
+  fullName: string;
+  phone: string;
+  address: string;
+  note: string;
 }
 
+interface PaymentResponse {
+  method: string;
+  status: string;
+}
+
+interface SummaryResponse {
+  totalPrice: number;
+  discount: number;
+  voucherDiscount: number;
+  shippingFee: number;
+  finalTotal: number;
+}
+
+interface OrderDetailResponse {
+  orderCode: string;
+  orderDate: string;
+  status: string;
+  items: OrderItemResponse[];
+  customerInfo: CustomerInfoResponse;
+  payment: PaymentResponse;
+  summary: SummaryResponse;
+  canCancel: boolean;
+}
+
+// ---------------------- COMPONENT ----------------------
 export default function OrderDetailPage() {
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const [selectedMenu] = useState("Chi tiết đơn hàng");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
-  const [customerInfo, setCustomerInfo] = useState({
-    name: "",
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfoResponse>({
+    fullName: "",
     phone: "",
     address: "",
+    note: "",
   });
   const [metaInfo, setMetaInfo] = useState({
+    orderCode: "",
     createdAt: "",
     status: "",
     paymentMethod: "",
+    paymentStatus: "",
+  });
+  const [summary, setSummary] = useState<SummaryResponse>({
+    totalPrice: 0,
+    discount: 0,
+    voucherDiscount: 0,
+    shippingFee: 0,
+    finalTotal: 0,
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   const numericOrderId = orderId ? parseInt(orderId) : null;
-  const displayOrderId = numericOrderId
-    ? `ORD${numericOrderId.toString().padStart(3, "0")}`
-    : "";
 
   useEffect(() => {
     const fetchOrder = async () => {
       if (!numericOrderId) return;
 
-      console.log("🔍 Fetching order with ID:", numericOrderId);
-      console.log("🛠️ API URL:", `/api/orders/${numericOrderId}/items`);
-
       try {
-        const orderRes = await axios.get<OrderResponse>(`/api/orders/${numericOrderId}`);
-        const orderData = orderRes.data;
-        console.log("✅ Order data:", orderData);
+        const res = await axios.get<OrderDetailResponse>(`/api/orders/${numericOrderId}`);
+        const data = res.data;
 
-        const itemsRes = await axios.get<OrderItemResponse[]>(`/api/orders/${numericOrderId}/items`);
-        const items = itemsRes.data;
-        console.log("📦 Order items raw:", items);
-
-        const formattedItems: OrderDetail[] = items.map((item, index) => ({
-          id: item.id, // ✅ sử dụng index để tạo id tạm thời
-          productName: item.medicineName, // ✅ chính xác field trả về từ backend
+        const formattedItems: OrderDetail[] = data.items.map((item, index) => ({
+          id: index.toString(),
+          productName: item.medicineName,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           totalPrice: item.quantity * item.unitPrice,
         }));
 
-        console.log("🧾 Formatted items:", formattedItems);
-
         setOrderDetails(formattedItems);
-        setCustomerInfo(orderData.customer);
+        setCustomerInfo(data.customerInfo);
         setMetaInfo({
-          createdAt: new Date(orderData.createdAt).toLocaleDateString("vi-VN"),
-          status: orderData.status,
-          paymentMethod: orderData.paymentMethod,
+          orderCode: data.orderCode,
+          createdAt: new Date(data.orderDate).toLocaleString("vi-VN"),
+          status: data.status,
+          paymentMethod: data.payment.method,
+          paymentStatus: data.payment.status,
         });
+        setSummary(data.summary);
       } catch (error) {
-        console.error("❌ Lỗi khi tải đơn hàng:", error);
+        console.error("❌ Lỗi khi tải chi tiết đơn hàng:", error);
       } finally {
         setLoading(false);
       }
@@ -100,18 +119,13 @@ export default function OrderDetailPage() {
   }, [searchTerm]);
 
   const filteredOrderDetails = orderDetails.filter((item) =>
-    item.productName?.toLowerCase().includes(searchTerm.toLowerCase()) // ✅ check null để tránh lỗi
+    item.productName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredOrderDetails.length / itemsPerPage);
   const paginatedOrderDetailItems = filteredOrderDetails.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
-
-  const totalAmount = orderDetails.reduce(
-    (sum, item) => sum + item.totalPrice,
-    0
   );
 
   return (
@@ -133,13 +147,13 @@ export default function OrderDetailPage() {
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên bán hàng</p>
-            </div>
+          {/* Icon nằm sát phải */}
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/sales/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 
@@ -153,7 +167,7 @@ export default function OrderDetailPage() {
             />
           </div>
           <h2 className="text-left text-xl font-semibold mb-4">
-            Chi tiết đơn hàng #{displayOrderId}
+            Chi tiết đơn hàng #{metaInfo.orderCode}
           </h2>
 
           <div className="bg-white p-4 rounded-xl shadow space-y-4 text-left">
@@ -161,33 +175,51 @@ export default function OrderDetailPage() {
               <p>Đang tải chi tiết đơn hàng...</p>
             ) : (
               <>
+                {/* Thông tin khách hàng & đơn hàng */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-gray-50 p-4 rounded border">
-                    <p><span className="font-medium">Tên khách hàng:</span> {customerInfo.name}</p>
+                    <p><span className="font-medium">Tên khách hàng:</span> {customerInfo.fullName}</p>
                     <p><span className="font-medium">Số điện thoại:</span> {customerInfo.phone}</p>
                     <p><span className="font-medium">Địa chỉ:</span> {customerInfo.address}</p>
+                    {customerInfo.note && (
+                      <p><span className="font-medium">Ghi chú:</span> {customerInfo.note}</p>
+                    )}
                   </div>
                   <div className="bg-gray-50 p-4 rounded border col-span-2">
                     <p><span className="font-medium">Ngày tạo:</span> {metaInfo.createdAt}</p>
                     <p><span className="font-medium">Trạng thái:</span> {metaInfo.status}</p>
                     <p><span className="font-medium">Phương thức thanh toán:</span> {metaInfo.paymentMethod}</p>
+                    <p><span className="font-medium">Trạng thái thanh toán:</span> {metaInfo.paymentStatus}</p>
                   </div>
                 </div>
 
+                {/* Bộ lọc và tổng */}
                 <div className="flex justify-between items-center mb-4">
                   <OrderDetailFilterBar
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                   />
                   <div className="text-sm font-medium">
-                    Tổng tiền:{" "}
+                    Tổng cộng:{" "}
                     <span className="text-red-500">
-                      {totalAmount.toLocaleString("vi-VN")} ₫
+                      {summary.finalTotal.toLocaleString("vi-VN")} ₫
                     </span>
                   </div>
                 </div>
 
+                {/* Bảng sản phẩm */}
                 <OrderDetailTable orderDetails={paginatedOrderDetailItems} />
+
+                {/* Tổng kết */}
+                <div className="mt-4 text-right text-sm space-y-1">
+                  <p>Tổng giá gốc: {summary.totalPrice.toLocaleString("vi-VN")} ₫</p>
+                  <p>Giảm giá: -{summary.discount.toLocaleString("vi-VN")} ₫</p>
+                  <p>Voucher: -{summary.voucherDiscount.toLocaleString("vi-VN")} ₫</p>
+                  <p>Phí vận chuyển: -{summary.shippingFee.toLocaleString("vi-VN")} ₫</p>
+                  <p className="text-lg font-semibold text-red-600">
+                    Tổng thanh toán: {summary.finalTotal.toLocaleString("vi-VN")} ₫
+                  </p>
+                </div>
               </>
             )}
           </div>

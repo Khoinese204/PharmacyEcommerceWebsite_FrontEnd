@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 
 export default function AddImportPage() {
   const navigate = useNavigate();
-  const [selectedMenu, setSelectedMenu] = useState("Nhập hàng");
+  const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
 
-  type Product = { id: string; name: string };
-  type Supplier = { id: string; name: string };
+  type Product = { id: number; name: string };
+  type Supplier = { id: number; name: string };
 
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -17,39 +18,57 @@ export default function AddImportPage() {
     supplierId: "",
     importDate: new Date().toISOString().split("T")[0],
     quantity: 1,
+    unitPrice: 0,
   });
 
+  // ✅ Gọi API lấy danh sách thuốc & nhà cung cấp
   useEffect(() => {
-    // Giả lập gọi API
-    setProducts([
-      { id: "p1", name: "Paracetamol" },
-      { id: "p2", name: "Amoxicillin" },
-    ]);
-    setSuppliers([
-      { id: "s1", name: "Dược phẩm A" },
-      { id: "s2", name: "Nhà cung cấp B" },
-    ]);
+    axios.get("/api/medicines")
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error("Lỗi load thuốc:", err));
+
+    axios.get("/api/suppliers")
+      .then((res) => setSuppliers(res.data))
+      .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Dữ liệu nhập hàng:", formData);
-    // Gọi API tạo đơn nhập tại đây nếu cần
+
+    const requestBody = {
+      supplierId: Number(formData.supplierId),
+      items: [
+        {
+          medicineId: Number(formData.productId),
+          quantity: Number(formData.quantity),
+          unitPrice: Number(formData.unitPrice),
+        },
+      ],
+    };
+
+    try {
+      await axios.post("/api/import", requestBody);
+      alert("Tạo đơn nhập thành công!");
+      navigate("/warehouse/import");
+    } catch (error) {
+      console.error("Lỗi tạo đơn nhập:", error);
+      alert("Tạo đơn nhập thất bại.");
+    }
   };
 
-const menu = [
-  { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
-  { label: "Kho", path: "/warehouse/inventory" },
-  { label: "Nhập kho", path: "/warehouse/import" },
-  { label: "Xuất kho", path: "/warehouse/export" },
-  { label: "Nhà cung cấp", path: "/warehouse/supplier" },
-  { label: "Vận chuyển", path: "/warehouse/shipment" },
-];
+  const menu = [
+    { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
+    { label: "Kho", path: "/warehouse/inventory" },
+    { label: "Nhập kho", path: "/warehouse/import" },
+    { label: "Xuất kho", path: "/warehouse/export" },
+    { label: "Nhà cung cấp", path: "/warehouse/supplier" },
+    { label: "Vận chuyển", path: "/warehouse/shipment" },
+  ];
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -148,7 +167,7 @@ const menu = [
                 value={formData.importDate}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
+                disabled
               />
             </div>
 
@@ -164,6 +183,17 @@ const menu = [
                 className="w-full border rounded px-3 py-2 bg-gray-50"
                 required
               />
+            </div>
+            <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Giá nhập (VNĐ)</label>
+                <input
+                    type="number"
+                    name="unitPrice"
+                    value={formData.unitPrice}
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 bg-gray-50"
+                    min={0}
+                />
             </div>
 
             <div className="text-center">

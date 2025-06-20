@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import SupplierTable, { Supplier } from "../../components/warehouse/SupplierTable";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
 import SupplierFilterBar from "../../components/warehouse/SupplierFilterBar";
 
 const menu = [
@@ -15,64 +15,41 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-const mockSuppliers: Supplier[] = [
-  {
-    id: "SUP001",
-    supplier: "Công ty Dược A",
-    contact: "Nguyễn Văn A",
-    phone: 123456789,
-    email: "a@duoc.vn",
-    address: "123 Đường A, Quận 1, TP.HCM",
-  },
-  {
-    id: "SUP002",
-    supplier: "Công ty Dược B",
-    contact: "Trần Thị B",
-    phone: 987654321,
-    email: "b@duoc.vn",
-    address: "456 Đường B, Quận 3, TP.HCM",
-  },
-  {
-    id: "SUP003",
-    supplier: "Công ty Dược C",
-    contact: "Lê Văn C",
-    phone: 1122334455,
-    email: "c@duoc.vn",
-    address: "789 Đường C, Quận 5, TP.HCM",
-  },
-  {
-    id: "SUP004",
-    supplier: "Công ty Dược D",
-    contact: "Phạm Thị D",
-    phone: 5566778899,
-    email: "d@duoc.vn",
-    address: "321 Đường D, Quận 10, TP.HCM",
-  },
-  {
-    id: "SUP005",
-    supplier: "Công ty Dược E",
-    contact: "Đặng Văn E",
-    phone: 9988776655,
-    email: "e@duoc.vn",
-    address: "654 Đường E, Quận 2, TP.HCM",
-  },
-];
-
 export default function SupplierPage() {
   const [selectedMenu, setSelectedMenu] = useState("Nhà cung cấp");
   const navigate = useNavigate();
-  const [suppliers, setSuppliers] = useState(mockSuppliers);
+
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const filteredSuppliers = suppliers.filter((sup) =>
-    sup.supplier.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ✅ Gọi API để lấy danh sách nhà cung cấp
+  useEffect(() => {
+    axios.get("/api/suppliers")
+      .then((res) => {
+        // Map lại nếu cần đổi tên fields để phù hợp với frontend (nếu backend không trùng khớp)
+        const mapped = res.data.map((s: any) => ({
+          id: s.id,
+          name: s.name,           // hoặc s.supplierName tùy theo backend
+          contactInfo: s.contactInfo,     // hoặc s.contact
+          address: s.address,
+        }));
+        setSuppliers(mapped);
+      })
+      .catch((err) => {
+        console.error("Lỗi khi lấy danh sách nhà cung cấp:", err);
+        alert("Không thể tải danh sách nhà cung cấp.");
+      });
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+
+  const filteredSuppliers = suppliers.filter((sup) =>
+    sup.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
   const paginatedSuppliers = filteredSuppliers.slice(
@@ -108,7 +85,7 @@ export default function SupplierPage() {
               <p className="text-xs text-gray-500">Nhân viên kho</p>
             </div>
           </div>
-        </header> 
+        </header>
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
@@ -116,24 +93,22 @@ export default function SupplierPage() {
           </div>
 
           <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhà cung cấp</h2>
-        </div>
-          
-            <div className="flex justify-between items-center mb-4">
-                <SupplierFilterBar
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    onReset={() => {
-                        setSearchTerm("");
-                    }}
-                />
-                <button
-                    onClick={() => navigate("/warehouse/supplier/add")}
-                    className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
-                >
-                    Thêm nhà cung cấp
-                </button>
-            </div>
+            <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhà cung cấp</h2>
+          </div>
+
+          <div className="flex justify-between items-center mb-4">
+            <SupplierFilterBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onReset={() => setSearchTerm("")}
+            />
+            <button
+              onClick={() => navigate("/warehouse/supplier/add")}
+              className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
+            >
+              Thêm nhà cung cấp
+            </button>
+          </div>
 
           <SupplierTable suppliers={paginatedSuppliers} />
 

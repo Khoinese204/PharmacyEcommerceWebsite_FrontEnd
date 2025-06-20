@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import InventoryTable from "../../components/warehouse/InventoryTable";
 import Pagination from "../../components/admin/TablePagination";
@@ -15,45 +16,47 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-export const mockInventory: InventoryItem[] = [
-  {
-    batchNumber: "LOT001",
-    productName: "Paracetamol 500mg",
-    quantity: 120,
-    expiryDate: "2025-08-12",
-    status: "Còn hạn",
-  },
-  {
-    batchNumber: "LOT002",
-    productName: "Amoxicillin 250mg",
-    quantity: 0,
-    expiryDate: "2023-12-01",
-    status: "Hết hàng",
-  },
-  {
-    batchNumber: "LOT003",
-    productName: "Vitamin C",
-    quantity: 300,
-    expiryDate: "2025-6-05",
-    status: "Sắp hết hạn",
-  },
-  {
-    batchNumber: "LOT004",
-    productName: "Ibuprofen 400mg",
-    quantity: 50,
-    expiryDate: "2026-01-15",
-    status: "Còn hạn",
-  },
-];
+// Map enum từ backend sang tiếng Việt để hiển thị
+function mapInventoryStatus(status: string): string {
+  switch (status) {
+    case "AVAILABLE":
+      return "Còn hàng";
+    case "LOW_STOCK":
+      return "Sắp hết hàng";
+    default:
+      return "Không xác định";
+  }
+}
 
 export default function InventoryPage() {
   const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState("Kho");
-  const [inventory, setInventory] = useState(mockInventory);
+
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const res = await axios.get("/api/warehouse/inventory");
+        const mappedData = res.data.map((item: any) => ({
+          batchNumber: item.batchNumber,
+          productName: item.productName,
+          quantity: item.quantity,
+          expiryDate: item.expiryDate,
+          status: mapInventoryStatus(item.status),
+        }));
+        setInventory(mappedData);
+      } catch (error) {
+        console.error("❌ Lỗi khi tải dữ liệu kho:", error);
+      }
+    };
+
+    fetchInventory();
+  }, []);
 
   const filtered = inventory.filter((item) => {
     const matchesName = item.productName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -73,6 +76,7 @@ export default function InventoryPage() {
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
+      {/* Sidebar */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {menu.map((item, idx) => (
@@ -90,7 +94,9 @@ export default function InventoryPage() {
         ))}
       </aside>
 
+      {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-2 text-sm">
             <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
@@ -101,6 +107,7 @@ export default function InventoryPage() {
           </div>
         </header>
 
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb items={[{ label: "Kho", path: "/warehouse/inventory" }]} />
@@ -125,14 +132,14 @@ export default function InventoryPage() {
 
           <div className="bg-white p-4 rounded-xl shadow">
             <InventoryTable
-                inventoryItems={paginated}
-                onUpdateItem={(updatedItem) => {
-                    setInventory((prev) =>
-                    prev.map((item) =>
-                        item.batchNumber === updatedItem.batchNumber ? updatedItem : item
-                    )
-                    );
-                }}
+              inventoryItems={paginated}
+              onUpdateItem={(updatedItem) => {
+                setInventory((prev) =>
+                  prev.map((item) =>
+                    item.batchNumber === updatedItem.batchNumber ? updatedItem : item
+                  )
+                );
+              }}
             />
           </div>
 

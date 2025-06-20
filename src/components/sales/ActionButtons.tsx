@@ -12,14 +12,10 @@ interface Props {
 
 const statuses = [
   { label: "Chờ xác nhận", value: "PENDING" },
-  { label: "Đã xác nhận", value: "CONFIRMED" },
   { label: "Đang đóng gói", value: "PACKING" },
-  { label: "Đã đóng gói", value: "PACKED" },
   { label: "Đang giao hàng", value: "DELIVERING" },
   { label: "Đã giao", value: "DELIVERED" },
   { label: "Đã hủy", value: "CANCELLED" },
-  { label: "Giao hàng thất bại", value: "FAIL_DELIVERY" },
-  { label: "Đã hoàn tiền", value: "REFUNDED" },
 ];
 
 export default function ActionButtons({
