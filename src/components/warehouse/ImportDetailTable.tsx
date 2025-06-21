@@ -1,12 +1,10 @@
 import React from "react";
 
 export interface ImportDetail {
-  id: string;
-  productName: string;
-  orderedAmount: number;
-  receivedAmount: number;
+  id: number;
+  medicineName: string;
+  quantity: number;
   unitPrice: number;
-  totalPrice: number;
 }
 
 interface Props {
@@ -20,8 +18,7 @@ export default function ImportDetailTable({ importDetails }: Props) {
         <thead className="bg-gray-100">
           <tr>
             <th className="px-4 py-3 font-semibold text-gray-700">TÊN THUỐC</th>
-            <th className="px-4 py-3 font-semibold text-gray-700">SỐ LƯỢNG ĐÃ ĐẶT</th>
-            <th className="px-4 py-3 font-semibold text-gray-700">SỐ LƯỢNG ĐÃ NHẬN</th>
+            <th className="px-4 py-3 font-semibold text-gray-700">SỐ LƯỢNG</th>
             <th className="px-4 py-3 font-semibold text-gray-700">ĐƠN GIÁ</th>
             <th className="px-4 py-3 font-semibold text-gray-700">TỔNG TIỀN</th>
           </tr>
@@ -29,9 +26,8 @@ export default function ImportDetailTable({ importDetails }: Props) {
         <tbody>
           {importDetails.map((detail) => (
             <tr key={detail.id} className="border-t hover:bg-gray-50">
-              <td className="px-4 py-2">{detail.productName}</td>
-              <td className="px-4 py-2">{detail.orderedAmount}</td>
-              <td className="px-4 py-2">{detail.receivedAmount}</td>
+              <td className="px-4 py-2">{detail.medicineName}</td>
+              <td className="px-4 py-2">{detail.quantity}</td>
               <td className="px-4 py-2">
                 {detail.unitPrice.toLocaleString("vi-VN", {
                   style: "currency",
@@ -39,7 +35,7 @@ export default function ImportDetailTable({ importDetails }: Props) {
                 })}
               </td>
               <td className="px-4 py-2">
-                {detail.totalPrice.toLocaleString("vi-VN", {
+                {(detail.unitPrice * detail.quantity).toLocaleString("vi-VN", {
                   style: "currency",
                   currency: "VND",
                 })}

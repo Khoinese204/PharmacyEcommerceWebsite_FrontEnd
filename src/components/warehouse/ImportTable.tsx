@@ -2,11 +2,10 @@ import React from "react";
 import ActionButtons from "./ActionButtons";
 
 export interface ImportOrder {
-  id: string;
+  id: number;
   supplier: string;
   createdAt: string; // ISO string
   totalAmount: number;
-  status: string;
 }
 
 interface Props {
@@ -39,7 +38,7 @@ export default function ImportTable({
         <tbody>
           {orders.map((order) => (
             <tr key={order.id} className="border-t hover:bg-gray-50">
-              <td className="px-4 py-2">{order.id}</td>
+              <td className="px-4 py-2">{"IMP" + String(order.id).padStart(3, "0")}</td>
               <td className="px-4 py-2">{order.supplier}</td>
               <td className="px-4 py-2">{formatDate(order.createdAt)}</td>
               <td className="px-4 py-2">{formatCurrency(order.totalAmount)}</td>
@@ -50,17 +49,6 @@ export default function ImportTable({
                   onDelete={() => console.log("Xóa đơn nhập:", order.id)}
                 />
               </td>
-              {isConfirmMode && (
-                <td className="px-4 py-2 text-center">
-                  {order.status === "Chờ xác nhận" ? (
-                    <input
-                      type="checkbox"
-                      checked={selectedOrders.includes(order.id)}
-                      onChange={() => onSelectOrder?.(order.id)}
-                    />
-                  ) : null}
-                </td>
-              )}
             </tr>
           ))}
         </tbody>

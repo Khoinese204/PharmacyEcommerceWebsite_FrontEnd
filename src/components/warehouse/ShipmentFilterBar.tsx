@@ -3,44 +3,26 @@ import { FaUndo } from "react-icons/fa";
 
 interface Props {
   searchTerm: string;
-  statusFilter: string;
   onSearchChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
   onReset: () => void;
 }
 
 export default function ImportFilterBar({
   searchTerm,
-  statusFilter,
   onSearchChange,
-  onStatusChange,
   onReset,
 }: Props) {
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-2">
-        {/* Tìm theo tên nhà cung cấp */}
+        {/* Tìm theo tên đơn vị vận chuyển */}
         <input
           type="text"
-          placeholder="Tìm theo nhà cung cấp"
+          placeholder="Tìm theo đơn vị vận chuyển"
           className="border rounded px-3 py-1.5 text-sm w-56"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
-
-        {/* Lọc theo trạng thái đơn nhập
-        <select
-          className="border rounded px-3 py-1.5 text-sm"
-          value={statusFilter}
-          onChange={(e) => onStatusChange(e.target.value)}
-        >
-          <option value="">Trạng thái</option>
-          <option value="Chờ xác nhận">Chờ xác nhận</option>
-          <option value="Đang xử lý">Đang xử lý</option>
-          <option value="Đã giao">Đã giao</option>
-          <option value="Đã nhận">Đã nhận</option>
-          <option value="Đã huỷ">Đã huỷ</option>
-        </select> */}
 
         {/* Nút đặt lại bộ lọc */}
         <button

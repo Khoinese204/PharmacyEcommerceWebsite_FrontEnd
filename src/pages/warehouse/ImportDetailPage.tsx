@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import OrderDetailFilterBar from "../../components/sales/OrderDetailFilterBar";
-import OrderDetailTable from "../../components/sales/OrderDetailTable";
+import ImportDetailTable, { ImportDetail } from "../../components/warehouse/ImportDetailTable";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import { OrderDetail } from "../../components/sales/OrderDetailTable";
-import ImportDetailTable, { ImportDetail } from "../../components/warehouse/ImportDetailTable";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -16,53 +15,54 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-const rawMockImportDetails = [
-  { id: "OD001", product: "Paracetamol 500mg", orderedAmount: 2, receivedAmount: 2, price: 50000 },
-  { id: "OD002", product: "Vitamin C 1000mg", orderedAmount: 1, receivedAmount: 1, price: 80000 },
-  { id: "OD003", product: "Khẩu trang y tế", orderedAmount: 5, receivedAmount: 4, price: 20000 },
-  { id: "OD004", product: "Sát khuẩn tay nhanh", orderedAmount: 3, receivedAmount: 3, price: 60000 },
-  { id: "OD005", product: "Thuốc ho siro", orderedAmount: 2, receivedAmount: 2, price: 75000 },
-  { id: "OD006", product: "Panadol Extra", orderedAmount: 1, receivedAmount: 1, price: 45000 },
-  { id: "OD007", product: "Nước muối sinh lý", orderedAmount: 4, receivedAmount: 3, price: 15000 },
-  { id: "OD008", product: "Kem chống nắng", orderedAmount: 1, receivedAmount: 1, price: 120000 },
-  { id: "OD009", product: "Sữa rửa mặt", orderedAmount: 2, receivedAmount: 2, price: 95000 },
-  { id: "OD010", product: "Tăm bông", orderedAmount: 3, receivedAmount: 3, price: 10000 },
-];
-
-const mockImportDetails: ImportDetail[] = rawMockImportDetails.map((item) => ({
-  id: item.id,
-  productName: item.product,
-  orderedAmount: item.orderedAmount,
-  receivedAmount: item.receivedAmount,
-  unitPrice: item.price,
-  totalPrice: item.orderedAmount * item.price,
-}));
+interface ImportOrderResponse {
+  id: number;
+  supplierName: string;
+  totalPrice: number;
+  createdAt: string;
+  items: ImportDetail[];
+}
 
 export default function ImportDetailPage() {
   const [selectedMenu, setSelectedMenu] = useState("Chi tiết nhập kho");
   const navigate = useNavigate();
+  const { orderId } = useParams<{ orderId: string }>();
   const [searchTerm, setSearchTerm] = useState("");
-  const [orderDetails, setOrderDetails] = useState(mockImportDetails);
+  const [orderDetails, setOrderDetails] = useState<ImportDetail[]>([]);
+  const [createdAt, setCreatedAt] = useState<string>("");
+  const [supplierName, setSupplierName] = useState<string>("");
+  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const filteredImportDetails = mockImportDetails.filter((item) =>
-    item.productName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchImportOrder = async () => {
+      try {
+        const res = await axios.get<ImportOrderResponse>(`/api/import/${orderId}`);
+        const data = res.data;
+        setOrderDetails(data.items);
+        setSupplierName(data.supplierName);
+        setCreatedAt(new Date(data.createdAt).toLocaleDateString("vi-VN"));
+        setTotalAmount(data.totalPrice);
+      } catch (error) {
+        console.error("❌ Lỗi khi tải dữ liệu đơn nhập:", error);
+      }
+    };
+    fetchImportOrder();
+  }, [orderId]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
+  const filteredImportDetails = orderDetails.filter((item) =>
+    item.medicineName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const totalPages = Math.ceil(filteredImportDetails.length / itemsPerPage);
   const paginatedImportDetailItems = filteredImportDetails.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
-
-  const totalAmount = orderDetails.reduce(
-    (sum, item) => sum + item.totalPrice,
-    0
   );
 
   return (
@@ -98,30 +98,30 @@ export default function ImportDetailPage() {
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
-                items={[
+              items={[
                 { label: "Nhập kho", path: "/warehouse/import" },
                 { label: "Chi tiết nhập kho" },
-                ]}
+              ]}
             />
-            </div>
-            <h2 className="text-left text-xl font-semibold mb-4">Chi tiết nhập kho</h2>
+          </div>
+          <h2 className="text-left text-xl font-semibold mb-4">Chi tiết nhập kho</h2>
 
           <div className="bg-white p-4 rounded-xl shadow space-y-4 text-left">
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-gray-50 p-4 rounded border">
-                <p><span className="font-medium">Mã đơn hàng:</span> IMP001</p>
-                <p><span className="font-medium">Nhà cung cấp:</span> Công ty Dược A</p>
-                <p><span className="font-medium">Ngày tạo đơn:</span> 01/05/2025</p>
+                <p><span className="font-medium">Mã đơn hàng:</span> {"IMP" + String(orderId).padStart(3, "0")}</p>
+                <p><span className="font-medium">Nhà cung cấp:</span> {supplierName}</p>
+                <p><span className="font-medium">Ngày tạo đơn:</span> {createdAt}</p>
               </div>
             </div>
 
             <div className="flex justify-between items-center mb-4">
-            <OrderDetailFilterBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-            <div className="text-sm font-medium">Tổng tiền: <span className="text-red-500">{totalAmount.toLocaleString()}₫</span></div>
-          </div>
+              <OrderDetailFilterBar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
+              <div className="text-sm font-medium">Tổng tiền: <span className="text-red-500">{totalAmount.toLocaleString()}₫</span></div>
+            </div>
 
             <ImportDetailTable importDetails={paginatedImportDetailItems} />
           </div>

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import ImportTable, { ImportOrder } from "../../components/warehouse/ImportTable";
-import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
+import ShipmentTable, { Shipment } from "../../components/warehouse/ShipmentTable";
+import ShipmentFilterBar from "../../components/warehouse/ShipmentFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 
@@ -16,49 +16,50 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-export default function ImportPage() {
-  const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
-  const navigate = useNavigate();
-  const [imports, setImports] = useState<ImportOrder[]>([]);
+export default function ShipmentPage() {
+  const [selectedMenu, setSelectedMenu] = useState("Vận chuyển");
+  const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const navigate = useNavigate();
 
-  // ✅ Gọi API lấy danh sách đơn nhập
+  // Gọi API để lấy danh sách shipment
   useEffect(() => {
     axios
-      .get("/api/import")
+      .get("/api/shipments")
       .then((res) => {
-        const mapped: ImportOrder[] = res.data.map((item: any) => ({
-          id: item.id, // Format mã đơn
-          supplier: item.supplierName,
-          createdAt: item.createdAt,
-          totalAmount: item.totalPrice,
+        const mapped = res.data.map((s: any) => ({
+          id: s.id,
+          shipmentCode: s.shipmentCode,
+          orderId: s.orderId || s.order?.id,
+          shippedBy: s.shippedBy,
+          shippedAt: s.shippedAt,
+          deliveredAt: s.deliveredAt,
+          status: s.status,
         }));
-        setImports(mapped);
+        setShipments(mapped);
       })
-      .catch((err) => console.error("Lỗi khi tải danh sách đơn nhập:", err));
+      .catch((err) => {
+        console.error("Lỗi khi tải danh sách vận chuyển:", err);
+        alert("Không thể tải danh sách vận chuyển.");
+      });
   }, []);
 
-  // ✅ Lọc dữ liệu
-  const filteredImports = imports.filter((imp) => {
-    const matchesSupplier = imp.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSupplier;
-  });
+  // Lọc theo searchTerm
+  const filteredShipments = shipments.filter((s) =>
+    s.shipmentCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
-
-  const totalPages = Math.ceil(filteredImports.length / itemsPerPage);
-  const paginatedImports = filteredImports.slice(
+  const totalPages = Math.ceil(filteredShipments.length / itemsPerPage);
+  const paginatedShipments = filteredShipments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
+      {/* Sidebar */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {menu.map((item, idx) => (
@@ -76,7 +77,9 @@ export default function ImportPage() {
         ))}
       </aside>
 
+      {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-2 text-sm">
             <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
@@ -87,38 +90,37 @@ export default function ImportPage() {
           </div>
         </header>
 
+        {/* Page content */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Breadcrumb */}
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Nhập kho", path: "/warehouse/import" }]} />
+            <Breadcrumb items={[{ label: "Vận chuyển", path: "/warehouse/shipment" }]} />
           </div>
 
+          {/* Tiêu đề */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhập kho</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Quản lý vận chuyển</h2>
           </div>
 
+          {/* Bộ lọc và nút thêm mới */}
           <div className="flex justify-between items-center mb-4">
-            <ImportFilterBar
+            <ShipmentFilterBar
               searchTerm={searchTerm}
-              statusFilter={statusFilter}
               onSearchChange={setSearchTerm}
-              onStatusChange={setStatusFilter}
-              onReset={() => {
-                setSearchTerm("");
-                setStatusFilter("");
-              }}
+              onReset={() => setSearchTerm("")}
             />
             <button
-              onClick={() => navigate("/warehouse/import/add")}
+              onClick={() => navigate("/warehouse/shipment/add")}
               className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
             >
-              Nhập hàng
+              Tạo vận đơn
             </button>
           </div>
 
-          <div className="bg-white p-4 rounded-xl shadow">
-            <ImportTable orders={paginatedImports} />
-          </div>
+          {/* Bảng dữ liệu */}
+          <ShipmentTable shipments={paginatedShipments} />
 
+          {/* Phân trang */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -129,4 +131,3 @@ export default function ImportPage() {
     </div>
   );
 }
-

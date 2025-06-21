@@ -36,8 +36,7 @@ export default function InventoryFilterBar({
         >
           <option value="">Trạng thái</option>
           <option value="Còn hạn">Còn hạn</option>
-          <option value="Sắp hết hạn">Sắp hết hạn</option>
-          <option value="Hết hàng">Hết hàng</option>
+          <option value="Sắp hết hàng">Sắp hết hàng</option>
         </select>
 
         {/* Reset */}
