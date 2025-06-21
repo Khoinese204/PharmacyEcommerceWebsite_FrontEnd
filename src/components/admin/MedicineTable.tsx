@@ -1,13 +1,15 @@
 import React from "react";
 import ActionButtons from "./UserActionButtons";
 import MedicineActionButtons from "./MedicineActionButtons";
+import { getCategoryNameById } from "../../utils/getCategoryNameById";
 
 interface Medicine {
   id: string;
   name: string;
+  originalPrice: number;
   price: number;
-  category: string;
-  stock: number;
+  categoryId: number;
+  unit: string;
 }
 
 interface Props {
@@ -20,18 +22,24 @@ export default function MedicineTable({ medicines }: Props) {
       <table className="min-w-full text-sm text-left border-collapse">
         <thead className="bg-gray-100">
           <tr>
-            {["ID", "TÊN", "GIÁ", "DANH MỤC", "TỒN KHO", "HÀNH ĐỘNG"].map(
-              (header) => (
-                <th
-                  key={header}
-                  className={`px-4 py-3 font-semibold text-gray-700 ${
-                    header === "HÀNH ĐỘNG" ? "text-center" : "text-left"
-                  }`}
-                >
-                  {header}
-                </th>
-              )
-            )}
+            {[
+              "ID",
+              "TÊN",
+              "GIÁ GỐC",
+              "GIÁ BÁN",
+              "ĐƠN VỊ",
+              "DANH MỤC",
+              "HÀNH ĐỘNG",
+            ].map((header) => (
+              <th
+                key={header}
+                className={`px-4 py-3 font-semibold text-gray-700 ${
+                  header === "HÀNH ĐỘNG" ? "text-center" : "text-left"
+                }`}
+              >
+                {header}
+              </th>
+            ))}
           </tr>
         </thead>
 
@@ -40,9 +48,13 @@ export default function MedicineTable({ medicines }: Props) {
             <tr key={med.id} className="border-t hover:bg-gray-50">
               <td className="px-4 py-2">{med.id}</td>
               <td className="px-4 py-2">{med.name}</td>
+              <td className="px-4 py-2">
+                {med.originalPrice.toLocaleString("vi-VN")}
+              </td>
               <td className="px-4 py-2">{med.price.toLocaleString("vi-VN")}</td>
-              <td className="px-4 py-2">{med.category}</td>
-              <td className="px-4 py-2">{med.stock}</td>
+              <td className="px-4 py-2">{med.unit}</td>
+
+              <td>{getCategoryNameById(med.categoryId)}</td>
               <td className="px-4 py-2 text-center">
                 <MedicineActionButtons medicineId={med.id} />
               </td>

@@ -5,6 +5,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "./CartContext";
 import { fetchMedicineById } from "../../common/api";
+import { BASE_IMAGE_URL } from "../../helper/constants";
 
 const allProducts = [
   {
@@ -166,7 +167,7 @@ const ProductDetailPage = () => {
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
           <img
-            src={`/images/products/${product!.imageUrl}`}
+            src={`${BASE_IMAGE_URL}${product!.imageUrl}`}
             alt={product!.name}
             className="w-full max-w-sm max-h-[800px] object-contain rounded-lg shadow-md"
           />
@@ -180,7 +181,7 @@ const ProductDetailPage = () => {
             {product!.name}
           </h1>
           <div className="text-left mb-4">
-            {product!.price !== product!.originalPrice && (
+            {product!.originalPrice > product!.price && (
               <span className="line-through text-gray-400 text-sm mr-2">
                 {product!.originalPrice.toLocaleString("vi-VN")}đ
               </span>
@@ -203,7 +204,7 @@ const ProductDetailPage = () => {
                   addToCart({
                     id: product!.id,
                     name: product!.name,
-                    image: `/images/products/${product.imageUrl}`, // ✅ đảm bảo có path
+                    image: `${BASE_IMAGE_URL}${product.imageUrl}`, // ✅ đảm bảo có path
                     unit: product!.unit,
                     price: product!.price,
                     originalPrice: product!.originalPrice,

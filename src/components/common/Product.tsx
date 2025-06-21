@@ -7,7 +7,7 @@ type ProductType = {
   name: string;
   image: string;
   originalPrice: number;
-  discountedPrice: number;
+  price: number;
   unit: string;
 };
 
@@ -22,10 +22,10 @@ export default function Product({ products, categoryPath }: ProductProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
       {products.map((product) => {
-        const isDiscounted = product.originalPrice > product.discountedPrice;
+        const isDiscounted = product.originalPrice > product.price;
         const discountPercent = isDiscounted
           ? Math.round(
-              ((product.originalPrice - product.discountedPrice) /
+              ((product.originalPrice - product.price) /
                 product.originalPrice) *
                 100
             )
@@ -67,7 +67,7 @@ export default function Product({ products, categoryPath }: ProductProps) {
               </div>
 
               <p className="text-blue-700 font-bold text-base mb-2">
-                {product.discountedPrice.toLocaleString()}đ/{product.unit}
+                {product.price.toLocaleString()}đ/{product.unit}
               </p>
             </div>
 
@@ -87,7 +87,7 @@ export default function Product({ products, categoryPath }: ProductProps) {
                   image: product.image,
                   unit: product.unit,
                   originalPrice: product.originalPrice,
-                  price: product.discountedPrice,
+                  price: product.price,
                 });
                 toast.success("Đã thêm vào giỏ hàng!");
               }}

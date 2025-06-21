@@ -15,6 +15,8 @@ import PriceHistoryPage from "../pages/admin/PriceHistoryPage";
 import ProductPriceHistoryPage from "../pages/admin/ProductPriceHistoryPage";
 import AccountPage from "../pages/admin/AdminAccountPage";
 import AdminAccountPage from "../pages/admin/AdminAccountPage";
+import ViewMedicinePage from "../pages/admin/vIEWMedicinePage";
+import EditMedicinePage from "../pages/admin/EditMedicinePage";
 // ... import các trang khác
 
 export default function AdminRoutes() {
@@ -31,6 +33,8 @@ export default function AdminRoutes() {
       <Route path="/users/:id/edit" element={<EditUserPage />} />
       <Route path="/medicines" element={<MedicineManagementPage />} />
       <Route path="/medicines/add" element={<AddMedicinePage />} />
+      <Route path="/medicines/:id" element={<ViewMedicinePage />} />
+      <Route path="/medicines/:id/edit" element={<EditMedicinePage />} />
 
       {/* ...các route khác */}
       <Route path="/categories" element={<CategoryManagementPage />} />

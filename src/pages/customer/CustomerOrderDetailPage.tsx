@@ -46,7 +46,7 @@ export default function CustomerOrderDetailPage() {
     unit: item.unit,
     image: item.imageUrl,
     originalPrice: item.originalPrice,
-    discountedPrice: item.unitPrice,
+    price: item.unitPrice,
     quantity: item.quantity,
   }));
 

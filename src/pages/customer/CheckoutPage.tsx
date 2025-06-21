@@ -176,6 +176,7 @@ const CheckoutPage = () => {
     }
 
     const fullAddress = `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedCity}`;
+
     const storedUser = localStorage.getItem("user");
     const userId = storedUser ? JSON.parse(storedUser).id : null;
 

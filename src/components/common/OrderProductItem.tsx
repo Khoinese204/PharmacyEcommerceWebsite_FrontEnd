@@ -1,5 +1,6 @@
 // src/components/common/OrderProductItem.tsx
 import React from "react";
+import { BASE_IMAGE_URL } from "../../helper/constants";
 
 type Props = {
   item: {
@@ -8,7 +9,7 @@ type Props = {
     unit: string;
     image: string;
     originalPrice: number;
-    discountedPrice: number;
+    price: number;
     quantity: number;
   };
 };
@@ -19,7 +20,7 @@ export default function OrderProductItem({ item }: Props) {
       {/* Hình ảnh và thông tin thuốc */}
       <div className="flex items-center gap-4 w-full">
         <img
-          src={`/images/products/${item.image}`}
+          src={`${BASE_IMAGE_URL}${item.image}`}
           alt={item.name}
           className="w-16 h-16 object-cover rounded"
         />
@@ -28,9 +29,9 @@ export default function OrderProductItem({ item }: Props) {
           <p className="text-xs text-gray-500">{item.unit}</p>
           <div className="flex gap-2 text-sm mt-1">
             <span className="text-red-500 font-bold">
-              {item.discountedPrice.toLocaleString()}đ
+              {item.price.toLocaleString()}đ
             </span>
-            {item.discountedPrice < item.originalPrice && (
+            {item.price < item.originalPrice && (
               <span className="line-through text-gray-400">
                 {item.originalPrice.toLocaleString()}đ
               </span>

@@ -3,7 +3,7 @@ type ProductDisplay = {
   name: string;
   image: string;
   originalPrice: number;
-  discountedPrice: number;
+  price: number;
   unit: string;
   brand: string;
 };

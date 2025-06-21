@@ -152,14 +152,14 @@ const PersonalCareProductListPage = () => {
   // 🧠 Lọc theo giá & thương hiệu
   const filteredProducts = products.filter((product) => {
     const matchPrice =
-      (priceRange === "under-100" && product.discountedPrice < 100000) ||
+      (priceRange === "under-100" && product.price < 100000) ||
       (priceRange === "100-300" &&
-        product.discountedPrice >= 100000 &&
-        product.discountedPrice <= 300000) ||
+        product.price >= 100000 &&
+        product.price <= 300000) ||
       (priceRange === "300-500" &&
-        product.discountedPrice > 300000 &&
-        product.discountedPrice <= 500000) ||
-      (priceRange === "above-500" && product.discountedPrice > 500000) ||
+        product.price > 300000 &&
+        product.price <= 500000) ||
+      (priceRange === "above-500" && product.price > 500000) ||
       priceRange === "";
 
     const matchBrand =
@@ -170,8 +170,8 @@ const PersonalCareProductListPage = () => {
 
   // 🧠 Sắp xếp sau khi lọc
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortOption === "asc") return a.discountedPrice - b.discountedPrice;
-    if (sortOption === "desc") return b.discountedPrice - a.discountedPrice;
+    if (sortOption === "asc") return a.price - b.price;
+    if (sortOption === "desc") return b.price - a.price;
     return 0;
   });
 

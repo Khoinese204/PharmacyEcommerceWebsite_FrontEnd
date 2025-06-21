@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type CartItem = {
   id: number;
   name: string;
   image: string;
   unit: string;
-  originalPrice: number; // 👈 Thêm dòng này
-  price: number; // discountedPrice
+  originalPrice: number;
+  price: number;
   quantity: number;
 };
 
@@ -16,7 +16,7 @@ type CartContextType = {
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   totalPrice: number;
-  isInCart: (id: number) => boolean; // ✅ thêm
+  isInCart: (id: number) => boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -25,6 +25,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+
+  // 🟢 Load cart from localStorage on mount
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+  // 🟢 Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setCart((prev) => {
@@ -55,9 +68,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const isInCart = (id: number) => {
-    return cart.some((item) => item.id === id);
-  };
+
+  const isInCart = (id: number) => cart.some((item) => item.id === id);
 
   return (
     <CartContext.Provider

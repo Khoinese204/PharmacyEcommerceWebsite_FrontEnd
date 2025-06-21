@@ -3,13 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Product from "../../components/common/Product";
 import RandomProduct from "../../components/common/RandomProduct";
+import { BASE_IMAGE_URL } from "../../helper/constants";
 
 interface ProductDto {
   id: number;
   name: string;
   imageUrl: string;
   originalPrice: number;
-  discountedPrice: number; // <-- ✅ thêm dòng này
+  price: number; // <-- ✅ thêm dòng này
   unit: string;
 }
 
@@ -98,9 +99,9 @@ export default function HomePage() {
           products={visibleProducts.map((p) => ({
             id: p.id,
             name: p.name,
-            image: `/images/products/${p.imageUrl}`,
+            image: `${BASE_IMAGE_URL}${p.imageUrl}`,
             originalPrice: p.originalPrice ?? 0,
-            discountedPrice: p.discountedPrice ?? p.originalPrice ?? 0, // <-- SỬA ở đây
+            price: p.price ?? p.originalPrice ?? 0, // <-- SỬA ở đây
             unit: p.unit,
           }))}
         />

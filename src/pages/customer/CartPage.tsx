@@ -53,15 +53,24 @@ export default function CartPage() {
   }, [selectedItems, isLoaded]);
 
   const selectedCart = cart.filter((item) => selectedItems.includes(item.id));
-  const totalOriginal = selectedCart.reduce(
-    (sum, item) => sum + item.originalPrice * item.quantity,
-    0
-  );
+  const totalOriginal = selectedCart.reduce((sum, item) => {
+    if (item.originalPrice > item.price) {
+      return sum + item.originalPrice * item.quantity;
+    }
+    return sum + item.price * item.quantity; // Nếu không giảm giá, lấy price luôn
+  }, 0);
   const totalPrice = selectedCart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const totalDiscount = totalOriginal - totalPrice;
+  // ✅ Chỉ tính giảm giá nếu price < originalPrice
+  const totalDiscount = selectedCart.reduce((sum, item) => {
+    if (item.originalPrice > item.price) {
+      return sum + (item.originalPrice - item.price) * item.quantity;
+    }
+    return sum;
+  }, 0);
+
   const totalVoucherDiscount = Object.values(appliedPromos).reduce(
     (a, b) => a + b,
     0

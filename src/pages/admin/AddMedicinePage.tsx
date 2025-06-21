@@ -1,9 +1,26 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import { FaUser } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 export default function AddMedicinePage() {
   const navigate = useNavigate();
+  const [selectedMenu, setSelectedMenu] = useState("Thuốc");
+  const storedUser = localStorage.getItem("user");
+  const userId = storedUser ? JSON.parse(storedUser).id : null;
+
+  const menu = [
+    { label: "Bảng điều khiển", path: "/admin/dashboard" },
+    { label: "Người dùng", path: "/admin/users" },
+    { label: "Thuốc", path: "/admin/medicines" },
+    { label: "Danh mục thuốc", path: "/admin/categories" },
+    { label: "Mã giảm giá", path: "/admin/coupons" },
+    { label: "Kho", path: "/admin/warehouse" },
+    { label: "Doanh thu", path: "/admin/revenue" },
+    { label: "Khách hàng", path: "/admin/customers" },
+    { label: "Lịch sử giá", path: "/admin/price-history" },
+  ];
 
   const [medicine, setMedicine] = useState({
     name: "",
@@ -17,6 +34,10 @@ export default function AddMedicinePage() {
     categoryId: "",
     shortDescription: "",
   });
+
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    []
+  );
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -56,6 +77,7 @@ export default function AddMedicinePage() {
         }),
       });
       const data = await res.json();
+      console.log("Success to fetch price:", data);
       setFinalPrice(data.finalPrice.toFixed(0));
     } catch (err) {
       console.error("Failed to fetch price:", err);
@@ -73,76 +95,84 @@ export default function AddMedicinePage() {
     e.preventDefault();
 
     const formData = new FormData();
+    formData.append("userId", userId);  
+    // Gửi các trường thuốc
     Object.entries(medicine).forEach(([key, value]) => {
-      formData.append(key, value);
+      if (key === "originalPrice" || key === "categoryId") {
+        formData.append(key, String(parseFloat(value)));
+      } else {
+        formData.append(key, value);
+      }
     });
-    formData.append("price", finalPrice);
-    formData.append("details", JSON.stringify(details));
+
+    formData.append("price", String(parseFloat(finalPrice)));
+    formData.append("details", JSON.stringify(details)); // ✅ dạng chuỗi JSON
+
+    // Gửi ảnh nếu có
     if (selectedImage) {
       formData.append("image", selectedImage);
     }
 
+    // Gọi API backend
     try {
-      const res = await fetch("/api/admin/medicines/upload", {
+      const res = await fetch("/api/medicines", {
         method: "POST",
         body: formData,
       });
 
       if (res.ok) {
-        alert("Thêm thuốc thành công!");
+        toast.success("Thêm thuốc thành công!");
         navigate("/admin/medicines");
       } else {
-        alert("Thêm thuốc thất bại!");
+        const text = await res.text();
+        toast.error("Thêm thuốc thất bại!");
       }
     } catch (err) {
-      console.error(err);
-      alert("Lỗi kết nối đến server");
+      console.error("Lỗi kết nối:", err);
+      alert("Không thể kết nối đến server!");
     }
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories");
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.error("Lỗi khi lấy danh mục:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
-        {[
-          "Bảng điều khiển",
-          "Người dùng",
-          "Thuốc",
-          "Danh mục thuốc",
-          "Mã giảm giá",
-          "Kho",
-          "Doanh thu",
-          "Khách hàng",
-          "Lịch sử giá",
-        ].map((label, idx) => (
+        {menu.map((item, idx) => (
           <button
             key={idx}
-            onClick={() =>
-              navigate(`/admin/${label.toLowerCase().replace(/\s+/g, "-")}`)
-            }
+            onClick={() => navigate(item.path)} // chuyển trang
             className={`block w-full text-left px-3 py-2 rounded transition ${
-              label === "Thuốc"
+              selectedMenu === item.label
                 ? "bg-blue-500 text-white"
                 : "text-gray-700 hover:bg-blue-50"
             }`}
           >
-            {label}
+            {item.label}
           </button>
         ))}
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img
-              src="/avatar.jpg"
-              alt="Avatar"
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Admin</p>
-            </div>
+          {/* Icon nằm sát phải */}
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/admin/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 
@@ -229,13 +259,20 @@ export default function AddMedicinePage() {
                 placeholder="Nơi sản xuất"
                 className="input"
               />
-              <input
+              <select
                 name="categoryId"
                 value={medicine.categoryId}
                 onChange={handleChange}
-                placeholder="ID danh mục"
                 className="input"
-              />
+              >
+                <option value="">-- Chọn danh mục --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+
               <input
                 name="shortDescription"
                 value={medicine.shortDescription}

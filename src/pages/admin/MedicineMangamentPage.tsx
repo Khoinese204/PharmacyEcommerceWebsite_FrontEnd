@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Chart from "../../components/admin/RevenueChart";
 import { Link, useNavigate } from "react-router-dom";
 import UserTable from "../../components/admin/UserTable";
@@ -22,38 +22,8 @@ const menu = [
   { label: "Lịch sử giá", path: "/admin/price-history" },
 ];
 
-const medicines = [
-  {
-    id: "00001",
-    name: "Nước súc miệng",
-    price: 65000,
-    category: "Chăm sóc cá nhân",
-    stock: 10,
-  },
-  {
-    id: "00002",
-    name: "Viên uống Immunvita EasyLife",
-    price: 70000,
-    category: "Thực phẩm chức năng",
-    stock: 20,
-  },
-  {
-    id: "00003",
-    name: "Thuốc Exopadin",
-    price: 60000,
-    category: "Thuốc",
-    stock: 15,
-  },
-  {
-    id: "00004",
-    name: "Thuốc Vomina Plus",
-    price: 100000,
-    category: "Thuốc",
-    stock: 5,
-  },
-];
-
 export default function MedicineManagementPage() {
+  const [medicines, setMedicines] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState("Thuốc");
   const navigate = useNavigate();
 
@@ -70,6 +40,20 @@ export default function MedicineManagementPage() {
   const handleSearchSelect = (item: string) => {
     console.log("Đã chọn:", item);
   };
+
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const res = await fetch("/api/medicines");
+        const data = await res.json();
+        setMedicines(data); // data là mảng các MedicineDto
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách thuốc:", err);
+      }
+    };
+
+    fetchMedicines();
+  }, []);
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">

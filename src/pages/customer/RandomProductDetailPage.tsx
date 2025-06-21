@@ -7,6 +7,7 @@ import { useCart } from "./CartContext";
 import { fetchMedicineById } from "../../common/api";
 import BreadcrumbBack from "../../components/common/BreadcrumbBack";
 import { getCategoryNameById } from "../../utils/getCategoryNameById";
+import { BASE_IMAGE_URL } from "../../helper/constants";
 
 const allProducts = [
   {
@@ -151,7 +152,7 @@ const RandomProductDetailPage = () => {
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
           <img
-            src={`/images/products/${product!.imageUrl}`}
+            src={`${BASE_IMAGE_URL}${product!.imageUrl}`}
             alt={product!.name}
             className="w-full max-w-sm max-h-[800px] object-contain rounded-lg shadow-md"
           />
@@ -188,7 +189,7 @@ const RandomProductDetailPage = () => {
                   addToCart({
                     id: product!.id,
                     name: product!.name,
-                    image: `/images/products/${product.imageUrl}`, // ✅ đảm bảo có path
+                    image: `${BASE_IMAGE_URL}${product!.imageUrl}`, // ✅ đảm bảo có path
                     unit: product!.unit,
                     price: product!.price,
                     originalPrice: product!.originalPrice,

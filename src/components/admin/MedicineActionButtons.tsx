@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function MedicineActionButtons({
   medicineId,
@@ -9,10 +10,27 @@ export default function MedicineActionButtons({
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleDelete = () => {
-    // TODO: Gọi API xóa thuốc tại đây
-    console.log("Deleted medicine:", medicineId);
-    setShowConfirm(false);
+  const handleDelete = async () => {
+    try {
+      const res = await fetch(`/api/medicines/${Number(medicineId)}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast.success("Xóa thuốc thành công!");
+        setShowConfirm(false);
+        // ✅ Option: reload hoặc cập nhật lại danh sách
+        setTimeout(() => {
+          window.location.reload(); // hoặc gọi callback
+        }, 2000);
+      } else {
+        const error = await res.text();
+        toast.error(`Xóa thất bại: ${error}`);
+      }
+    } catch (err) {
+      console.error("Lỗi khi xóa:", err);
+      toast.error("Đã xảy ra lỗi khi xóa thuốc.");
+    }
   };
 
   return (
@@ -33,7 +51,8 @@ export default function MedicineActionButtons({
           <div className="relative bg-white p-6 rounded shadow-lg max-w-sm w-full z-10">
             <h3 className="text-lg font-semibold mb-4">Thông báo</h3>
             <p className="mb-4">
-              Bạn có chắc muốn xóa thuốc <strong>{medicineId}</strong> này?
+              Bạn có chắc muốn xóa thuốc có mã <strong>{medicineId}</strong>{" "}
+              này?
             </p>
             <div className="flex justify-end gap-2">
               <button

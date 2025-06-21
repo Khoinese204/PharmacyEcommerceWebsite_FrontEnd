@@ -8,7 +8,7 @@ type Product = {
   unit: string;
   image: string;
   originalPrice: number;
-  discountedPrice: number;
+  price: number;
   quantity: number;
 };
 

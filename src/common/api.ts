@@ -1,5 +1,6 @@
 // common/api.ts
 import axios from "axios";
+import { BASE_IMAGE_URL } from "../helper/constants";
 
 export async function fetchMedicines(categoryId: number) {
   const response = await axios.get("/api/medicines");
@@ -13,9 +14,9 @@ export async function fetchMedicines(categoryId: number) {
   return filteredData.map((item: any) => ({
     id: item.id,
     name: item.name,
-    image: `/images/products/${item.imageUrl}`, // 👈 Sửa chỗ này
+    image: `${BASE_IMAGE_URL}${item.imageUrl}`, // 👈 Sửa chỗ này
     originalPrice: item.originalPrice,
-    discountedPrice: item.price,
+    price: item.price,
     unit: item.unit,
     brand: item.brandOrigin,
   }));
