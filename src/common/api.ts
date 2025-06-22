@@ -27,3 +27,11 @@ export const fetchMedicineById = async (id: number) => {
   console.log("🧪 Medicine detail:", response.data);
   return response.data; // ✅ FIXED
 };
+
+export const fetchInventoryQuantity = async (
+  medicineId: number
+): Promise<number> => {
+  const res = await fetch(`/api/inventory/quantity/${medicineId}`);
+  if (!res.ok) throw new Error("Không thể lấy tồn kho");
+  return res.json();
+};
