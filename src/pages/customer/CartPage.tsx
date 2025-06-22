@@ -33,6 +33,30 @@ export default function CartPage() {
   );
   const [showPromoList, setShowPromoList] = useState(false);
 
+  const [inventoryMap, setInventoryMap] = useState<{
+    [medicineId: number]: number;
+  }>({});
+
+  useEffect(() => {
+    const fetchInventoryQuantities = async () => {
+      try {
+        const res = await fetch("/api/inventory/quantities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cart.map((item) => item.id)),
+        });
+        const data = await res.json(); // { 101: 12, 102: 0, ... }
+        setInventoryMap(data);
+      } catch (err) {
+        console.error("Lỗi lấy tồn kho tổng hợp", err);
+      }
+    };
+
+    if (cart.length > 0) {
+      fetchInventoryQuantities();
+    }
+  }, [cart]);
+
   const getPromotionType = (promo: Promotion): PromotionType => {
     if (promo.name.toLowerCase().includes("vanchuyen")) return "shipping";
     if (promo.name.toLowerCase().includes("coupon")) return "coupon";
@@ -202,7 +226,13 @@ export default function CartPage() {
                     type="checkbox"
                     className="accent-cyan-600"
                     checked={selectedItems.includes(item.id)}
-                    onChange={() => toggleSelect(item.id)}
+                    onChange={() => {
+                      if ((inventoryMap[item.id] ?? 0) === 0) {
+                        toast.error("Sản phẩm này đã hết hàng");
+                        return;
+                      }
+                      toggleSelect(item.id);
+                    }}
                   />
                   <img
                     src={item.image}
@@ -214,6 +244,7 @@ export default function CartPage() {
                     <p className="text-sm text-gray-500">
                       Đơn vị tính: {item.unit}
                     </p>
+
                     {item.price < item.originalPrice && (
                       <p className="line-through text-gray-400 text-sm">
                         {item.originalPrice.toLocaleString()}đ
@@ -222,19 +253,35 @@ export default function CartPage() {
                     <p className="text-blue-600 font-bold">
                       {item.price.toLocaleString()}đ
                     </p>
+                    <p className="text-sm text-green-600">
+                      Còn hàng: {inventoryMap[item.id] ?? 0}
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-center">
                   <QuantityButton
                     quantity={item.quantity}
                     enabled={true}
-                    onIncrement={() =>
-                      updateQuantity(item.id, item.quantity + 1)
-                    }
+                    onIncrement={() => {
+                      const maxQty = inventoryMap[item.id] ?? 0;
+
+                      if (maxQty === 0) {
+                        toast.error("Không thể tăng, sản phẩm đã hết hàng");
+                        return;
+                      }
+
+                      if (item.quantity + 1 > maxQty) {
+                        toast.error(`Không thể tăng quá số lượng còn hàng`);
+                        return;
+                      }
+
+                      updateQuantity(item.id, item.quantity + 1);
+                    }}
                     onDecrement={() =>
                       updateQuantity(item.id, item.quantity - 1)
                     }
                   />
+
                   <button
                     onClick={() => removeFromCart(item.id)}
                     className="text-red-500 hover:text-red-700 text-xl"
