@@ -1,29 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import axios from "axios";
 
 interface Props {
   viewUrl: string;
   orderId: number;
-  currentStatus: string; // code: CONFIRMED, PENDING, ...
+  currentStatus: "PENDING" | "PACKING" | "DELIVERING" | "DELIVERED" | "CANCELLED";
   onDelete?: () => void;
-  onStatusUpdateSuccess?: (newStatus: string) => void;
+  onStatusUpdateSuccess?: (newStatusCode: string) => void;
+  editUrl?: string;
+  customEditAction?: () => void;
 }
 
 const statuses = [
   { label: "Chờ xác nhận", value: "PENDING" },
-  { label: "Đang đóng gói", value: "PACKING" },
+  { label: "Đang gói hàng", value: "PACKING" },
   { label: "Đang giao hàng", value: "DELIVERING" },
   { label: "Đã giao", value: "DELIVERED" },
   { label: "Đã hủy", value: "CANCELLED" },
 ];
 
-export default function ActionButtons({
+export default function ActionButtonsExport({
   viewUrl,
+  editUrl,
   orderId,
   currentStatus,
   onDelete,
   onStatusUpdateSuccess,
+  customEditAction,
 }: Props) {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -44,28 +49,69 @@ export default function ActionButtons({
       await axios.put(`/api/orders/${orderId}/status`, {
         orderId,
         newStatus: selectedStatus,
-        updatedByUserId: 3,
-        note: "Cập nhật từ nhân viên bán hàng",
+        updatedByUserId: 4, // bạn có thể truyền động nếu cần
+        note: "Cập nhật trạng thái từ nhân viên kho",
       });
 
       onStatusUpdateSuccess?.(selectedStatus);
       setShowEdit(false);
     } catch (err) {
-        console.error("Lỗi cập nhật trạng thái:", err);
-        setErrorMessage("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
+      console.error("Lỗi cập nhật trạng thái:", err);
+      setErrorMessage("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   };
 
   return (
     <>
-      <div className="flex justify-center gap-1 items-center">
-        <button onClick={() => navigate(viewUrl)}>👁️</button>
-        <button onClick={() => setShowEdit(true)}>✏️</button>
-        {onDelete && <button onClick={() => setShowConfirm(true)}>🗑️</button>}
+      <div className="flex justify-center gap-2 items-center">
+        <button
+          onClick={() => navigate(viewUrl)}
+          className="p-1 text-blue-600 hover:bg-gray-100 rounded"
+          title="Xem chi tiết"
+        >
+          <Eye size={18} />
+        </button>
+
+        {customEditAction ? (
+          <button
+            onClick={customEditAction}
+            className="p-1 text-green-600 hover:bg-gray-100 rounded"
+            title="Chỉnh sửa trạng thái"
+          >
+            <Pencil size={18} />
+          </button>
+        ) : onStatusUpdateSuccess ? (
+          <button
+            onClick={() => setShowEdit(true)}
+            className="p-1 text-green-600 hover:bg-gray-100 rounded"
+            title="Cập nhật trạng thái"
+          >
+            <Pencil size={18} />
+          </button>
+        ) : editUrl ? (
+          <button
+            onClick={() => navigate(editUrl)}
+            className="p-1 text-green-600 hover:bg-gray-100 rounded"
+            title="Chỉnh sửa"
+          >
+            <Pencil size={18} />
+          </button>
+        ) : null}
+
+        {onDelete && (
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="p-1 text-red-600 hover:bg-gray-100 rounded"
+            title="Xóa"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
       </div>
 
+      {/* Modal xác nhận xóa */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0 bg-black/30" />
@@ -74,13 +120,13 @@ export default function ActionButtons({
             <p className="mb-4">Bạn có chắc muốn xóa mục này?</p>
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-1 rounded bg-gray-200"
+                className="px-4 py-1 rounded bg-gray-200 hover:bg-gray-300"
                 onClick={() => setShowConfirm(false)}
               >
                 Hủy
               </button>
               <button
-                className="px-4 py-1 rounded bg-red-500 text-white"
+                className="px-4 py-1 rounded bg-red-500 text-white hover:bg-red-600"
                 onClick={handleDelete}
               >
                 Xóa
@@ -90,6 +136,7 @@ export default function ActionButtons({
         </div>
       )}
 
+      {/* Modal cập nhật trạng thái */}
       {showEdit && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0 bg-black/30" />
@@ -97,7 +144,7 @@ export default function ActionButtons({
             <h3 className="text-lg font-semibold mb-4">Chỉnh sửa trạng thái</h3>
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(e) => setSelectedStatus(e.target.value as Props["currentStatus"])}
               className="w-full mb-3 border px-3 py-2 rounded"
             >
               {statuses.map((s) => (

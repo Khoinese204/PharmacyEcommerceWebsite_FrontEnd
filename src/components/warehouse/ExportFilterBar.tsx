@@ -36,13 +36,10 @@ export default function ExportFilterBar({
         >
           <option value="">Trạng thái</option>
           <option value="Chờ xác nhận">Chờ xác nhận</option>
-          <option value="Đang xử lý">Đang xử lý</option>
-          <option value="Đã soạn hàng">Đã soạn hàng</option>
-          <option value="Đang giao">Đang giao</option>
+          <option value="Đang gói hàng">Đang gói hàng</option>
+          <option value="Đang giao hàng">Đang giao hàng</option>
           <option value="Đã giao">Đã giao</option>
-          <option value="Đã nhận">Đã nhận</option>
           <option value="Đã hủy">Đã hủy</option>
-          <option value="Trả hàng">Trả hàng</option>
         </select>
 
         {/* Nút đặt lại bộ lọc */}

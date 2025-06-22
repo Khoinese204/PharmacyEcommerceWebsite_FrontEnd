@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 import ExportTable, { ExportOrder } from "../../components/warehouse/ExportTable";
-import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
+import ExportFilterBar from "../../components/warehouse/ExportFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import ExportFilterBar from "../../components/warehouse/ExportFilterBar";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -15,57 +16,34 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-const mockExports: ExportOrder[] = [
-  {
-    id: "IMP001",
-    receiver: "Kho PrimeCare",
-    phone: "0901123456",
-    address: 1,
-    status: "Đã nhận",
-  },
-  {
-    id: "IMP002",
-    receiver: "Kho PrimeCare",
-    phone: "0901123456",
-    address: 2,
-    status: "Đã giao",
-  },
-  {
-    id: "IMP003",
-    receiver: "Kho PrimeCare",
-    phone: "0901123456",
-    address: 3,
-    status: "Chờ xác nhận",
-  },
-  {
-    id: "IMP004",
-    receiver: "Kho PrimeCare",
-    phone: "0901123456",
-    address: 4,
-    status: "Đã huỷ",
-  },
-  {
-    id: "IMP005",
-    receiver: "Kho PrimeCare",
-    phone: "0901123456",
-    address: 5,
-    status: "Đang xử lý",
-  },
-];
-
 export default function ExportPage() {
-  const [selectedMenu, setSelectedMenu] = useState("Xuất kho");
   const navigate = useNavigate();
-  const [exports, setExports] = useState<ExportOrder[]>(mockExports);
+  const [selectedMenu, setSelectedMenu] = useState("Xuất kho");
+  const [exports, setExports] = useState<ExportOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const filteredExports = exports.filter((imp) => {
-    const matchesReceiver = imp.receiver.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter ? imp.status === statusFilter : true;
-    return matchesReceiver && matchesStatus;
+  // Call API để lấy danh sách đơn xuất
+  useEffect(() => {
+  axios.get("/api/exports")
+    .then((res) => {
+      const fixedData = res.data.map((item: any) => ({
+        ...item,
+        status: item.status as ExportOrder["status"],
+      }));
+      setExports(fixedData);
+    })
+    .catch((err) => console.error("Lỗi khi tải đơn xuất:", err));
+}, []);
+
+
+  // Lọc theo tên người nhận và trạng thái
+  const filteredExports = exports.filter((exp) => {
+    const matchesName = exp.recipientName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter ? exp.status === statusFilter : true;
+    return matchesName && matchesStatus;
   });
 
   useEffect(() => {
@@ -131,7 +109,9 @@ export default function ExportPage() {
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow">
-            <ExportTable orders={paginatedExports} />
+            <ExportTable 
+                orders={paginatedExports}
+                onOrdersChange={(newOrders) => setExports(newOrders)} />
           </div>
 
           <Pagination

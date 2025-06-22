@@ -20,6 +20,7 @@ export default function ShipmentPage() {
   const [selectedMenu, setSelectedMenu] = useState("Vận chuyển");
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const navigate = useNavigate();
@@ -47,9 +48,15 @@ export default function ShipmentPage() {
   }, []);
 
   // Lọc theo searchTerm
-  const filteredShipments = shipments.filter((s) =>
-    s.shipmentCode.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredShipments = shipments.filter((s) => {
+    const shipCode = s.shipmentCode.toLowerCase().includes(searchTerm.toLowerCase());
+    const shipStatus = statusFilter ? s.status === statusFilter : true;
+    return shipCode && shipStatus;
+  }
   );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const totalPages = Math.ceil(filteredShipments.length / itemsPerPage);
   const paginatedShipments = filteredShipments.slice(
@@ -106,8 +113,12 @@ export default function ShipmentPage() {
           <div className="flex justify-between items-center mb-4">
             <ShipmentFilterBar
               searchTerm={searchTerm}
+              statusFilter={statusFilter}
               onSearchChange={setSearchTerm}
-              onReset={() => setSearchTerm("")}
+              onStatusChange={setStatusFilter}
+              onReset={() => {
+                setSearchTerm("");
+                setStatusFilter("");}}
             />
             <button
               onClick={() => navigate("/warehouse/shipment/add")}

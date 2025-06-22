@@ -3,13 +3,17 @@ import { FaUndo } from "react-icons/fa";
 
 interface Props {
   searchTerm: string;
+  statusFilter: string;
   onSearchChange: (value: string) => void;
+  onStatusChange: (value: string) => void;
   onReset: () => void;
 }
 
 export default function ImportFilterBar({
   searchTerm,
+  statusFilter,
   onSearchChange,
+  onStatusChange,
   onReset,
 }: Props) {
   return (
@@ -23,6 +27,17 @@ export default function ImportFilterBar({
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
+        {/* Filter by inventory status */}
+        <select
+          className="border rounded px-3 py-1.5 text-sm"
+          value={statusFilter}
+          onChange={(e) => onStatusChange(e.target.value)}
+        >
+          <option value="">Trạng thái</option>
+          <option value="WAITING">Chờ xử lý</option>
+          <option value="SHIPPING">Đang giao hàng</option>
+          <option value="DELIVERED">Đã giao</option>
+        </select>
 
         {/* Nút đặt lại bộ lọc */}
         <button
