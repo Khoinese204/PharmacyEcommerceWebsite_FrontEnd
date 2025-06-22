@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import ActionButtons from "./ActionButtons";
+import axios from "axios"; // ← THÊM DÒNG NÀY
+
 
 export interface InventoryItem {
   batchNumber: string;
   productName: string;
   quantity: number;
   expiryDate: string;
-  status: "Còn hạn" | "Sắp hết hạn" | "Hết hạn" | "Hết hàng";
+  status: "Còn hạn" | "Sắp hết hàng";
 }
 
 interface Props {
@@ -16,27 +18,36 @@ interface Props {
 
 export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) {
   const [editBatch, setEditBatch] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Partial<InventoryItem>>({});
+  const [editQuantity, setEditQuantity] = useState<number>(0);
 
   const handleEditClick = (item: InventoryItem) => {
     setEditBatch(item.batchNumber);
-    setEditData({ quantity: item.quantity, status: item.status });
+    setEditQuantity(item.quantity);
   };
 
-  const handleSave = (item: InventoryItem) => {
-    const updatedItem = {
+  const handleSave = async (item: InventoryItem) => {
+  try {
+    const updatedItem: InventoryItem = {
       ...item,
-      quantity: editData.quantity ?? item.quantity,
-      status: editData.status ?? item.status,
+      quantity: editQuantity,
     };
-    onUpdateItem(updatedItem);
+
+    // Gọi API cập nhật tồn kho
+    await axios.patch(`/api/inventory/${item.batchNumber}`, {
+      quantity: editQuantity,
+    });
+
+    onUpdateItem(updatedItem); // cập nhật state ở cha
     setEditBatch(null);
-    setEditData({});
-  };
+  } catch (error) {
+    console.error("Lỗi khi cập nhật tồn kho:", error);
+    alert("❌ Cập nhật thất bại. Vui lòng thử lại.");
+  }
+};
+
 
   const handleCancel = () => {
     setEditBatch(null);
-    setEditData({});
   };
 
   return (
@@ -64,13 +75,8 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
                     <input
                       type="number"
                       className="border px-2 py-1 w-20"
-                      value={editData.quantity ?? item.quantity}
-                      onChange={(e) =>
-                        setEditData((prev) => ({
-                          ...prev,
-                          quantity: Number(e.target.value),
-                        }))
-                      }
+                      value={editQuantity}
+                      onChange={(e) => setEditQuantity(Number(e.target.value))}
                     />
                   ) : (
                     item.quantity
@@ -80,37 +86,17 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
                   {new Date(item.expiryDate).toLocaleDateString("vi-VN")}
                 </td>
                 <td className="px-4 py-2">
-                  {isEditing ? (
-                    <select
-                      className="border px-2 py-1"
-                      value={editData.status ?? item.status}
-                      onChange={(e) =>
-                        setEditData((prev) => ({
-                          ...prev,
-                          status: e.target.value as InventoryItem["status"],
-                        }))
-                      }
-                    >
-                      <option value="Còn hạn">Còn hạn</option>
-                      <option value="Sắp hết hạn">Sắp hết hạn</option>
-                      <option value="Hết hạn">Hết hạn</option>
-                      <option value="Hết hàng">Hết hàng</option>
-                    </select>
-                  ) : (
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        item.status === "Còn hạn"
-                          ? "bg-green-100 text-green-700"
-                          : item.status === "Sắp hết hạn"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : item.status === "Hết hàng"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  )}
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      item.status === "Còn hạn"
+                        ? "bg-green-100 text-green-700"
+                        : item.status === "Sắp hết hàng"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {item.status}
+                  </span>
                 </td>
                 <td className="px-4 py-2 text-center">
                   {isEditing ? (
@@ -131,7 +117,6 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
                   ) : (
                     <ActionButtons
                       viewUrl={`/warehouse/inventory/${item.batchNumber}`}
-                      // Chỉ override nút edit để dùng inline edit
                       editUrl=""
                       onDelete={() =>
                         console.log("Xóa lô hàng:", item.batchNumber)

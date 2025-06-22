@@ -9,7 +9,7 @@ interface Props {
   onReset: () => void;
 }
 
-export default function InventoryFilterBar({
+export default function ImportFilterBar({
   searchTerm,
   statusFilter,
   onSearchChange,
@@ -17,17 +17,16 @@ export default function InventoryFilterBar({
   onReset,
 }: Props) {
   return (
-    <div className="flex justify-between items-center w-full">
+    <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-2">
-        {/* Search by medicine name */}
+        {/* Tìm theo tên đơn vị vận chuyển */}
         <input
           type="text"
-          placeholder="Tìm theo tên thuốc"
-          className="border rounded px-3 py-1.5 text-sm w-60"
+          placeholder="Tìm theo đơn vị vận chuyển"
+          className="border rounded px-3 py-1.5 text-sm w-56"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
-
         {/* Filter by inventory status */}
         <select
           className="border rounded px-3 py-1.5 text-sm"
@@ -35,11 +34,12 @@ export default function InventoryFilterBar({
           onChange={(e) => onStatusChange(e.target.value)}
         >
           <option value="">Trạng thái</option>
-          <option value="Còn hạn">Còn hạn</option>
-          <option value="Sắp hết hàng">Sắp hết hàng</option>
+          <option value="WAITING">Chờ xử lý</option>
+          <option value="SHIPPING">Đang giao hàng</option>
+          <option value="DELIVERED">Đã giao</option>
         </select>
 
-        {/* Reset */}
+        {/* Nút đặt lại bộ lọc */}
         <button
           className="flex items-center gap-1 px-3 py-1.5 text-red-500 border border-red-100 bg-red-50 rounded text-sm hover:bg-red-100"
           onClick={onReset}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import ExportTable, { ExportOrder } from "../../components/warehouse/ExportTable";
-import ExportFilterBar from "../../components/warehouse/ExportFilterBar";
-import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import InventoryHistoryTable, {
+  InventoryLogItem,
+} from "../../components/warehouse/InventoryHistoryTable";
+import Pagination from "../../components/admin/TablePagination";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -16,42 +16,36 @@ const menu = [
   { label: "Vận chuyển", path: "/warehouse/shipment" },
 ];
 
-export default function ExportPage() {
+export default function InventoryHistoryPage() {
   const navigate = useNavigate();
-  const [selectedMenu, setSelectedMenu] = useState("Xuất kho");
-  const [exports, setExports] = useState<ExportOrder[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [selectedMenu, setSelectedMenu] = useState("Lịch sử kho");
+  const [logs, setLogs] = useState<InventoryLogItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-
-  // Call API để lấy danh sách đơn xuất
-  useEffect(() => {
-  axios.get("/api/exports")
-    .then((res) => {
-      const fixedData = res.data.map((item: any) => ({
-        ...item,
-        status: item.status as ExportOrder["status"],
-      }));
-      setExports(fixedData);
-    })
-    .catch((err) => console.error("Lỗi khi tải đơn xuất:", err));
-}, []);
-
-
-  // Lọc theo tên người nhận và trạng thái
-  const filteredExports = exports.filter((exp) => {
-    const matchesName = exp.recipientName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter ? exp.status === statusFilter : true;
-    return matchesName && matchesStatus;
-  });
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+    const fetchLogs = async () => {
+      try {
+        const res = await axios.get("/api/inventory/history");
+        console.log("Logs raw:", res.data);
+        const mapped = res.data.map((log: any) => ({
+          id: log.id,
+          medicineName: log.medicineName,
+          type: log.type,
+          quantity: log.quantity,
+          relatedOrderId: log.relatedOrderId,
+          createdAt: log.createdAt.replace(" ", "T"),
+        }));
+        setLogs(mapped);
+      } catch (err) {
+        console.error("Lỗi khi tải lịch sử kho:", err);
+      }
+    };
+    fetchLogs();
+  }, []);
 
-  const totalPages = Math.ceil(filteredExports.length / itemsPerPage);
-  const paginatedExports = filteredExports.slice(
+  const totalPages = Math.ceil(logs.length / itemsPerPage);
+  const paginatedLogs = logs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -88,31 +82,19 @@ export default function ExportPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Xuất kho", path: "/warehouse/export" }]} />
+            <Breadcrumb items={[
+                { label: "Kho", path: "/warehouse/inventory" },
+                { label: "Lịch sử kho" },
+            ]} />
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Quản lý xuất kho</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Lịch sử kho
+            </h2>
           </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <ExportFilterBar
-              searchTerm={searchTerm}
-              statusFilter={statusFilter}
-              onSearchChange={setSearchTerm}
-              onStatusChange={setStatusFilter}
-              onReset={() => {
-                setSearchTerm("");
-                setStatusFilter("");
-              }}
-            />
-          </div>
-
-          <div className="bg-white p-4 rounded-xl shadow">
-            <ExportTable 
-                orders={paginatedExports}
-                onOrdersChange={(newOrders) => setExports(newOrders)} />
-          </div>
+          <InventoryHistoryTable logs={paginatedLogs} />
 
           <Pagination
             currentPage={currentPage}

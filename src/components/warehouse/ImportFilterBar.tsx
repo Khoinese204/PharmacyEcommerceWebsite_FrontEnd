@@ -28,7 +28,7 @@ export default function ImportFilterBar({
           onChange={(e) => onSearchChange(e.target.value)}
         />
 
-        {/* Lọc theo trạng thái đơn nhập */}
+        {/* Lọc theo trạng thái đơn nhập
         <select
           className="border rounded px-3 py-1.5 text-sm"
           value={statusFilter}
@@ -40,7 +40,7 @@ export default function ImportFilterBar({
           <option value="Đã giao">Đã giao</option>
           <option value="Đã nhận">Đã nhận</option>
           <option value="Đã huỷ">Đã huỷ</option>
-        </select>
+        </select> */}
 
         {/* Nút đặt lại bộ lọc */}
         <button
