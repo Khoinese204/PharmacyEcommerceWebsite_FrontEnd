@@ -26,27 +26,29 @@ export default function InventoryPage() {
   const itemsPerPage = 8;
 
   useEffect(() => {
-  const fetchInventory = async () => {
-    try {
-      const res = await axios.get("/api/inventory");
+    const fetchInventory = async () => {
+      try {
+        const res = await axios.get("/api/inventory");
 
-        const mappedData = res.data.map((item: any) => ({
-        batchNumber: item.batchNumber,
-        productName: item.productName,
-        quantity: item.quantity,
-        expiryDate: item.expiryDate,
-        status: item.status, // nếu đã là tiếng Việt rồi thì giữ nguyên
+        const mappedData: InventoryItem[] = res.data.map((item: any) => ({
+          id: item.id,
+          batchNumber: item.batchNumber,
+          productName: item.productName,
+          quantity: item.quantity,
+          expiryDate: item.expiryDate,
+          status: item.status,           // Tình trạng kho: Còn hàng, Sắp hết hàng, Hết hàng
+          dateStatus: item.dateStatus,   // Tình trạng hạn: Còn hạn, Hết hạn
+          warnings: item.warnings || [],
         }));
 
-      setInventory(mappedData);
-    } catch (error) {
-      console.error("❌ Lỗi khi tải dữ liệu kho:", error);
-    }
-  };
+        setInventory(mappedData);
+      } catch (error) {
+        console.error("❌ Lỗi khi tải dữ liệu kho:", error);
+      }
+    };
 
-  fetchInventory();
-}, []);
-
+    fetchInventory();
+  }, []);
 
   const filtered = inventory.filter((item) => {
     const matchesName = item.productName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -63,6 +65,32 @@ export default function InventoryPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleUpdateItem = async (updatedItem: InventoryItem) => {
+    try {
+      const res = await axios.get("/api/inventory");
+      const refreshed = res.data.find((i: any) => i.id === updatedItem.id);
+      if (refreshed) {
+        const newItem: InventoryItem = {
+          id: refreshed.id,
+          batchNumber: refreshed.batchNumber,
+          productName: refreshed.productName,
+          quantity: refreshed.quantity,
+          expiryDate: refreshed.expiryDate,
+          status: refreshed.status,
+          dateStatus: refreshed.dateStatus,
+        };
+
+        setInventory((prev) =>
+          prev.map((item) =>
+            item.batchNumber === newItem.batchNumber ? newItem : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi cập nhật lại dữ liệu item:", error);
+    }
+  };
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -125,13 +153,7 @@ export default function InventoryPage() {
           <div className="bg-white p-4 rounded-xl shadow">
             <InventoryTable
               inventoryItems={paginated}
-              onUpdateItem={(updatedItem) => {
-                setInventory((prev) =>
-                  prev.map((item) =>
-                    item.batchNumber === updatedItem.batchNumber ? updatedItem : item
-                  )
-                );
-              }}
+              onUpdateItem={handleUpdateItem}
             />
           </div>
 
