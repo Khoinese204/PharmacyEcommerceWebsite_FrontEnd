@@ -89,7 +89,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
             <div className="min-w-[1000px]">
               <h2 className="text-lg font-semibold mb-4">Đơn hàng</h2>
-              <OrderChart />
+              {/* <OrderChart /> */}
             </div>
           </div>
         </main>

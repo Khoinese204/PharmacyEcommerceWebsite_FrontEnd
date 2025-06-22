@@ -8,41 +8,45 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  { day: 1, orders: 5 },
-  { day: 2, orders: 10 },
-  { day: 3, orders: 14 },
-  { day: 4, orders: 11 },
-  { day: 5, orders: 60 },
-  { day: 6, orders: 55 },
-  { day: 7, orders: 40 },
-  { day: 8, orders: 70 },
-  { day: 9, orders: 30 },
-  { day: 10, orders: 50 },
-  { day: 11, orders: 25 },
-  { day: 12, orders: 45 },
-  { day: 13, orders: 60 },
-  { day: 14, orders: 50 },
-  { day: 15, orders: 180 }, // peak
-  { day: 16, orders: 40 },
-  { day: 17, orders: 70 },
-  { day: 18, orders: 85 },
-  { day: 19, orders: 60 },
-  { day: 20, orders: 50 },
-  { day: 21, orders: 70 },
-  { day: 22, orders: 65 },
-  { day: 23, orders: 75 },
-  { day: 24, orders: 55 },
-  { day: 25, orders: 90 },
-  { day: 26, orders: 65 },
-  { day: 27, orders: 80 },
-  { day: 28, orders: 85 },
-  { day: 29, orders: 95 },
-  { day: 30, orders: 45 },
-  { day: 31, orders: 20 },
-];
+// const data = [
+//   { day: 1, orders: 5 },
+//   { day: 2, orders: 10 },
+//   { day: 3, orders: 14 },
+//   { day: 4, orders: 11 },
+//   { day: 5, orders: 60 },
+//   { day: 6, orders: 55 },
+//   { day: 7, orders: 40 },
+//   { day: 8, orders: 70 },
+//   { day: 9, orders: 30 },
+//   { day: 10, orders: 50 },
+//   { day: 11, orders: 25 },
+//   { day: 12, orders: 45 },
+//   { day: 13, orders: 60 },
+//   { day: 14, orders: 50 },
+//   { day: 15, orders: 180 }, // peak
+//   { day: 16, orders: 40 },
+//   { day: 17, orders: 70 },
+//   { day: 18, orders: 85 },
+//   { day: 19, orders: 60 },
+//   { day: 20, orders: 50 },
+//   { day: 21, orders: 70 },
+//   { day: 22, orders: 65 },
+//   { day: 23, orders: 75 },
+//   { day: 24, orders: 55 },
+//   { day: 25, orders: 90 },
+//   { day: 26, orders: 65 },
+//   { day: 27, orders: 80 },
+//   { day: 28, orders: 85 },
+//   { day: 29, orders: 95 },
+//   { day: 30, orders: 45 },
+//   { day: 31, orders: 20 },
+// ];
 
-export default function OrdersChart() {
+type OrdersChartProps = {
+  data: { day: number; orders: number }[];
+};
+
+export default function OrdersChart({ data }: OrdersChartProps) {
   return (
     <div className="w-full">
       <ResponsiveContainer width="100%" height={300}>
@@ -69,7 +73,7 @@ export default function OrdersChart() {
           />
           <Line
             type="monotone"
-            dataKey="orders"
+            dataKey="count"
             stroke="#3b82f6"
             strokeWidth={2}
             dot={{ r: 4 }}

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import Pagination from "../../components/admin/TablePagination";
 import SearchBar from "../../components/admin/SearchBar";
@@ -17,50 +18,42 @@ const menu = [
   { label: "Lịch sử giá", path: "/admin/price-history" },
 ];
 
-const originalCoupons = [
-  {
-    id: "00001",
-    name: "SIEUDEAL Giảm 10% tối đa 70K đơn Online 299K",
-    discount: 10,
-    startDate: "7/5/2025",
-    endDate: "30/5/2025",
-    applicableCategories: "thuốc, thực phẩm chức năng",
-  },
-  {
-    id: "00001",
-    name: "SIEUDEAL Giảm 15% tối đa 100K đơn Online 299K",
-    discount: 15,
-    startDate: "7/5/2025",
-    endDate: "30/5/2025",
-    applicableCategories: "thuốc, thực phẩm chức năng",
-  },
-  {
-    id: "00001",
-    name: "SIEUDEAL Giảm 20% tối đa 80K đơn Online 599K",
-    discount: 20,
-    startDate: "7/5/2025",
-    endDate: "30/5/2025",
-    applicableCategories: "thuốc, thực phẩm chức năng",
-  },
-  {
-    id: "00001",
-    name: "SIEUDEAL Giảm 10% tối đa 70K đơn Online 299K",
-    discount: 10,
-    startDate: "7/5/2025",
-    endDate: "30/5/2025",
-    applicableCategories: "tất cả danh mục",
-  },
-];
-
 export default function CouponManagementPage() {
   const [selectedMenu, setSelectedMenu] = useState("Mã giảm giá");
   const [searchTerm, setSearchTerm] = useState("");
-  const [coupons, setCoupons] = useState(originalCoupons);
+  const [coupons, setCoupons] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   const itemsPerPage = 8;
 
-  const filtered = coupons.filter((coupon) =>
+  // Gọi API để lấy danh sách mã giảm giá
+  const fetchCoupons = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/promotions/all");
+      const formatted = res.data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        discount: item.discountPercent || 0,
+        startDate: new Date(item.startDate).toLocaleDateString("vi-VN"),
+        endDate: new Date(item.endDate).toLocaleDateString("vi-VN"),
+        applicableCategories: item.applicableCategoryName || "Tất cả danh mục",
+      }));
+      setCoupons(formatted);
+    } catch (error) {
+      console.error("Lỗi khi tải mã giảm giá:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const handleReset = () => {
+    setSearchTerm("");
+    fetchCoupons();
+  };
+
+  const filtered = coupons.filter((coupon: any) =>
     coupon.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -68,11 +61,6 @@ export default function CouponManagementPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const handleReset = () => {
-    setSearchTerm("");
-    setCoupons(originalCoupons);
-  };
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -98,7 +86,6 @@ export default function CouponManagementPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          {/* Icon nằm sát phải */}
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/admin/account">
               <FaUser />
@@ -160,7 +147,7 @@ export default function CouponManagementPage() {
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((coupon) => (
+                {paginated.map((coupon: any) => (
                   <tr key={coupon.id} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">{coupon.id}</td>
                     <td className="px-4 py-2">{coupon.name}</td>

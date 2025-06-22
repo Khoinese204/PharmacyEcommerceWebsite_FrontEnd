@@ -70,9 +70,9 @@ function getRoleStyle(role: string) {
   switch (role) {
     case "Admin":
       return "bg-red-100 text-red-600";
-    case "Sales Staff":
+    case "Sales":
       return "bg-purple-100 text-purple-600";
-    case "Warehouse Staff":
+    case "Warehouse":
       return "bg-green-100 text-green-600";
     case "Customer":
       return "bg-orange-100 text-orange-600";
