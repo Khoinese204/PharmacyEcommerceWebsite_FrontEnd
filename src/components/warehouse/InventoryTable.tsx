@@ -146,7 +146,7 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
                     </div>
                   ) : (
                     <ActionButtons
-                      viewUrl={`/warehouse/inventory/${item.batchNumber}`}
+                      viewUrl={`/warehouse/inventory/${item.id}`}
                       editUrl=""
                       onDelete={() =>
                         console.log("Xóa lô hàng:", item.batchNumber)
