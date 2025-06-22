@@ -14,15 +14,18 @@ export default function CustomerOrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
 
   useEffect(() => {
-    if (id) {
-      fetch(`/api/orders/${id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("Fetched order:", data);
-          setOrder(data);
-        })
-        .catch((err) => console.error("Lỗi tải chi tiết đơn hàng:", err));
+    if (!id || isNaN(Number(id))) {
+      console.error("ID không hợp lệ:", id);
+      return;
     }
+
+    fetch(`/api/orders/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Fetched order:", data);
+        setOrder(data);
+      })
+      .catch((err) => console.error("Lỗi tải chi tiết đơn hàng:", err));
   }, [id]);
 
   if (!order) return <p className="text-center mt-10">Đang tải...</p>;

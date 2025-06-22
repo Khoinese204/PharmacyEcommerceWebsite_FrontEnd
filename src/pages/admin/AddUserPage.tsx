@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import { toast } from "react-toastify";
 
 export default function AddUserPage() {
   const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState("Người dùng");
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,6 +16,8 @@ export default function AddUserPage() {
     role: "Admin",
   });
 
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -21,10 +25,46 @@ export default function AddUserPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setAvatarFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Thực hiện gọi API tại đây nếu cần
+
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("email", formData.email);
+    data.append("phone", formData.phone);
+    data.append("address", formData.address);
+    data.append("password", formData.password);
+    data.append("role", formData.role);
+    if (avatarFile) {
+      data.append("avatar", avatarFile);
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/users/admin/addUser",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Thêm người dùng thành công");
+        navigate("/admin/users");
+      } else {
+        const errorMsg = await response.text();
+        toast.error("Lỗi: " + errorMsg);
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+      toast.error("Có lỗi xảy ra khi gửi yêu cầu");
+    }
   };
 
   const menu = [
@@ -47,7 +87,7 @@ export default function AddUserPage() {
         {menu.map((item, idx) => (
           <button
             key={idx}
-            onClick={() => navigate(item.path)} // chuyển trang
+            onClick={() => navigate(item.path)}
             className={`block w-full text-left px-3 py-2 rounded transition ${
               selectedMenu === item.label
                 ? "bg-blue-500 text-white"
@@ -58,6 +98,7 @@ export default function AddUserPage() {
           </button>
         ))}
       </aside>
+
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
@@ -94,16 +135,38 @@ export default function AddUserPage() {
           >
             <div className="flex items-start gap-6">
               {/* Upload Avatar */}
+              {/* Upload Avatar */}
               <div className="flex flex-col items-center space-y-2">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-xl border">
-                  📷
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-xl border overflow-hidden">
+                  {avatarFile ? (
+                    <img
+                      src={URL.createObjectURL(avatarFile)}
+                      alt="Preview"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-2xl">📷</span>
+                  )}
                 </div>
+
+                {/* Nút cập nhật ảnh */}
                 <button
                   type="button"
+                  onClick={() =>
+                    document.getElementById("avatarInput")?.click()
+                  }
                   className="text-sm text-blue-500 hover:underline"
                 >
-                  Upload ảnh
+                  Cập nhật ảnh mới
                 </button>
+
+                <input
+                  id="avatarInput"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={{ display: "none" }}
+                />
               </div>
 
               {/* Input Fields */}
@@ -178,8 +241,8 @@ export default function AddUserPage() {
                     className="w-full border rounded px-3 py-2 bg-gray-50"
                   >
                     <option value="Admin">Admin</option>
-                    <option value="Sales Staff">Sales Staff</option>
-                    <option value="Warehouse Staff">Warehouse Staff</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Warehouse">Warehouse</option>
                     <option value="Customer">Customer</option>
                   </select>
                 </div>

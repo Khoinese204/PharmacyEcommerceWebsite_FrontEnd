@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Eye, Pencil, Trash2 } from "lucide-react"; // Thư viện icon hiện đại
 
 interface Props {
   viewUrl: string;

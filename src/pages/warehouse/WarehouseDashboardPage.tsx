@@ -99,7 +99,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
             <div className="min-w-[1000px]">
               <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hàng</h2>
-              <LowStockChart />
+              {/* <LowStockChart /> */}
             </div>
           </div>
         </main>

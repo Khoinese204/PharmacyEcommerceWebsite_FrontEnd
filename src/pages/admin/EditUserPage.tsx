@@ -1,19 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import { toast } from "react-toastify";
 
 export default function EditUserPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedMenu, setSelectedMenu] = useState("Người dùng");
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
     password: "",
-    role: "Admin",
+    role: "Customer",
+    avatarUrl: "",
   });
-  const { userId } = useParams(); //
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -22,11 +27,71 @@ export default function EditUserPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Thực hiện gọi API tại đây nếu cần
+    try {
+      await axios.put(`http://localhost:8080/api/users/admin/${id}`, {
+        fullName: formData.name,
+        email: formData.email,
+        phoneNumber: formData.phone,
+        address: formData.address,
+        role: formData.role,
+        avatarUrl: formData.avatarUrl,
+      });
+      toast.success("Cập nhật thành công");
+      navigate("/admin/users");
+    } catch (error) {
+      toast.error("Lỗi khi cập nhật người dùng");
+      console.error(error);
+    }
   };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("avatar", file);
+
+    try {
+      const res = await axios.post(
+        `http://localhost:8080/api/users/${id}/avatar`,
+        formDataUpload,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      const newUrl = res.data.avatarUrl;
+      setFormData((prev) => ({ ...prev, avatarUrl: newUrl }));
+      toast.success("Cập nhật ảnh thành công");
+    } catch (err) {
+      console.error("Lỗi khi upload ảnh", err);
+      toast.error("Lỗi khi upload ảnh");
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8080/api/users/${id}`);
+        const data = res.data;
+        setFormData({
+          name: data.fullName || "",
+          email: data.email || "",
+          phone: data.phoneNumber || "",
+          address: data.address || "",
+          password: "",
+          role: data.role || "Customer",
+          avatarUrl: data.avatarUrl || "",
+        });
+      } catch (err) {
+        console.error("Lỗi lấy dữ liệu người dùng", err);
+      }
+    };
+
+    if (id) fetchUser();
+  }, [id]);
 
   const menu = [
     { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -48,7 +113,7 @@ export default function EditUserPage() {
         {menu.map((item, idx) => (
           <button
             key={idx}
-            onClick={() => navigate(item.path)} // chuyển trang
+            onClick={() => navigate(item.path)}
             className={`block w-full text-left px-3 py-2 rounded transition ${
               selectedMenu === item.label
                 ? "bg-blue-500 text-white"
@@ -59,9 +124,9 @@ export default function EditUserPage() {
           </button>
         ))}
       </aside>
-      {/* Main Area */}
+
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-2 text-sm">
             <img
@@ -76,15 +141,11 @@ export default function EditUserPage() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
               items={[
-                {
-                  label: "Danh sách người dùng",
-                  path: `/admin/users`, // lấy userId từ URL
-                },
+                { label: "Danh sách người dùng", path: `/admin/users` },
                 { label: "Chỉnh sửa người dùng" },
               ]}
             />
@@ -92,6 +153,7 @@ export default function EditUserPage() {
           <h2 className="text-left text-xl font-semibold mb-4">
             Chỉnh sửa người dùng
           </h2>
+
           <form
             onSubmit={handleSubmit}
             className="bg-white p-6 rounded-xl shadow w-full"
@@ -99,18 +161,32 @@ export default function EditUserPage() {
             <div className="flex items-start gap-6">
               {/* Upload Avatar */}
               <div className="flex flex-col items-center space-y-2">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-xl border">
-                  📷
-                </div>
+                <img
+                  src={
+                    formData.avatarUrl.startsWith("http")
+                      ? formData.avatarUrl
+                      : `http://localhost:8080${formData.avatarUrl}`
+                  }
+                  alt="Avatar"
+                  className="w-20 h-20 rounded-full border object-cover"
+                />
                 <button
                   type="button"
                   className="text-sm text-blue-500 hover:underline"
+                  onClick={() => fileInputRef.current?.click()}
                 >
                   Upload ảnh
                 </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                />
               </div>
 
-              {/* Input Fields */}
+              {/* Form Fields */}
               <div className="text-left flex-1 grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Tên</label>
@@ -130,22 +206,18 @@ export default function EditUserPage() {
                     name="email"
                     type="email"
                     value={formData.email}
-                    onChange={handleChange}
-                    className="w-full border rounded px-3 py-2 bg-gray-50"
-                    required
+                    className="w-full border rounded px-3 py-2 bg-gray-100"
+                    disabled
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Số điện thoại
-                  </label>
+                  <label className="block text-sm font-medium mb-1">SĐT</label>
                   <input
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 bg-gray-50"
-                    required
                   />
                 </div>
                 <div>
@@ -168,9 +240,8 @@ export default function EditUserPage() {
                     name="password"
                     type="password"
                     value={formData.password}
-                    onChange={handleChange}
-                    className="w-full border rounded px-3 py-2 bg-gray-50"
-                    required
+                    className="w-full border rounded px-3 py-2 bg-gray-100"
+                    disabled
                   />
                 </div>
                 <div>
@@ -182,15 +253,14 @@ export default function EditUserPage() {
                     className="w-full border rounded px-3 py-2 bg-gray-50"
                   >
                     <option value="Admin">Admin</option>
-                    <option value="Sales Staff">Sales Staff</option>
-                    <option value="Warehouse Staff">Warehouse Staff</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Warehouse">Warehouse</option>
                     <option value="Customer">Customer</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="mt-6 text-center">
               <button
                 type="submit"

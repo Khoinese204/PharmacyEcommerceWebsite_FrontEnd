@@ -14,8 +14,8 @@ export default function UserFilterBar() {
         <select className="border rounded px-3 py-1.5 text-sm">
           <option>VAI TRÒ</option>
           <option>Admin</option>
-          <option>Sales Staff</option>
-          <option>Warehouse Staff</option>
+          <option>Sales</option>
+          <option>Warehouse</option>
           <option>Customer</option>
         </select>
 

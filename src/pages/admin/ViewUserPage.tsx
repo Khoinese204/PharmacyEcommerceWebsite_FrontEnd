@@ -1,17 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import axios from "axios";
 
 export default function ViewUserPage() {
   const navigate = useNavigate();
-  const [selectedMenu, setSelectedMenu] = useState("Người dùng");
+  const { id } = useParams(); // 👈 lấy ID từ URL
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
-    password: "",
-    role: "Admin",
+    password: "********",
+    role: "Customer",
+    avatarUrl: "",
   });
 
   const handleChange = (
@@ -21,12 +24,27 @@ export default function ViewUserPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Thực hiện gọi API tại đây nếu cần
-  };
-  
+  useEffect(() => {
+    if (id) {
+      axios
+        .get(`http://localhost:8080/api/users/${id}`)
+        .then((res) => {
+          const data = res.data;
+          setFormData({
+            name: data.fullName || "",
+            email: data.email || "",
+            phone: data.phoneNumber || "",
+            address: data.address || "",
+            password: "********",
+            role: data.role || "Customer",
+            avatarUrl: data.avatarUrl || "/avatar-default.png",
+          });
+        })
+        .catch((err) => {
+          console.error("Lỗi khi lấy người dùng:", err);
+        });
+    }
+  }, [id]);
 
   const menu = [
     { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -48,9 +66,9 @@ export default function ViewUserPage() {
         {menu.map((item, idx) => (
           <button
             key={idx}
-            onClick={() => navigate(item.path)} // chuyển trang
+            onClick={() => navigate(item.path)}
             className={`block w-full text-left px-3 py-2 rounded transition ${
-              selectedMenu === item.label
+              item.label === "Người dùng"
                 ? "bg-blue-500 text-white"
                 : "text-gray-700 hover:bg-blue-50"
             }`}
@@ -59,7 +77,8 @@ export default function ViewUserPage() {
           </button>
         ))}
       </aside>
-      {/* Main Area */}
+
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
@@ -89,22 +108,16 @@ export default function ViewUserPage() {
           <h2 className="text-left text-xl font-semibold mb-4">
             Xem người dùng
           </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-xl shadow w-full"
-          >
+          <form className="bg-white p-6 rounded-xl shadow w-full">
             <div className="flex items-start gap-6">
-              {/* Upload Avatar */}
+              {/* Avatar */}
               <div className="flex flex-col items-center space-y-2">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-xl border">
-                  📷
-                </div>
-                <button
-                  type="button"
-                  className="text-sm text-blue-500 hover:underline"
-                >
-                  Upload ảnh
-                </button>
+                <img
+                  src={`http://localhost:8080${formData.avatarUrl}`} // ✅ Load từ backend
+                  alt="Avatar"
+                  className="w-20 h-20 rounded-full object-cover border"
+                />
+                <span className="text-gray-500 text-sm">Avatar</span>
               </div>
 
               {/* Input Fields */}
@@ -116,7 +129,7 @@ export default function ViewUserPage() {
                     value={formData.name}
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 bg-gray-200"
-                    required
+                    disabled
                   />
                 </div>
                 <div>
@@ -125,14 +138,12 @@ export default function ViewUserPage() {
                   </label>
                   <input
                     name="email"
-                    type="email"
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 bg-gray-200"
-                    required
+                    disabled
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Số điện thoại
@@ -142,7 +153,7 @@ export default function ViewUserPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 bg-gray-200"
-                    required
+                    disabled
                   />
                 </div>
                 <div>
@@ -154,20 +165,20 @@ export default function ViewUserPage() {
                     value={formData.address}
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 bg-gray-200"
+                    disabled
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Mật khẩu
                   </label>
                   <input
                     name="password"
-                    type="password"
                     value={formData.password}
                     onChange={handleChange}
+                    type="password"
                     className="w-full border rounded px-3 py-2 bg-gray-200"
-                    required
+                    disabled
                   />
                 </div>
                 <div>
@@ -177,17 +188,16 @@ export default function ViewUserPage() {
                     value={formData.role}
                     onChange={handleChange}
                     className="w-full border rounded px-3 py-2 bg-gray-200"
+                    disabled
                   >
                     <option value="Admin">Admin</option>
-                    <option value="Sales Staff">Sales Staff</option>
-                    <option value="Warehouse Staff">Warehouse Staff</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Warehouse">Warehouse</option>
                     <option value="Customer">Customer</option>
                   </select>
                 </div>
               </div>
             </div>
-
-            {/* Submit Button */}
           </form>
         </main>
       </div>
