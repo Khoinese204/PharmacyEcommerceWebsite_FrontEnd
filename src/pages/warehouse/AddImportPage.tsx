@@ -7,7 +7,7 @@ export default function AddImportPage() {
   const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
 
-  type Product = { id: number; name: string };
+  type Product = { id: number; name: string; originalPrice: number };
   type Supplier = { id: number; name: string };
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,11 +32,23 @@ export default function AddImportPage() {
       .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
   }, []);
 
+  // ✅ Xử lý thay đổi trường nhập
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "productId") {
+      const selected = products.find((p) => p.id === Number(value));
+      setFormData((prev) => ({
+        ...prev,
+        productId: value,
+        unitPrice: selected ? selected.originalPrice : 0,
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
+  // ✅ Gửi đơn nhập hàng
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -90,7 +102,7 @@ export default function AddImportPage() {
         ))}
       </aside>
 
-      {/* Main Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
@@ -103,7 +115,7 @@ export default function AddImportPage() {
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Main Form */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
@@ -184,16 +196,19 @@ export default function AddImportPage() {
                 required
               />
             </div>
+
+            {/* Đơn giá */}
             <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Giá nhập (VNĐ)</label>
-                <input
-                    type="number"
-                    name="unitPrice"
-                    value={formData.unitPrice}
-                    onChange={handleChange}
-                    className="w-full border rounded px-3 py-2 bg-gray-50"
-                    min={0}
-                />
+              <label className="block text-sm font-medium mb-1">Giá nhập (VNĐ)</label>
+              <input
+                type="number"
+                name="unitPrice"
+                value={formData.unitPrice}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 bg-gray-50"
+                min={0}
+                readOnly
+              />
             </div>
 
             <div className="text-center">
