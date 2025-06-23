@@ -6,7 +6,12 @@ import axios from "axios";
 interface Props {
   viewUrl: string;
   orderId: number;
-  currentStatus: "PENDING" | "PACKING" | "DELIVERING" | "DELIVERED" | "CANCELLED";
+  currentStatus:
+    | "PENDING"
+    | "PACKING"
+    | "DELIVERING"
+    | "DELIVERED"
+    | "CANCELLED";
   onDelete?: () => void;
   onStatusUpdateSuccess?: (newStatusCode: string) => void;
   editUrl?: string;
@@ -37,6 +42,10 @@ export default function ActionButtonsExport({
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const storedUser = localStorage.getItem("user");
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+  const userId = currentUser?.id;
+
   const handleDelete = () => {
     if (onDelete) onDelete();
     setShowConfirm(false);
@@ -49,7 +58,7 @@ export default function ActionButtonsExport({
       await axios.put(`/api/orders/${orderId}/status`, {
         orderId,
         newStatus: selectedStatus,
-        updatedByUserId: 4, // bạn có thể truyền động nếu cần
+        updatedByUserId: userId,
         note: "Cập nhật trạng thái từ nhân viên kho",
       });
 
@@ -144,7 +153,9 @@ export default function ActionButtonsExport({
             <h3 className="text-lg font-semibold mb-4">Chỉnh sửa trạng thái</h3>
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as Props["currentStatus"])}
+              onChange={(e) =>
+                setSelectedStatus(e.target.value as Props["currentStatus"])
+              }
               className="w-full mb-3 border px-3 py-2 rounded"
             >
               {statuses.map((s) => (

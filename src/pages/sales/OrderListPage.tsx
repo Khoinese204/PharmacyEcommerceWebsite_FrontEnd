@@ -31,26 +31,33 @@ export default function OrderListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  const storedUser = localStorage.getItem("user");
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+  const userId = currentUser?.id;
+
   // Lọc dữ liệu
   const filteredOrders = orders.filter((order) => {
-    const matchesName = order.customer.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesName = order.customer
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter ? order.status === statusFilter : true;
     return matchesName && matchesStatus;
   });
 
   // Gọi API và map dữ liệu
   useEffect(() => {
-    axios.get("/api/orders")
-      .then(res => {
+    axios
+      .get("/api/orders")
+      .then((res) => {
         const apiOrders: Order[] = res.data.map((order: any) => ({
-          id: `ORD${String(order.orderId).padStart(3, '0')}`,
+          id: `ORD${String(order.orderId).padStart(3, "0")}`,
           customer: order.customer,
           status: convertStatus(order.status),
           total: order.totalPrice,
         }));
         setOrders(apiOrders);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Lỗi khi tải đơn hàng:", err);
       });
   }, []);
@@ -83,18 +90,25 @@ export default function OrderListPage() {
     setSelectedOrders([]);
     setIsConfirmMode(false);
 
-    console.log("Đã xác nhận đơn hàng:", selectedOrders);
+    console.log("🟩 Đã xác nhận đơn hàng:", selectedOrders);
+    console.log("🟡 userId đang gửi là:", userId);
 
-    // ✅ Gửi cập nhật lên backend
+    // Gửi PUT request cho từng đơn hàng đã chọn
     selectedOrders.forEach((id) => {
-    const realId = parseInt(id.replace("ORD", ""));
-    axios.put(`/api/orders/${realId}/status`, {
-      orderId: realId,
-      newStatus: "PACKING", // Hoặc trạng thái phù hợp
-      updatedByUserId: 2, // hoặc ID thực tế của nhân viên bán hàng đang đăng nhập
-      note: "Xác nhận từ frontend"
-    }).catch(err => console.error("Lỗi khi xác nhận đơn hàng:", err));
-  });
+      const realId = parseInt(id.replace("ORD", ""));
+      const payload = {
+        orderId: realId,
+        newStatus: "PACKING",
+        updatedByUserId: userId,
+        note: "Xác nhận từ frontend",
+      };
+
+      console.log("📦 Payload gửi lên:", payload);
+
+      axios
+        .put(`/api/orders/${realId}/status`, payload)
+        .catch((err) => console.error("❌ Lỗi khi xác nhận đơn hàng:", err));
+    });
   };
 
   // Xử lý nút xác nhận
@@ -138,11 +152,15 @@ export default function OrderListPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Đơn hàng", path: "/sales/orders" }]} />
+            <Breadcrumb
+              items={[{ label: "Đơn hàng", path: "/sales/orders" }]}
+            />
           </div>
 
           <div className="flex justify-between items-center mb-6 relative z-10">
-            <h2 className="text-2xl font-semibold text-gray-800">Quản lý đơn hàng</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Quản lý đơn hàng
+            </h2>
           </div>
 
           <div className="flex justify-between items-center mb-4">
@@ -160,7 +178,9 @@ export default function OrderListPage() {
             <button
               onClick={handleConfirmClick}
               className={`${
-                isConfirmMode ? "bg-green-500 hover:bg-green-600" : "bg-blue-500 hover:bg-blue-600"
+                isConfirmMode
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-blue-500 hover:bg-blue-600"
               } text-white px-4 py-1.5 rounded text-sm`}
             >
               {isConfirmMode ? "Xác nhận đơn đã chọn" : "Xác nhận đơn hàng"}
