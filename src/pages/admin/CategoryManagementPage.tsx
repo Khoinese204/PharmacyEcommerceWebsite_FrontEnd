@@ -69,7 +69,6 @@ export default function CategoryManagementPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          {/* Icon nằm sát phải */}
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/admin/account">
               <FaUser />
@@ -91,8 +90,10 @@ export default function CategoryManagementPage() {
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div className="p-6">
               <SearchBar
-                placeholder="Tìm kiếm theo tên danh mục..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 onSelect={(value: string) => setSearchTerm(value)}
+                placeholder="Tìm kiếm theo tên danh mục..."
               />
             </div>
             <button
@@ -103,7 +104,7 @@ export default function CategoryManagementPage() {
             </button>
           </div>
 
-          {/* Filter + Add button */}
+          {/* Add button */}
           <div className="flex justify-between items-center px-6 mb-4">
             <div></div>
             <button

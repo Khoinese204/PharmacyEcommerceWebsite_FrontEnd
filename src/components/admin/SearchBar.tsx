@@ -1,43 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 
 interface SearchBarProps {
+  value?: string; // ✅ Cho phép điều khiển từ bên ngoài
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void; // ✅ Điều khiển nhập liệu từ cha
   onSelect?: (item: string) => void;
   placeholder: string;
 }
 
-export default function SearchBar({ onSelect, placeholder }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+export default function SearchBar({
+  value,
+  onChange,
+  onSelect,
+  placeholder,
+}: SearchBarProps) {
+  const [internalQuery, setInternalQuery] = useState("");
+  const query = value !== undefined ? value : internalQuery;
+
   const [history, setHistory] = useState<string[]>([]);
   const [filtered, setFiltered] = useState<string[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setQuery(value);
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
 
-    // Lọc từ lịch sử nhập
+    if (onChange) {
+      onChange(e); // Gửi về component cha
+    } else {
+      setInternalQuery(val);
+    }
+
     const results = history.filter((item) =>
-      item.toLowerCase().includes(value.toLowerCase())
+      item.toLowerCase().includes(val.toLowerCase())
     );
     setFiltered(results);
   };
 
   const handleSelect = (item: string) => {
-    setQuery(item);
-    setFiltered([]);
-    if (onSelect) onSelect(item);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim() === "") return;
-
-    // Thêm vào lịch sử nếu chưa tồn tại
-    if (!history.includes(query.trim())) {
-      setHistory([query.trim(), ...history]);
+    if (onChange) {
+      onChange({ target: { value: item } } as ChangeEvent<HTMLInputElement>);
+    } else {
+      setInternalQuery(item);
     }
 
     setFiltered([]);
-    if (onSelect) onSelect(query.trim());
+    onSelect?.(item);
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (trimmed === "") return;
+
+    if (!history.includes(trimmed)) {
+      setHistory([trimmed, ...history]);
+    }
+
+    setFiltered([]);
+    onSelect?.(trimmed);
   };
 
   return (

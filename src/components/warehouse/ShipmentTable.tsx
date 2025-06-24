@@ -1,5 +1,7 @@
 import React from "react";
+import axios from "axios";
 import ActionButtons from "./ActionButtons";
+import { useNavigate } from "react-router-dom";
 
 export interface Shipment {
   id: number;
@@ -16,6 +18,24 @@ interface Props {
 }
 
 export default function ShipmentTable({ shipments }: Props) {
+  const navigate = useNavigate();
+
+  const handleMarkAsDelivered = async (shipmentId: number) => {
+    const confirmed = window.confirm("Xác nhận đã giao hàng?");
+    if (!confirmed) return;
+
+    try {
+      await axios.put(`/api/shipments/${shipmentId}/status`, {
+        status: "DELIVERED",
+      });
+      alert("Cập nhật trạng thái thành công!");
+      window.location.reload(); // reload bảng
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái:", error);
+      alert("Cập nhật trạng thái thất bại.");
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow overflow-x-auto">
       <table className="min-w-full text-sm text-left border-collapse">
@@ -23,7 +43,7 @@ export default function ShipmentTable({ shipments }: Props) {
           <tr>
             <th className="px-4 py-3 font-semibold text-gray-700">MÃ VẬN CHUYỂN</th>
             <th className="px-4 py-3 font-semibold text-gray-700">MÃ ĐƠN HÀNG</th>
-            <th className="px-4 py-3 font-semibold text-gray-700">NV GIAO HÀNG</th>
+            <th className="px-4 py-3 font-semibold text-gray-700">ĐƠN VỊ VẬN CHUYỂN</th>
             <th className="px-4 py-3 font-semibold text-gray-700">NGÀY GIAO</th>
             <th className="px-4 py-3 font-semibold text-gray-700">NGÀY NHẬN</th>
             <th className="px-4 py-3 font-semibold text-gray-700">TRẠNG THÁI</th>
@@ -34,7 +54,9 @@ export default function ShipmentTable({ shipments }: Props) {
           {shipments.map((shipment) => (
             <tr key={shipment.id} className="border-t hover:bg-gray-50">
               <td className="px-4 py-2">{shipment.shipmentCode}</td>
-              <td className="px-4 py-2">{"ORD" + String(shipment.orderId).padStart(3, "0")}</td>
+              <td className="px-4 py-2">
+                {"ORD" + String(shipment.orderId).padStart(3, "0")}
+              </td>
               <td className="px-4 py-2">{shipment.shippedBy}</td>
               <td className="px-4 py-2">
                 {shipment.shippedAt
@@ -59,8 +81,8 @@ export default function ShipmentTable({ shipments }: Props) {
                   }`}
                 >
                   {{
-                    PENDING: "Chờ xử lý",
-                    SHIPPED: "Đang giao",
+                    WAITING: "Chờ xử lý",
+                    SHIPPING: "Đang giao hàng",
                     DELIVERED: "Đã giao",
                   }[shipment.status]}
                 </span>
@@ -70,6 +92,11 @@ export default function ShipmentTable({ shipments }: Props) {
                   viewUrl={`/warehouse/shipment/${shipment.id}`}
                   editUrl={`/warehouse/shipment/${shipment.id}/edit`}
                   onDelete={() => console.log("Xóa vận chuyển:", shipment.id)}
+                  customEditAction={
+                    shipment.status === "SHIPPING"
+                      ? () => handleMarkAsDelivered(shipment.id)
+                      : undefined
+                  }
                 />
               </td>
             </tr>

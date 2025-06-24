@@ -26,7 +26,6 @@ export default function CouponManagementPage() {
   const navigate = useNavigate();
   const itemsPerPage = 8;
 
-  // Gọi API để lấy danh sách mã giảm giá
   const fetchCoupons = async () => {
     try {
       const res = await axios.get("http://localhost:8080/api/promotions/all");
@@ -108,6 +107,8 @@ export default function CouponManagementPage() {
             <div className="p-6">
               <SearchBar
                 placeholder="Tìm kiếm theo tên mã giảm giá..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 onSelect={(value: string) => setSearchTerm(value)}
               />
             </div>
@@ -119,7 +120,7 @@ export default function CouponManagementPage() {
             </button>
           </div>
 
-          {/* Filter + Add button */}
+          {/* Add button */}
           <div className="flex justify-between items-center px-6 mb-4">
             <div></div>
             <button

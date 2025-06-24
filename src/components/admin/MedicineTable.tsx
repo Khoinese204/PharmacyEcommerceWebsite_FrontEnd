@@ -3,7 +3,7 @@ import ActionButtons from "./UserActionButtons";
 import MedicineActionButtons from "./MedicineActionButtons";
 import { getCategoryNameById } from "../../utils/getCategoryNameById";
 
-interface Medicine {
+export interface Medicine {
   id: string;
   name: string;
   originalPrice: number;

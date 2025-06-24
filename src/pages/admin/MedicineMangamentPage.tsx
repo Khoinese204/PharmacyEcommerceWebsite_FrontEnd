@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import Chart from "../../components/admin/RevenueChart";
 import { Link, useNavigate } from "react-router-dom";
-import UserTable from "../../components/admin/UserTable";
-import UserFilterBar from "../../components/admin/UserFilterBar";
-import Pagination from "../../components/admin/TablePagination";
+import { FaUser } from "react-icons/fa";
+
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import Pagination from "../../components/admin/TablePagination";
 import SearchBar from "../../components/admin/SearchBar";
 import MedicineTable from "../../components/admin/MedicineTable";
 import MedicineFilterBar from "../../components/admin/MedicineFilterBar";
-import { FaUser } from "react-icons/fa";
+import type { Medicine } from "../../components/admin/MedicineTable";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -16,37 +15,70 @@ const menu = [
   { label: "Thuốc", path: "/admin/medicines" },
   { label: "Danh mục thuốc", path: "/admin/categories" },
   { label: "Mã giảm giá", path: "/admin/coupons" },
-  // { label: "Kho", path: "/admin/warehouse" },
-  // { label: "Doanh thu", path: "/admin/revenue" },
-  // { label: "Khách hàng", path: "/admin/customers" },
-  // { label: "Lịch sử giá", path: "/admin/price-history" },
+//   { label: "Kho", path: "/admin/warehouse" },
+//   { label: "Doanh thu", path: "/admin/revenue" },
+//   { label: "Khách hàng", path: "/admin/customers" },
+//   { label: "Lịch sử giá", path: "/admin/price-history" },
 ];
 
 export default function MedicineManagementPage() {
-  const [medicines, setMedicines] = useState([]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [selectedMenu, setSelectedMenu] = useState("Thuốc");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [priceFilter, setPriceFilter] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
   const navigate = useNavigate();
 
-  // State mới:
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // mỗi trang hiển thị 8 user
+  const onReset = () => {
+    setCategoryFilter("");
+    setPriceFilter("");
+    setSearchKeyword("");
+  };
 
-  // Giới hạn user theo trang
-  const paginated = medicines.slice(
+  const handleSearchSelect = (keyword: string) => {
+    setSearchKeyword(keyword);
+  };
+
+  const filteredMedicines = medicines.filter((med) => {
+    const matchCategory =
+      categoryFilter === "" ||
+      (categoryFilter === "Thuốc" && med.categoryId === 1) ||
+      (categoryFilter === "Thực phẩm chức năng" && med.categoryId === 2) ||
+      (categoryFilter === "Chăm sóc cá nhân" && med.categoryId === 3);
+
+    const matchPrice =
+      priceFilter === "" ||
+      (priceFilter === "Dưới 100.000đ" && med.price < 100000) ||
+      (priceFilter === "100.000đ - 300.000đ" &&
+        med.price >= 100000 &&
+        med.price <= 300000) ||
+      (priceFilter === "300.000đ - 500.000đ" &&
+        med.price > 300000 &&
+        med.price <= 500000) ||
+      (priceFilter === "Trên 500.000đ" && med.price > 500000);
+
+    const matchSearch =
+      searchKeyword.trim() === "" ||
+      med.name.toLowerCase().includes(searchKeyword.toLowerCase());
+
+    return matchCategory && matchPrice && matchSearch;
+  });
+
+  const paginated = filteredMedicines.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const handleSearchSelect = (item: string) => {
-    console.log("Đã chọn:", item);
-  };
 
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
         const res = await fetch("/api/medicines");
         const data = await res.json();
-        setMedicines(data); // data là mảng các MedicineDto
+        setMedicines(data);
       } catch (err) {
         console.error("Lỗi khi tải danh sách thuốc:", err);
       }
@@ -74,11 +106,11 @@ export default function MedicineManagementPage() {
           </button>
         ))}
       </aside>
+
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          {/* Icon nằm sát phải */}
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/admin/account">
               <FaUser />
@@ -93,33 +125,30 @@ export default function MedicineManagementPage() {
               items={[{ label: "Danh sách thuốc", path: "/admin/medicines" }]}
             />
           </div>
+
           {/* Search bar*/}
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div className="p-6">
               <SearchBar
                 onSelect={handleSearchSelect}
                 placeholder="Tìm kiếm theo tên thuốc, ..."
+                value={searchKeyword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchKeyword(e.target.value)
+                }
               />
             </div>
-            {/* Filter Date*/}
-            {/* <div className="flex items-center gap-2 text-xs">
-              <select className="border rounded px-2 py-1 z-10 relative">
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1}>{`Tháng ${i + 1}`}</option>
-                ))}
-              </select>
-              <select className="border rounded px-2 py-1 z-10 relative">
-                {[2024, 2025].map((year) => (
-                  <option key={year}>{`Năm ${year}`}</option>
-                ))}
-              </select>
-            </div> */}
           </div>
 
-          {/* Filter + Thêm người dùng trên cùng 1 dòng */}
+          {/* Filter + Thêm người dùng */}
           <div className="flex justify-between items-center px-6 mb-4">
-            <MedicineFilterBar />
-
+            <MedicineFilterBar
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              priceFilter={priceFilter}
+              setPriceFilter={setPriceFilter}
+              onReset={onReset}
+            />
             <button
               onClick={() => navigate("/admin/medicines/add")}
               className="bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600 text-sm"
@@ -128,15 +157,15 @@ export default function MedicineManagementPage() {
             </button>
           </div>
 
-          {/* User Table */}
+          {/* Medicine Table */}
           <div className="bg-white p-4 rounded-xl shadow">
             <MedicineTable medicines={paginated} />
           </div>
 
-          {/* User Table Pagination */}
+          {/* Pagination */}
           <Pagination
             currentPage={currentPage}
-            totalPages={Math.ceil(medicines.length / itemsPerPage)}
+            totalPages={Math.ceil(filteredMedicines.length / itemsPerPage)}
             onPageChange={(page) => setCurrentPage(page)}
           />
         </main>
