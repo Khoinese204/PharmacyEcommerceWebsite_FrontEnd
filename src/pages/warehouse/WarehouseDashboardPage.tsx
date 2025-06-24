@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import LowStockChart from "../../components/admin/LowStockChart";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 import { FaUser } from "react-icons/fa";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import LowStockChart from "../../components/admin/LowStockChart";
+import DashboardLowStockTable from "../../components/warehouse/DashboardLowStockTable";
+
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -17,6 +19,26 @@ const menu = [
 export default function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [summary, setSummary] = useState<{
+    totalMedicineTypes: number;
+    lowStockMedicines: number;
+    expiredMedicines: number;
+  } | null>(null);
+
+  useEffect(() => {
+  axios
+    .get("/api/warehouse/dashboard-summary")
+    .then((res) => {
+      console.log("DEBUG - Dashboard summary data:", res.data); // ✅ Thêm dòng này
+      setSummary(res.data);
+    })
+    .catch((err) => {
+      console.error("Lỗi lấy dashboard summary:", err); // ✅ In lỗi cụ thể
+      setSummary(null);
+    });
+}, []);
+
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -40,11 +62,11 @@ export default function DashboardPage() {
           );
         })}
       </aside>
+
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          {/* Icon nằm sát phải */}
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/warehouse/account">
               <FaUser />
@@ -55,16 +77,11 @@ export default function DashboardPage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-4 py-4">
           <div className="mb-2">
-            <Breadcrumb
-              items={[{ label: "Kho", path: "/warehouse/inventory" }]}
-            />
+            <Breadcrumb items={[{ label: "Kho", path: "/warehouse/inventory" }]} />
           </div>
 
-          {/* Title + Filters */}
           <div className="flex justify-between items-center mb-6 relative z-10">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Bảng điều khiển
-            </h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Bảng điều khiển</h2>
             <div className="flex items-center gap-2 text-xs">
               <select className="border rounded px-2 py-1 z-10 relative">
                 {Array.from({ length: 12 }, (_, i) => (
@@ -78,21 +95,35 @@ export default function DashboardPage() {
               </select>
             </div>
           </div>
+
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {[
-              { title: "Tổng loại thuốc trong kho", value: "12500" },
-              { title: "Loại thuốc sắp hết hàng", value: "320" },
-              { title: "Loại thuốc hết hạn", value: "15" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl p-4 shadow hover:shadow-md transition"
-              >
-                <p className="text-gray-500">{item.title}</p>
-                <p className="text-xl font-bold text-black">{item.value}</p>
-              </div>
-            ))}
+            {summary ? (
+              [
+                {
+                  title: "Tổng loại thuốc trong kho",
+                  value: summary.totalMedicineTypes,
+                },
+                {
+                  title: "Loại thuốc sắp hết hàng",
+                  value: summary.lowStockMedicines,
+                },
+                {
+                  title: "Loại thuốc hết hạn",
+                  value: summary.expiredMedicines,
+                },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl p-4 shadow hover:shadow-md transition"
+                >
+                  <p className="text-gray-500">{item.title}</p>
+                  <p className="text-xl font-bold text-black">{item.value}</p>
+                </div>
+              ))
+            ) : (
+              <p>Đang tải dữ liệu...</p>
+            )}
           </div>
 
           {/* Chart */}
@@ -100,6 +131,7 @@ export default function DashboardPage() {
             <div className="min-w-[1000px]">
               <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hàng</h2>
               {/* <LowStockChart /> */}
+              <DashboardLowStockTable />
             </div>
           </div>
         </main>

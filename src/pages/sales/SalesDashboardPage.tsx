@@ -1,8 +1,8 @@
-import { useState } from "react";
-import OrderChart from "../../components/admin/OrderChart";
-import { Link, useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
+import axios from "axios";
+import OrderChart from "../../components/admin/OrderChart";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/sales/dashboard" },
@@ -12,6 +12,30 @@ const menu = [
 export default function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [orderStats, setOrderStats] = useState({
+    PENDING: 0,
+    PACKING: 0,
+    DELIVERING: 0,
+    DELIVERED: 0,
+  });
+
+  useEffect(() => {
+    axios
+      .get("/api/orders/stats")
+      .then((res) => {
+        const stats = res.data;
+        setOrderStats((prev) => ({
+          PENDING: stats.PENDING || 0,
+          PACKING: stats.PACKING || 0,
+          DELIVERING: stats.DELIVERING || 0,
+          DELIVERED: stats.DELIVERED || 0,
+        }));
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi khi tải thống kê đơn hàng:", err);
+      });
+  }, []);
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -35,11 +59,11 @@ export default function DashboardPage() {
           );
         })}
       </aside>
+
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          {/* Icon nằm sát phải */}
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/sales/account">
               <FaUser />
@@ -49,7 +73,6 @@ export default function DashboardPage() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-4 py-4">
-          {/* Title + Filters */}
           <div className="flex justify-between items-center mb-6 relative z-10">
             <h2 className="text-2xl font-semibold text-gray-800">
               Bảng điều khiển
@@ -67,13 +90,26 @@ export default function DashboardPage() {
               </select>
             </div>
           </div>
+
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
-              { title: "Đơn hàng đang chờ xác nhận", value: "15" },
-              { title: "Đơn hàng đang xử lý", value: "24" },
-              { title: "Đơn hàng đã vận chuyển", value: "10" },
-              { title: "Đơn hàng đã giao", value: "82" },
+              {
+                title: "Đơn hàng đang chờ xác nhận",
+                value: orderStats.PENDING,
+              },
+              {
+                title: "Đơn hàng đang gói hàng",
+                value: orderStats.PACKING,
+              },
+              {
+                title: "Đơn hàng đang giao hàng",
+                value: orderStats.DELIVERING,
+              },
+              {
+                title: "Đơn hàng đã giao",
+                value: orderStats.DELIVERED,
+              },
             ].map((item, index) => (
               <div
                 key={index}

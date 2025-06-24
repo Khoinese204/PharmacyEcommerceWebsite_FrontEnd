@@ -4,16 +4,20 @@ import { FaUndo } from "react-icons/fa";
 interface Props {
   searchTerm: string;
   statusFilter: string;
+  dateStatusFilter: string;
   onSearchChange: (value: string) => void;
   onStatusChange: (value: string) => void;
+  onDateStatusChange: (value: string) => void;
   onReset: () => void;
 }
 
 export default function InventoryFilterBar({
   searchTerm,
   statusFilter,
+  dateStatusFilter,
   onSearchChange,
   onStatusChange,
+  onDateStatusChange,
   onReset,
 }: Props) {
   return (
@@ -34,9 +38,21 @@ export default function InventoryFilterBar({
           value={statusFilter}
           onChange={(e) => onStatusChange(e.target.value)}
         >
-          <option value="">Trạng thái</option>
-          <option value="Còn hạn">Còn hạn</option>
+          <option value="">Tình trạng kho</option>
+          <option value="Còn hàng">Còn hàng</option>
           <option value="Sắp hết hàng">Sắp hết hàng</option>
+          <option value="Hết hàng">Hết hàng</option>
+        </select>
+
+        {/* Filter by expiry date status */}
+        <select
+          className="border rounded px-3 py-1.5 text-sm"
+          value={dateStatusFilter}
+          onChange={(e) => onDateStatusChange(e.target.value)}
+        >
+          <option value="">Hạn sử dụng</option>
+          <option value="Còn hạn">Còn hạn</option>
+          <option value="Hết hạn">Hết hạn</option>
         </select>
 
         {/* Reset */}

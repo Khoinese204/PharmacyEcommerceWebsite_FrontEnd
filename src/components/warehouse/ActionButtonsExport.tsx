@@ -38,7 +38,7 @@ export default function ActionButtonsExport({
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(currentStatus);
+  const [selectedStatus, setSelectedStatus] = useState<Props["currentStatus"]>("PACKING"); // default, sẽ reset sau
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -52,6 +52,14 @@ export default function ActionButtonsExport({
   };
 
   const handleSaveStatus = async () => {
+    console.log("DEBUG - currentStatus:", currentStatus);
+    console.log("DEBUG - selectedStatus:", selectedStatus);
+
+    if (!(currentStatus === "PACKING" && selectedStatus === "DELIVERING")) {
+      setErrorMessage("Chỉ được chuyển từ 'Đang gói hàng' sang 'Đang giao hàng'.");
+      return;
+    }
+
     setIsSaving(true);
     setErrorMessage("");
     try {
@@ -72,6 +80,23 @@ export default function ActionButtonsExport({
     }
   };
 
+  const getAllowedNextStatuses = (status: Props["currentStatus"]) => {
+    if (status === "PACKING") {
+      return statuses.filter((s) => s.value === "DELIVERING");
+    }
+    return [];
+  };
+
+  const handleOpenEdit = () => {
+    const allowed = getAllowedNextStatuses(currentStatus);
+    if (allowed.length > 0) {
+      setSelectedStatus(allowed[0].value as Props["currentStatus"]);
+    } else {
+      setSelectedStatus(currentStatus);
+    }
+    setShowEdit(true);
+  };
+
   return (
     <>
       <div className="flex justify-center gap-2 items-center">
@@ -80,7 +105,7 @@ export default function ActionButtonsExport({
           className="p-1 text-blue-600 hover:bg-gray-100 rounded"
           title="Xem chi tiết"
         >
-          <Eye size={18} />
+          👁️
         </button>
 
         {customEditAction ? (
@@ -89,15 +114,15 @@ export default function ActionButtonsExport({
             className="p-1 text-green-600 hover:bg-gray-100 rounded"
             title="Chỉnh sửa trạng thái"
           >
-            <Pencil size={18} />
+            ✏️
           </button>
         ) : onStatusUpdateSuccess ? (
           <button
-            onClick={() => setShowEdit(true)}
+            onClick={handleOpenEdit}
             className="p-1 text-green-600 hover:bg-gray-100 rounded"
             title="Cập nhật trạng thái"
           >
-            <Pencil size={18} />
+            ✏️
           </button>
         ) : editUrl ? (
           <button
@@ -105,7 +130,7 @@ export default function ActionButtonsExport({
             className="p-1 text-green-600 hover:bg-gray-100 rounded"
             title="Chỉnh sửa"
           >
-            <Pencil size={18} />
+            ✏️
           </button>
         ) : null}
 
@@ -115,7 +140,7 @@ export default function ActionButtonsExport({
             className="p-1 text-red-600 hover:bg-gray-100 rounded"
             title="Xóa"
           >
-            <Trash2 size={18} />
+            🗑️
           </button>
         )}
       </div>
@@ -158,7 +183,7 @@ export default function ActionButtonsExport({
               }
               className="w-full mb-3 border px-3 py-2 rounded"
             >
-              {statuses.map((s) => (
+              {getAllowedNextStatuses(currentStatus).map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>

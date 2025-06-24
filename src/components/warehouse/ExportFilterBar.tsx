@@ -35,11 +35,11 @@ export default function ExportFilterBar({
           onChange={(e) => onStatusChange(e.target.value)}
         >
           <option value="">Trạng thái</option>
-          <option value="Chờ xác nhận">Chờ xác nhận</option>
-          <option value="Đang gói hàng">Đang gói hàng</option>
-          <option value="Đang giao hàng">Đang giao hàng</option>
-          <option value="Đã giao">Đã giao</option>
-          <option value="Đã hủy">Đã hủy</option>
+          <option value="PENDING">Chờ xác nhận</option>
+          <option value="PACKING">Đang gói hàng</option>
+          <option value="DELIVERING">Đang giao hàng</option>
+          <option value="DELIVERED">Đã giao</option>
+          <option value="CANCELLED">Đã hủy</option>
         </select>
 
         {/* Nút đặt lại bộ lọc */}

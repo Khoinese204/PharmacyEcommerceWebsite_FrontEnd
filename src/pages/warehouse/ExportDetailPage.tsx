@@ -40,7 +40,7 @@ interface ExportDetailResponse {
 
 // ---------------------- COMPONENT ----------------------
 export default function ExportDetailPage() {
-  const { exportId } = useParams();
+  const { orderId } = useParams(); // ✅ đổi từ exportId ➝ orderId
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,15 +67,17 @@ export default function ExportDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const numericExportId = exportId ? parseInt(exportId) : null;
+  const numericExportId = orderId ? parseInt(orderId) : null;
 
   useEffect(() => {
     const fetchExport = async () => {
       if (!numericExportId) return;
 
       try {
+        console.log("🔍 Đang fetch đơn xuất ID:", numericExportId);
         const res = await axios.get<ExportDetailResponse>(`/api/exports/${numericExportId}`);
         const data = res.data;
+        console.log("✅ Dữ liệu đơn xuất:", data);
 
         const formattedItems: ExportDetail[] = data.items.map((item, index) => ({
           id: index.toString(),
@@ -95,13 +97,15 @@ export default function ExportDetailPage() {
         setSummary(data.summary);
       } catch (error) {
         console.error("❌ Lỗi khi tải chi tiết xuất kho:", error);
+        alert("Không tìm thấy đơn xuất. Quay lại trang danh sách.");
+        navigate("/warehouse/export");
       } finally {
         setLoading(false);
       }
     };
 
     fetchExport();
-  }, [numericExportId]);
+  }, [numericExportId, navigate]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -173,7 +177,6 @@ export default function ExportDetailPage() {
                     )}
                   </div>
                   <div className="bg-gray-50 p-4 rounded border col-span-2">
-                    <p><span className="font-medium">Ngày xuất:</span> {metaInfo.createdAt}</p>
                     <p><span className="font-medium">Trạng thái:</span> {metaInfo.status}</p>
                   </div>
                 </div>

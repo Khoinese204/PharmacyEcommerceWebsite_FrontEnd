@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SupplierTable, { Supplier } from "../../components/warehouse/SupplierTable";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import SupplierFilterBar from "../../components/warehouse/SupplierFilterBar";
+import { FaUser } from "react-icons/fa";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -77,13 +78,12 @@ export default function SupplierPage() {
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên kho</p>
-            </div>
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/warehouse/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 

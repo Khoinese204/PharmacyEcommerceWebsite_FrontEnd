@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Breadcrumb from "../../components/admin/Breadcrumb";
+import { FaUser } from "react-icons/fa";
 
 export default function EditStatusPage() {
   const navigate = useNavigate();
@@ -46,13 +47,12 @@ export default function EditStatusPage() {
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên bán hàng</p>
-            </div>
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/sales/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 

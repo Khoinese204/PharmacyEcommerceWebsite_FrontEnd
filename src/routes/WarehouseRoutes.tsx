@@ -31,7 +31,7 @@ export default function WarehouseRoutes() {
       <Route path="/supplier" element={<SupplierPage />} />
       <Route path="/supplier/add" element={<AddSupplierPage />} />
       <Route path="/export" element={<ExportPage />} />
-      <Route path="/export:orderId" element={<ExportDetailPage />} />
+      <Route path="/export/:orderId" element={<ExportDetailPage />} />
       <Route path="/shipment" element={<ShipmentPage />} />
     </Routes>
     // </WarehouseLayout>

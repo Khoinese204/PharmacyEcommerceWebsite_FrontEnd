@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import InventoryTable from "../../components/warehouse/InventoryTable";
 import Pagination from "../../components/admin/TablePagination";
 import InventoryFilterBar from "../../components/warehouse/InventoryFilterBar";
 import { InventoryItem } from "../../components/warehouse/InventoryTable";
+import { FaUser } from "react-icons/fa";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -22,6 +23,7 @@ export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [dateStatusFilter, setDateStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -36,9 +38,8 @@ export default function InventoryPage() {
           productName: item.productName,
           quantity: item.quantity,
           expiryDate: item.expiryDate,
-          status: item.status,           // Tình trạng kho: Còn hàng, Sắp hết hàng, Hết hàng
-          dateStatus: item.dateStatus,   // Tình trạng hạn: Còn hạn, Hết hạn
-          warnings: item.warnings || [],
+          status: item.status,
+          dateStatus: item.dateStatus,
         }));
 
         setInventory(mappedData);
@@ -53,12 +54,13 @@ export default function InventoryPage() {
   const filtered = inventory.filter((item) => {
     const matchesName = item.productName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
-    return matchesName && matchesStatus;
+    const matchesDateStatus = dateStatusFilter ? item.dateStatus === dateStatusFilter : true;
+    return matchesName && matchesStatus && matchesDateStatus;
   });
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, dateStatusFilter]);
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginated = filtered.slice(
@@ -94,6 +96,7 @@ export default function InventoryPage() {
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
+      {/* Sidebar */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {menu.map((item, idx) => (
@@ -111,23 +114,25 @@ export default function InventoryPage() {
         ))}
       </aside>
 
+      {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        {/* Header */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <img src="/avatar.jpg" alt="Avatar" className="w-8 h-8 rounded-full" />
-            <div>
-              <p className="font-semibold text-gray-800">Boss</p>
-              <p className="text-xs text-gray-500">Nhân viên kho</p>
-            </div>
+          <div className="ml-auto flex items-center gap-4 text-black text-lg">
+            <Link to="/warehouse/account">
+              <FaUser />
+            </Link>
           </div>
         </header>
 
+        {/* Content */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb items={[{ label: "Kho", path: "/warehouse/inventory" }]} />
           </div>
 
-          <div className="flex justify-between items-center mb-6 relative z-10">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-800">Quản lý kho</h2>
           </div>
 
@@ -135,11 +140,14 @@ export default function InventoryPage() {
             <InventoryFilterBar
               searchTerm={searchTerm}
               statusFilter={statusFilter}
+              dateStatusFilter={dateStatusFilter}
               onSearchChange={setSearchTerm}
               onStatusChange={setStatusFilter}
+              onDateStatusChange={setDateStatusFilter}
               onReset={() => {
                 setSearchTerm("");
                 setStatusFilter("");
+                setDateStatusFilter("");
               }}
             />
             <button
