@@ -13,7 +13,7 @@ interface Props {
   isConfirmMode?: boolean;
   selectedOrders?: string[];
   onSelectOrder?: (orderId: string) => void;
-  onOrdersChange?: (newOrders: Order[]) => void; 
+  onOrdersChange?: (newOrders: Order[]) => void;
 }
 
 export default function OrderTable({
@@ -28,11 +28,19 @@ export default function OrderTable({
       <table className="min-w-full text-sm text-left border-collapse">
         <thead className="bg-gray-100">
           <tr>
-            <th className="px-4 py-3 font-semibold text-gray-700">MÃ ĐƠN HÀNG</th>
-            <th className="px-4 py-3 font-semibold text-gray-700">TÊN KHÁCH HÀNG</th>
+            <th className="px-4 py-3 font-semibold text-gray-700">
+              MÃ ĐƠN HÀNG
+            </th>
+            <th className="px-4 py-3 font-semibold text-gray-700">
+              TÊN NGƯỜI ĐẶT
+            </th>
             <th className="px-4 py-3 font-semibold text-gray-700">TỔNG TIỀN</th>
-            <th className="px-4 py-3 font-semibold text-gray-700">TRẠNG THÁI</th>
-            <th className="px-4 py-3 font-semibold text-gray-700 text-center">HÀNH ĐỘNG</th>
+            <th className="px-4 py-3 font-semibold text-gray-700">
+              TRẠNG THÁI
+            </th>
+            <th className="px-4 py-3 font-semibold text-gray-700 text-center">
+              HÀNH ĐỘNG
+            </th>
             {isConfirmMode && <th className="px-4 py-3 text-center"></th>}
           </tr>
         </thead>
@@ -56,7 +64,9 @@ export default function OrderTable({
               </td>
               <td className="px-4 py-2 text-center">
                 <ActionButtons
-                  viewUrl={`/sales/orders/${parseInt(order.id.replace("ORD", ""))}`}
+                  viewUrl={`/sales/orders/${parseInt(
+                    order.id.replace("ORD", "")
+                  )}`}
                   orderId={parseInt(order.id.replace("ORD", ""))}
                   currentStatus={mapStatusToCode(order.status)}
                   onDelete={() => console.log("Xóa đơn hàng:", order.id)}
@@ -89,7 +99,6 @@ export default function OrderTable({
   );
 }
 
-
 function getStatusStyle(status: string) {
   switch (status) {
     case "Chờ xác nhận":
@@ -109,23 +118,34 @@ function getStatusStyle(status: string) {
 
 function mapStatusToCode(status: string): string {
   switch (status) {
-    case "Chờ xác nhận": return "PENDING";
-    case "Đang đóng gói": return "PACKING";
-    case "Đang giao hàng": return "DELIVERING";
-    case "Đã giao": return "DELIVERED";
-    case "Đã hủy": return "CANCELLED";
-    default: return "UNKNOWN";
+    case "Chờ xác nhận":
+      return "PENDING";
+    case "Đang đóng gói":
+      return "PACKING";
+    case "Đang giao hàng":
+      return "DELIVERING";
+    case "Đã giao":
+      return "DELIVERED";
+    case "Đã hủy":
+      return "CANCELLED";
+    default:
+      return "UNKNOWN";
   }
 }
 
 function convertStatus(statusCode: string): string {
   switch (statusCode) {
-    case "PENDING": return "Chờ xác nhận";
-    case "PACKING": return "Đang đóng gói";
-    case "DELIVERING": return "Đang giao hàng";
-    case "DELIVERED": return "Đã giao";
-    case "CANCELLED": return "Đã hủy";
-    default: return statusCode;
+    case "PENDING":
+      return "Chờ xác nhận";
+    case "PACKING":
+      return "Đang đóng gói";
+    case "DELIVERING":
+      return "Đang giao hàng";
+    case "DELIVERED":
+      return "Đã giao";
+    case "CANCELLED":
+      return "Đã hủy";
+    default:
+      return statusCode;
   }
 }
-

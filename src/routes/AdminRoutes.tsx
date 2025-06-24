@@ -15,6 +15,7 @@ import PriceHistoryPage from "../pages/admin/PriceHistoryPage";
 import ProductPriceHistoryPage from "../pages/admin/ProductPriceHistoryPage";
 import AccountPage from "../pages/admin/AdminAccountPage";
 import AdminAccountPage from "../pages/admin/AdminAccountPage";
+// import EditMedicinePage from "../pages/admin/EditMedicinePage";
 import ViewMedicinePage from "../pages/admin/vIEWMedicinePage";
 import EditMedicinePage from "../pages/admin/EditMedicinePage";
 // ... import các trang khác

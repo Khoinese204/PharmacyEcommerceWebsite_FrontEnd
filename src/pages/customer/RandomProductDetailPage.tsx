@@ -4,7 +4,7 @@ import QuantityButton from "../../components/common/QuantityButton";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "./CartContext";
-import { fetchMedicineById } from "../../common/api";
+import { fetchInventoryQuantity, fetchMedicineById } from "../../common/api";
 import BreadcrumbBack from "../../components/common/BreadcrumbBack";
 import { getCategoryNameById } from "../../utils/getCategoryNameById";
 import { BASE_IMAGE_URL } from "../../helper/constants";
@@ -116,7 +116,10 @@ const RandomProductDetailPage = () => {
   const { productId } = useParams(); // 👈 Lấy từ URL
   const location = useLocation();
   const categoryPath = location.pathname.split("/")[1]; // "drugs" | "functional-foods" | ...
-  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [product, setProduct] = useState<any | null>(null);
+  const [inventoryQuantity, setInventoryQuantity] = useState<number | null>(
+    null
+  );
 
   // const getDetailContent = (type: string): string => {
   //   return (
@@ -134,6 +137,8 @@ const RandomProductDetailPage = () => {
       try {
         const data = await fetchMedicineById(Number(productId));
         setProduct(data);
+        const quantity = await fetchInventoryQuantity(Number(productId));
+        setInventoryQuantity(quantity);
       } catch (error: any) {
         console.error("❌ Error fetching product:", error.message);
       }
@@ -228,6 +233,12 @@ const RandomProductDetailPage = () => {
               <tr>
                 <td className="pr-4 py-1">Thương hiệu:</td>
                 <td>{product!.brandOrigin}</td>
+              </tr>
+              <tr>
+                <td className="pr-4 py-1 font-bold text-green-600">Còn hàng</td>
+                <td className="text-green-600">
+                  {inventoryQuantity !== null ? inventoryQuantity : 0}
+                </td>
               </tr>
             </tbody>
           </table>

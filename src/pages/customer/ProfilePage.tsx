@@ -20,7 +20,9 @@ export default function ProfilePage() {
   const [gender, setGender] = useState("");
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("/avatar-default.png");
+  const [avatarUrl, setAvatarUrl] = useState(
+    "/images/avatar/avatar-default.jpg"
+  );
   const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
@@ -36,7 +38,7 @@ export default function ProfilePage() {
         setGender(data.gender || "");
         setAddress(data.address || "");
         setPhoneNumber(data.phoneNumber || "");
-        setAvatarUrl(data.avatarUrl || "/avatar-default.png");
+        setAvatarUrl(data.avatarUrl || "/images/avatar/avatar-default.jpg");
         setBirthDate(data.birthDate ? new Date(data.birthDate) : null);
       })
       .catch((err) => {

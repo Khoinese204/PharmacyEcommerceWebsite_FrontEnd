@@ -37,7 +37,7 @@ export default function ViewUserPage() {
             address: data.address || "",
             password: "********",
             role: data.role || "Customer",
-            avatarUrl: data.avatarUrl || "/avatar-default.png",
+            avatarUrl: data.avatarUrl || "/images/avatar/avatar-default.jpg",
           });
         })
         .catch((err) => {
