@@ -130,10 +130,10 @@ export default function EditMedicinePage() {
     });
 
     if (res.ok) {
-      toast("Cập nhật thuốc thành công!");
+      toast.success("Cập nhật thuốc thành công!");
       navigate("/admin/medicines");
     } else {
-      toast("Lỗi khi cập nhật thuốc!");
+      toast.error("Lỗi khi cập nhật thuốc!");
     }
   };
 
