@@ -6,7 +6,6 @@ import Breadcrumb from "../../components/admin/Breadcrumb";
 import LowStockChart from "../../components/admin/LowStockChart";
 import DashboardLowStockTable from "../../components/warehouse/DashboardLowStockTable";
 
-
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
   { label: "Kho", path: "/warehouse/inventory" },
@@ -27,18 +26,17 @@ export default function DashboardPage() {
   } | null>(null);
 
   useEffect(() => {
-  axios
-    .get("/api/warehouse/dashboard-summary")
-    .then((res) => {
-      console.log("DEBUG - Dashboard summary data:", res.data); // ✅ Thêm dòng này
-      setSummary(res.data);
-    })
-    .catch((err) => {
-      console.error("Lỗi lấy dashboard summary:", err); // ✅ In lỗi cụ thể
-      setSummary(null);
-    });
-}, []);
-
+    axios
+      .get("/api/warehouse/dashboard-summary")
+      .then((res) => {
+        console.log("DEBUG - Dashboard summary data:", res.data); // ✅ Thêm dòng này
+        setSummary(res.data);
+      })
+      .catch((err) => {
+        console.error("Lỗi lấy dashboard summary:", err); // ✅ In lỗi cụ thể
+        setSummary(null);
+      });
+  }, []);
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
@@ -77,12 +75,16 @@ export default function DashboardPage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-4 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Kho", path: "/warehouse/inventory" }]} />
+            <Breadcrumb
+              items={[{ label: "Kho", path: "/warehouse/inventory" }]}
+            />
           </div>
 
           <div className="flex justify-between items-center mb-6 relative z-10">
-            <h2 className="text-2xl font-semibold text-gray-800">Bảng điều khiển</h2>
-            <div className="flex items-center gap-2 text-xs">
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Bảng điều khiển
+            </h2>
+            {/* <div className="flex items-center gap-2 text-xs">
               <select className="border rounded px-2 py-1 z-10 relative">
                 {Array.from({ length: 12 }, (_, i) => (
                   <option key={i + 1}>{`Tháng ${i + 1}`}</option>
@@ -93,7 +95,7 @@ export default function DashboardPage() {
                   <option key={year}>{`Năm ${year}`}</option>
                 ))}
               </select>
-            </div>
+            </div> */}
           </div>
 
           {/* Stats */}

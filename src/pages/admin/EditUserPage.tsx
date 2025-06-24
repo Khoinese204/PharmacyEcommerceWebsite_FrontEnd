@@ -99,10 +99,10 @@ export default function EditUserPage() {
     { label: "Thuốc", path: "/admin/medicines" },
     { label: "Danh mục thuốc", path: "/admin/categories" },
     { label: "Mã giảm giá", path: "/admin/coupons" },
-    { label: "Kho", path: "/admin/warehouse" },
-    { label: "Doanh thu", path: "/admin/revenue" },
-    { label: "Khách hàng", path: "/admin/customers" },
-    { label: "Lịch sử giá", path: "/admin/price-history" },
+    // { label: "Kho", path: "/admin/warehouse" },
+    // { label: "Doanh thu", path: "/admin/revenue" },
+    // { label: "Khách hàng", path: "/admin/customers" },
+    // { label: "Lịch sử giá", path: "/admin/price-history" },
   ];
 
   return (
