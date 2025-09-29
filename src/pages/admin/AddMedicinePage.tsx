@@ -96,7 +96,7 @@ export default function AddMedicinePage() {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append("userId", userId);  
+    formData.append("userId", userId);
     // Gửi các trường thuốc
     Object.entries(medicine).forEach(([key, value]) => {
       if (key === "originalPrice" || key === "categoryId") {

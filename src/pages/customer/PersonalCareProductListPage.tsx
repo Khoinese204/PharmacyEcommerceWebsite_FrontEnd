@@ -107,7 +107,7 @@ const allProducts = [
 ];
 
 const PersonalCareProductListPage = () => {
-  const [products, setProducts] = useState<ProductDisplay[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -42,7 +42,7 @@ export default function SalesAccountPage() {
               {/* Avatar */}
               <div className="flex flex-col items-center col-span-1">
                 <img
-                  src="/avatar-default.png"
+                  src="/images/avatar/avatar-default.jpg"
                   alt="Avatar"
                   className="w-24 h-24 rounded-full border object-cover"
                 />

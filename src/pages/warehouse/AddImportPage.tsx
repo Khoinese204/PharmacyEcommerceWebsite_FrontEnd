@@ -20,21 +20,26 @@ export default function AddImportPage() {
     importDate: new Date().toISOString().split("T")[0],
     quantity: 1,
     unitPrice: 0,
+    expiredAt: "", // ✅ thêm dòng này
   });
 
   // ✅ Gọi API lấy danh sách thuốc & nhà cung cấp
   useEffect(() => {
-    axios.get("/api/medicines")
+    axios
+      .get("/api/medicines")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error("Lỗi load thuốc:", err));
 
-    axios.get("/api/suppliers")
+    axios
+      .get("/api/suppliers")
       .then((res) => setSuppliers(res.data))
       .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
   }, []);
 
   // ✅ Xử lý thay đổi trường nhập
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
     if (name === "productId") {
@@ -60,6 +65,7 @@ export default function AddImportPage() {
           medicineId: Number(formData.productId),
           quantity: Number(formData.quantity),
           unitPrice: Number(formData.unitPrice),
+          expiredAt: formData.expiredAt,
         },
       ],
     };
@@ -126,7 +132,9 @@ export default function AddImportPage() {
             />
           </div>
 
-          <h2 className="text-left text-xl font-semibold mb-4">Tạo đơn nhập hàng</h2>
+          <h2 className="text-left text-xl font-semibold mb-4">
+            Tạo đơn nhập hàng
+          </h2>
 
           <form
             onSubmit={handleSubmit}
@@ -153,7 +161,9 @@ export default function AddImportPage() {
 
             {/* Nhà cung cấp */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Nhà cung cấp</label>
+              <label className="block text-sm font-medium mb-1">
+                Nhà cung cấp
+              </label>
               <select
                 name="supplierId"
                 value={formData.supplierId}
@@ -172,7 +182,9 @@ export default function AddImportPage() {
 
             {/* Ngày tạo đơn */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Ngày tạo đơn</label>
+              <label className="block text-sm font-medium mb-1">
+                Ngày tạo đơn
+              </label>
               <input
                 type="date"
                 name="importDate"
@@ -199,7 +211,9 @@ export default function AddImportPage() {
 
             {/* Đơn giá */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Giá nhập (VNĐ)</label>
+              <label className="block text-sm font-medium mb-1">
+                Giá nhập (VNĐ)
+              </label>
               <input
                 type="number"
                 name="unitPrice"
@@ -208,6 +222,22 @@ export default function AddImportPage() {
                 className="w-full border rounded px-3 py-2 bg-gray-50"
                 min={0}
                 required
+              />
+            </div>
+
+            {/* Ngày hết hạn */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Ngày hết hạn
+              </label>
+              <input
+                type="date"
+                name="expiredAt"
+                value={formData.expiredAt}
+                onChange={handleChange}
+                className="w-full border rounded px-3 py-2 bg-gray-50"
+                required
+                min={new Date().toISOString().split("T")[0]}
               />
             </div>
 
