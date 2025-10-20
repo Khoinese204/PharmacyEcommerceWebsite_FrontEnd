@@ -23,6 +23,7 @@ export default function DashboardPage() {
     totalMedicineTypes: number;
     lowStockMedicines: number;
     expiredMedicines: number;
+    nearExpiryMedicines: number;
   } | null>(null);
 
   useEffect(() => {
@@ -113,6 +114,10 @@ export default function DashboardPage() {
                 {
                   title: "Loại thuốc hết hạn",
                   value: summary.expiredMedicines,
+                },
+                {
+                  title: "Loại thuốc sắp hết hạn",
+                  value: summary.nearExpiryMedicines,
                 },
               ].map((item, index) => (
                 <div
