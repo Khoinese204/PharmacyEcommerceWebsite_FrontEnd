@@ -29,7 +29,7 @@ export default function OrderSuccessPage() {
             <p>
               Bạn đã đặt hàng thành công đơn hàng mã <strong>{orderId}</strong>,{" "}
               {paymentMethod === "bank"
-                ? "đã chọn hình thức chuyển khoản (QR Code)."
+                ? "thanh toán bằng chuyển khoản (QR Code)."
                 : "thanh toán khi nhận hàng."}
             </p>
             <p>

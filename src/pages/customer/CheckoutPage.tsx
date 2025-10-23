@@ -5,6 +5,7 @@ import locations from "../../assets/locations.json";
 import { useCart } from "./CartContext";
 import { calculateCartSummary } from "../../utils/calculateCartSummary";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 type ApplyPromotionResponse = {
   success: boolean;
@@ -202,6 +203,24 @@ const CheckoutPage = () => {
       });
       return;
     }
+
+    // // ✅ Nếu là BANK_TRANSFER thì tạo thanh toán VNPay
+    // if (paymentMethod === "bank") {
+    //   const amount = Math.round(Number(summary?.finalTotal ?? 0));
+    //   console.log("amount gửi lên BE:", amount);
+
+    //   const res = await axios.post("/api/v1/payment/create-payment", null, {
+    //     params: { amount },
+    //   });
+
+    //   if (res.data?.code === "00" && res.data?.data) {
+    //     window.location.href = res.data.data;
+    //   } else {
+    //     console.error("VNPay response:", res.data);
+    //     alert(res.data?.message || "Tạo thanh toán VNPay thất bại");
+    //   }
+    //   return;
+    // }
 
     // ✅ Nếu là COD thì call API luôn
     const orderRequest = {

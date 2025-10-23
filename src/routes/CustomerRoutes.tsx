@@ -23,6 +23,7 @@ import DrugProductListPage from "../pages/customer/DrugProductListPage";
 import PersonalCareProductListPage from "../pages/customer/PersonalCareProductListPage";
 import PaymentTransferPage from "../pages/customer/PaymentTransferPage";
 import RandomProductDetailPage from "../pages/customer/RandomProductDetailPage";
+import VnpayReturnPage from "../pages/customer/VnpayReturnPage";
 
 export default function CustomerRoutes() {
   return (
@@ -46,6 +47,7 @@ export default function CustomerRoutes() {
         />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
+        <Route path="/checkout/vnpay-return" element={<VnpayReturnPage />} />
         <Route path="ordersuccess" element={<OrderSuccessPage />} />
         <Route path="orderfail" element={<OrderFailPage />} />
         <Route

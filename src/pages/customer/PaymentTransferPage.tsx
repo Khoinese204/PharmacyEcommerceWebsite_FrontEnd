@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useCart } from "./CartContext";
+import axios from "axios";
 
 const PaymentTransferPage = () => {
   const location = useLocation();
@@ -11,77 +11,91 @@ const PaymentTransferPage = () => {
   const userId = storedUser ? JSON.parse(storedUser).id : null;
 
   const {
-    selectedItems,
-    appliedPromotions,
-    voucherDiscount,
-    shippingDiscount,
-    total,
-    customerName,
-    customerPhone,
-    selectedCity,
-    selectedDistrict,
-    selectedWard,
-    specificAddress,
-    note,
-    appliedShippingPromo,
-    cart, // ✅ bổ sung dòng này
+    selectedItems = [],
+    appliedPromotions = [],
+    voucherDiscount = 0,
+    shippingDiscount = 0,
+    total = 0,
+    customerName = "",
+    customerPhone = "",
+    selectedCity = "",
+    selectedDistrict = "",
+    selectedWard = "",
+    specificAddress = "",
+    note = "",
+    appliedShippingPromo = null,
+    cart = [],
   } = location.state || {};
 
+  // Fallback bảo vệ khi không có state
+  if (!location.state) {
+    return (
+      <div className="p-10 text-center text-red-600">
+        Không có dữ liệu đơn hàng. Vui lòng quay lại trang đặt hàng.
+      </div>
+    );
+  }
+
+  const fullAddress = useMemo(
+    () =>
+      `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedCity}`,
+    [specificAddress, selectedWard, selectedDistrict, selectedCity]
+  );
+
+  // Nội dung chuyển khoản hiển thị (không ảnh hưởng tới VNPay)
+  const transferContent = useMemo(() => {
+    const name = (customerName || "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9 ]/g, "")
+      .replace(/\s+/g, "")
+      .toUpperCase();
+    return `${name}_${customerPhone || ""}`;
+  }, [customerName, customerPhone]);
+
   const handleConfirmTransfer = async () => {
-    const fullAddress = `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedCity}`;
-
-    const orderRequest = {
-      userId,
-      items: cart
-        .filter((item) => selectedItems.includes(item.id))
-        .map((item) => ({
-          medicineId: item.id,
-          quantity: item.quantity,
-        })),
-      totalPrice: total,
-      voucherDiscount: voucherDiscount,
-      shippingDiscount: shippingDiscount,
-      paymentMethod: "BANK_TRANSFER",
-      shippingInfo: {
-        recipientName: customerName,
-        phone: customerPhone,
-        province: selectedCity,
-        district: selectedDistrict,
-        ward: selectedWard,
-        addressDetail: specificAddress,
-        note: note,
-      },
-      promotionIds: appliedPromotions,
-      shippingPromotionId: appliedShippingPromo,
-    };
-
     try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderRequest),
+      // 1) Lưu tạm dữ liệu checkout để khi VNPay redirect về FE có thể tạo đơn
+      sessionStorage.setItem(
+        "pendingOrder",
+        JSON.stringify({
+          userId,
+          cart,
+          selectedItems,
+          appliedPromotions,
+          voucherDiscount,
+          shippingDiscount,
+          customerName,
+          customerPhone,
+          selectedCity,
+          selectedDistrict,
+          selectedWard,
+          specificAddress,
+          note,
+          appliedShippingPromo,
+          total: Math.round(Number(total ?? 0)),
+        })
+      );
+
+      // 2) Gọi BE tạo link VNPay
+      const amount = Math.round(Number(total ?? 0)); // FE gửi VND nguyên, BE sẽ *100
+      const res = await axios.post("/api/v1/payment/create-payment", null, {
+        params: { amount },
       });
 
-      console.log("Đặt hàng với userId =", userId, orderRequest);
-      if (!res.ok) throw new Error("Đặt hàng thất bại");
+      if (res.data?.code === "00" && res.data?.data) {
+        // 3) Redirect sang VNPay (trình duyệt rời trang, code sau đây sẽ không chạy)
+        window.location.href = res.data.data;
+        return;
+      }
 
-      const response = await res.json();
-
-      navigate("/ordersuccess", {
-        state: {
-          orderId: response.orderId,
-          name: customerName,
-          phone: customerPhone,
-          address: fullAddress,
-          total,
-          paymentMethod: "BANK_TRANSFER",
-          expectedDate: response.expectedDeliveryDate,
-        },
-      });
+      console.error("VNPay response:", res.data);
+      toast.error(res.data?.message || "Tạo thanh toán VNPay thất bại");
     } catch (err) {
-      console.log("Đặt hàng với userId =", userId, orderRequest);
-      console.error("Đặt hàng thất bại:", err);
-      toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+      console.error("Lỗi tạo thanh toán VNPay:", err);
+      toast.error("Không thể kết nối cổng thanh toán. Vui lòng thử lại!");
     }
   };
 
@@ -91,26 +105,11 @@ const PaymentTransferPage = () => {
     });
   };
 
-  if (!location.state) {
-    return (
-      <div className="p-10 text-center text-red-600">
-        Không có dữ liệu đơn hàng. Vui lòng quay lại trang đặt hàng.
-      </div>
-    );
-  }
-
-  const transferContent = `${customerName
-    .replace(/đ/g, "d") // xử lý đ thường
-    .replace(/Đ/g, "D") // xử lý Đ hoa
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // xóa dấu
-    .replace(/[^a-zA-Z0-9 ]/g, "") // chỉ giữ chữ, số, khoảng trắng
-    .replace(/\s+/g, "") // xóa khoảng trắng
-    .toUpperCase()}_${customerPhone}`;
-
   return (
     <div className="max-w-xl mx-auto py-10 px-6 bg-white rounded shadow text-gray-800">
       <h2 className="text-xl font-bold mb-6">Thông tin chuyển khoản</h2>
+
+      {/* Phần hiển thị này chỉ để hướng dẫn, không ảnh hưởng VNPay */}
       <p>
         <strong>Ngân hàng:</strong> ABC Bank
       </p>
@@ -144,6 +143,13 @@ const PaymentTransferPage = () => {
           Tôi đã chuyển khoản
         </button>
       </div>
+
+      {/* Gợi ý trải nghiệm: giải thích rõ bước tiếp theo */}
+      <p className="text-xs text-gray-500 mt-3">
+        Bạn sẽ được chuyển đến cổng VNPay để hoàn tất thanh toán. Sau khi thanh
+        toán thành công, hệ thống sẽ tự động tạo đơn hàng và chuyển đến trang
+        xác nhận.
+      </p>
     </div>
   );
 };
