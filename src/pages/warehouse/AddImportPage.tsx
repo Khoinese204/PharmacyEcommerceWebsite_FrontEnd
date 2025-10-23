@@ -20,10 +20,9 @@ export default function AddImportPage() {
     importDate: new Date().toISOString().split("T")[0],
     quantity: 1,
     unitPrice: 0,
-    expiredAt: "", // ✅ thêm dòng này
+    expiredAt: "",
   });
 
-  // ✅ Gọi API lấy danh sách thuốc & nhà cung cấp
   useEffect(() => {
     axios
       .get("/api/medicines")
@@ -36,7 +35,6 @@ export default function AddImportPage() {
       .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
   }, []);
 
-  // ✅ Xử lý thay đổi trường nhập
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -54,7 +52,6 @@ export default function AddImportPage() {
     }
   };
 
-  // ✅ Gửi đơn nhập hàng
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -151,9 +148,9 @@ export default function AddImportPage() {
                 required
               >
                 <option value="">-- Chọn thuốc --</option>
-                {products.map((p) => (
+                {products.map((p, index) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {`B${index + 1} - ${p.name}`}
                   </option>
                 ))}
               </select>

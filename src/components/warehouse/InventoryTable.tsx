@@ -9,7 +9,7 @@ export interface InventoryItem {
   quantity: number;
   expiryDate: string;
   status: "Còn hàng" | "Sắp hết hàng" | "Hết hàng";
-  dateStatus: "Còn hạn" | "Hết hạn";
+  dateStatus: "Còn hạn" | "Hết hạn" | "Sắp hết hạn";
 }
 
 interface Props {
@@ -89,10 +89,15 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
             else statusClass = "bg-red-100 text-red-700";
 
             // 💡 Xác định màu trạng thái hạn
-            let dateStatusClass =
-              item.dateStatus === "Còn hạn"
-                ? "bg-green-50 text-green-600"
-                : "bg-gray-200 text-gray-700";
+            let dateStatusClass = "";
+            if (item.dateStatus === "Còn hạn") {
+                dateStatusClass = "bg-green-50 text-green-600";
+            } else if (item.dateStatus === "Sắp hết hạn") {
+                dateStatusClass = "bg-yellow-100 text-yellow-800";
+            } else {
+                dateStatusClass = "bg-red-100 text-red-700";
+            }
+
 
             return (
               <tr key={item.batchNumber} className="border-t hover:bg-gray-50">

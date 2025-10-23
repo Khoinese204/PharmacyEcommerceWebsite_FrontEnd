@@ -5,6 +5,7 @@ import { FaUser } from "react-icons/fa";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import LowStockChart from "../../components/admin/LowStockChart";
 import DashboardLowStockTable from "../../components/warehouse/DashboardLowStockTable";
+import DashboardNearExpiryTable from "../../components/warehouse/DashboardNearExpiryTable";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -23,6 +24,7 @@ export default function DashboardPage() {
     totalMedicineTypes: number;
     lowStockMedicines: number;
     expiredMedicines: number;
+    nearExpiryMedicines: number;
   } | null>(null);
 
   useEffect(() => {
@@ -114,6 +116,10 @@ export default function DashboardPage() {
                   title: "Loại thuốc hết hạn",
                   value: summary.expiredMedicines,
                 },
+                {
+                  title: "Loại thuốc sắp hết hạn",
+                  value: summary.nearExpiryMedicines,
+                },
               ].map((item, index) => (
                 <div
                   key={index}
@@ -134,6 +140,12 @@ export default function DashboardPage() {
               <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hàng</h2>
               {/* <LowStockChart /> */}
               <DashboardLowStockTable />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
+            <div className="min-w-[1000px]">
+              <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hạn</h2>
+              <DashboardNearExpiryTable />
             </div>
           </div>
         </main>

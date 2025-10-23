@@ -26,6 +26,7 @@ export default function AddMedicinePage() {
     name: "",
     unit: "",
     originalPrice: "",
+    //price: "",
     discountPercent: "0",
     vatPercent: "10",
     brandOrigin: "",
@@ -208,6 +209,14 @@ export default function AddMedicinePage() {
                 type="number"
                 className="input"
               />
+              {/* <input
+                name="price"
+                value={medicine.price}
+                onChange={handleChange}
+                placeholder="Giá bán"
+                type="number"
+                className="input"
+              /> */}
               <select
                 name="discountPercent"
                 value={medicine.discountPercent}
