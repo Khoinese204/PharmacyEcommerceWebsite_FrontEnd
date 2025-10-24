@@ -140,7 +140,7 @@ const PaymentTransferPage = () => {
           onClick={handleConfirmTransfer}
           className="ml-auto bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
         >
-          Tôi đã chuyển khoản
+          Chuyển khoản
         </button>
       </div>
 

@@ -53,7 +53,7 @@ export default function VnpayReturnPage() {
           const reason =
             data?.message || "Thanh toán thất bại. Vui lòng thử lại!";
           // toast?.error?.(reason);
-          navigate("/orderfailed", {
+          navigate("/orderfail", {
             state: { reason, vnp: data?.data },
             replace: true,
           });
