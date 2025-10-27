@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import ActionButtons from "./ActionButtons";
-import axios from "axios";
 
 export interface InventoryItem {
   id: number;
@@ -15,55 +14,10 @@ export interface InventoryItem {
 interface Props {
   inventoryItems: InventoryItem[];
   onUpdateItem: (updatedItem: InventoryItem) => void;
+  onEditItem?: (item: InventoryItem) => void;
 }
 
-export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) {
-  const [editBatch, setEditBatch] = useState<string | null>(null);
-  const [editQuantity, setEditQuantity] = useState<number>(0);
-
-  const handleEditClick = (item: InventoryItem) => {
-    setEditBatch(item.batchNumber);
-    setEditQuantity(item.quantity);
-  };
-
-  const handleSave = async (item: InventoryItem) => {
-    if (editQuantity < 0) {
-      alert("❌ Số lượng phải lớn hơn hoặc bằng 0.");
-      return;
-    }
-
-    try {
-      let newStatus: InventoryItem["status"];
-      if (editQuantity === 0) newStatus = "Hết hàng";
-      else if (editQuantity <= 20) newStatus = "Sắp hết hàng";
-      else newStatus = "Còn hàng";
-
-      const isExpired = new Date(item.expiryDate) < new Date();
-      const newDateStatus: InventoryItem["dateStatus"] = isExpired ? "Hết hạn" : "Còn hạn";
-
-      const updatedItem: InventoryItem = {
-        ...item,
-        quantity: editQuantity,
-        status: newStatus,
-        dateStatus: newDateStatus,
-      };
-
-      await axios.patch(`/api/inventory/${item.id}`, {
-        quantity: editQuantity,
-      });
-
-      onUpdateItem(updatedItem);
-      setEditBatch(null);
-    } catch (error) {
-      console.error("Lỗi khi cập nhật tồn kho:", error);
-      alert("❌ Cập nhật thất bại. Vui lòng thử lại.");
-    }
-  };
-
-  const handleCancel = () => {
-    setEditBatch(null);
-  };
-
+export default function InventoryTable({ inventoryItems, onUpdateItem, onEditItem }: Props) {
   return (
     <div className="bg-white rounded-xl shadow overflow-x-auto mt-4">
       <table className="min-w-full text-sm text-left border-collapse">
@@ -80,42 +34,27 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
         </thead>
         <tbody>
           {inventoryItems.map((item) => {
-            const isEditing = editBatch === item.batchNumber;
-
-            // 💡 Xác định màu trạng thái kho
+            // 💡 Màu tình trạng kho
             let statusClass = "";
             if (item.status === "Còn hàng") statusClass = "bg-green-100 text-green-700";
             else if (item.status === "Sắp hết hàng") statusClass = "bg-yellow-100 text-yellow-800";
             else statusClass = "bg-red-100 text-red-700";
 
-            // 💡 Xác định màu trạng thái hạn
+            // 💡 Màu tình trạng hạn
             let dateStatusClass = "";
             if (item.dateStatus === "Còn hạn") {
-                dateStatusClass = "bg-green-50 text-green-600";
+              dateStatusClass = "bg-green-50 text-green-600";
             } else if (item.dateStatus === "Sắp hết hạn") {
-                dateStatusClass = "bg-yellow-100 text-yellow-800";
+              dateStatusClass = "bg-yellow-100 text-yellow-800";
             } else {
-                dateStatusClass = "bg-red-100 text-red-700";
+              dateStatusClass = "bg-red-100 text-red-700";
             }
-
 
             return (
               <tr key={item.batchNumber} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-2">{item.batchNumber}</td>
                 <td className="px-4 py-2">{item.productName}</td>
-                <td className="px-4 py-2">
-                  {isEditing ? (
-                    <input
-                      type="number"
-                      className="border px-2 py-1 w-20"
-                      value={editQuantity}
-                      onChange={(e) => setEditQuantity(Number(e.target.value))}
-                      min={0}
-                    />
-                  ) : (
-                    item.quantity
-                  )}
-                </td>
+                <td className="px-4 py-2">{item.quantity}</td>
                 <td className="px-4 py-2">
                   {new Date(item.expiryDate).toLocaleDateString("vi-VN")}
                 </td>
@@ -134,31 +73,16 @@ export default function InventoryTable({ inventoryItems, onUpdateItem }: Props) 
                   </span>
                 </td>
                 <td className="px-4 py-2 text-center">
-                  {isEditing ? (
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => handleSave(item)}
-                        className="text-green-600 hover:text-green-800"
-                      >
-                        💾
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        ❌
-                      </button>
-                    </div>
-                  ) : (
-                    <ActionButtons
-                      viewUrl={`/warehouse/inventory/${item.id}`}
-                      editUrl=""
-                      onDelete={() =>
-                        console.log("Xóa lô hàng:", item.batchNumber)
-                      }
-                      customEditAction={() => handleEditClick(item)}
-                    />
-                  )}
+                  <ActionButtons
+                    viewUrl={`/warehouse/inventory/${item.id}`}
+                    editUrl=""
+                    onDelete={() =>
+                      console.log("Xóa lô hàng:", item.batchNumber)
+                    }
+                    customEditAction={() => {
+                      if (onEditItem) onEditItem(item);
+                    }}
+                  />
                 </td>
               </tr>
             );
