@@ -22,6 +22,7 @@ function App() {
       case "Warehouse":
         return "/warehouse/dashboard";
       case "Customer":
+      case "Pharmacist":
         return "/";
       default:
         return "/auth";
@@ -47,7 +48,7 @@ function App() {
             {role === "Warehouse" && (
               <Route path="/warehouse/*" element={<WarehouseRoutes />} />
             )}
-            {role === "Customer" && (
+            {(role === "Customer" || role === "Pharmacist") && (
               <Route path="/*" element={<CustomerRoutes />} />
             )}
 

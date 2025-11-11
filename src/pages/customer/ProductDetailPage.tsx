@@ -6,108 +6,8 @@ import { toast } from "react-toastify";
 import { useCart } from "./CartContext";
 import { fetchInventoryQuantity, fetchMedicineById } from "../../common/api";
 import { BASE_IMAGE_URL } from "../../helper/constants";
-
-const allProducts = [
-  {
-    id: 1,
-    name: "Vitamin C 500mg",
-    image: "/images/products/product1.jpg",
-    originalPrice: 165000,
-    discountedPrice: 165000,
-    unit: "hộp",
-    brand: "VitaHealth",
-  },
-  {
-    id: 2,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product2.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-    brand: "Vinamilk",
-  },
-  {
-    id: 3,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product3.jpg",
-    originalPrice: 200000,
-    discountedPrice: 200000,
-    unit: "lon",
-    brand: "Vinamilk",
-  },
-  {
-    id: 4,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product4.jpg",
-    originalPrice: 200000,
-    discountedPrice: 200000,
-    unit: "lon",
-    brand: "Nutifood",
-  },
-  {
-    id: 5,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product5.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-    brand: "Nutifood",
-  },
-  {
-    id: 6,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product6.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-    brand: "TH True Milk",
-  },
-  {
-    id: 7,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product7.jpg",
-    originalPrice: 180000,
-    discountedPrice: 180000,
-    unit: "lon",
-    brand: "TH True Milk",
-  },
-  {
-    id: 8,
-    name: "Sữa tăng đề kháng",
-    image: "/images/products/product8.jpg",
-    originalPrice: 200000,
-    discountedPrice: 180000,
-    unit: "lon",
-    brand: "Abbott",
-  },
-  {
-    id: 9,
-    name: "Sữa tăng đề kháng extra",
-    image: "/images/products/product9.jpg",
-    originalPrice: 210000,
-    discountedPrice: 190000,
-    unit: "lon",
-    brand: "Abbott",
-  },
-  {
-    id: 10,
-    name: "Sữa tăng đề kháng extra",
-    image: "/images/products/product10.jpg",
-    originalPrice: 210000,
-    discountedPrice: 190000,
-    unit: "lon",
-    brand: "Nestlé",
-  },
-  {
-    id: 11,
-    name: "Sữa tăng đề kháng extra",
-    image: "/images/products/product11.jpg",
-    originalPrice: 210000,
-    discountedPrice: 190000,
-    unit: "lon",
-    brand: "Nestlé",
-  },
-];
+import RatingsAndReviews from "../../components/common/RatingsAndReviews";
+import QASection from "../../components/common/QASection";
 
 const ProductDetailPage = () => {
   const [activeTab, setActiveTab] = useState("mo-ta");
@@ -119,12 +19,8 @@ const ProductDetailPage = () => {
     null
   );
 
-  // const getDetailContent = (type: string): string => {
-  //   return (
-  //     product?.details.find((d) => d.type === type)?.content ||
-  //     "Không có dữ liệu"
-  //   );
-  // };
+  const storedUser = localStorage.getItem("user");
+  const userId = storedUser ? JSON.parse(storedUser).id : null; // lấy userId từ localStorage
 
   const { addToCart, isInCart } = useCart(); // ✅ khai báo ở đây
   const categoryLabels: Record<string, string> = {
@@ -308,6 +204,7 @@ const ProductDetailPage = () => {
             ))}
         </div>
       </div>
+      <RatingsAndReviews medicineId={product.id} viewerId={userId} />
     </div>
   );
 };
