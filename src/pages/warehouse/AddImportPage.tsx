@@ -3,9 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
 import { FaUser } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+
 
 export default function AddImportPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedProductName = location.state?.selectedProductName || "";
+
   const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
 
   type Product = { id: number; name: string; originalPrice: number };
@@ -23,17 +28,51 @@ export default function AddImportPage() {
     expiredAt: "",
   });
 
-  useEffect(() => {
-    axios
-      .get("/api/medicines")
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error("Lỗi load thuốc:", err));
+//   useEffect(() => {
+//     axios
+//       .get("/api/medicines")
+//       .then((res) => setProducts(res.data))
+//       .catch((err) => console.error("Lỗi load thuốc:", err));
 
-    axios
-      .get("/api/suppliers")
-      .then((res) => setSuppliers(res.data))
-      .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
-  }, []);
+//     axios
+//       .get("/api/suppliers")
+//       .then((res) => setSuppliers(res.data))
+//       .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
+//   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+        const [productRes, supplierRes] = await Promise.all([
+            axios.get("/api/medicines"),
+            axios.get("/api/suppliers"),
+        ]);
+
+        setProducts(productRes.data);
+        setSuppliers(supplierRes.data);
+
+        // ✅ Nếu có selectedProductName thì tự động set vào form
+        if (selectedProductName) {
+            const foundProduct = productRes.data.find(
+            (p: any) =>
+                p.name.toLowerCase() === selectedProductName.toLowerCase()
+            );
+            if (foundProduct) {
+            setFormData((prev) => ({
+                ...prev,
+                productId: String(foundProduct.id),
+                unitPrice: foundProduct.originalPrice,
+            }));
+            }
+        }
+        } catch (err) {
+        console.error("❌ Lỗi tải dữ liệu:", err);
+        }
+    };
+
+    fetchData();
+    }, [selectedProductName]);
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

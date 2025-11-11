@@ -162,6 +162,9 @@ export default function InventoryPage() {
             <InventoryTable
               inventoryItems={paginated}
               onUpdateItem={handleUpdateItem}
+              onEditItem={(item) => {
+                navigate("/warehouse/import/add", { state: { selectedProductName: item.productName } });
+            }}
             />
           </div>
 
