@@ -19,6 +19,7 @@ type ReviewItem = {
   reviewId: number;
   userId: number;
   userName: string;
+  userRole: string;
   medicineId: number;
   rating: number; // 1..5
   reviewText: string;
@@ -582,7 +583,15 @@ const RatingsAndReviews = ({
               <div className="flex items-start gap-3">
                 <Avatar label={userLabel} />
                 <div className="flex-1">
-                  <div className="font-semibold text-sm">{userLabel}</div>
+                  {/* Header người review */}
+                  <div className="flex items-center gap-2">
+                    <div className="font-semibold text-sm">{userLabel}</div>
+                    {r.userRole && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                        {roleVi(r.userRole)}
+                      </span>
+                    )}
+                  </div>
 
                   {/* “5 ⭐” */}
                   <div className="text-sm mt-0.5 flex items-center gap-1">
