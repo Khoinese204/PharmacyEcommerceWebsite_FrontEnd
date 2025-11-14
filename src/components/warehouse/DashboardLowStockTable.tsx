@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Pagination from "../../components/admin/TablePagination"; // ✅ dùng lại component phân trang cũ
+import Pagination from "../../components/admin/TablePagination";
 
 interface LowStockItem {
   id: number;
@@ -18,12 +18,19 @@ export default function DashboardLowStockTable() {
 
   useEffect(() => {
     axios
-      .get("/api/inventory") // hoặc `/api/warehouse/inventory` tùy backend của bạn
+      .get("/api/inventory") // hoặc /api/warehouse/inventory
       .then((res) => {
         const filtered = res.data.filter(
           (item: any) => item.status === "Sắp hết hàng"
         );
-        setItems(filtered);
+
+        // ✅ BẠN CHỈ CẦN THÊM DÒNG NÀY
+        // Sắp xếp theo số lượng (quantity) tăng dần (a - b)
+        const sorted = filtered.sort(
+          (a: LowStockItem, b: LowStockItem) => a.quantity - b.quantity
+        );
+
+        setItems(sorted); // <-- Dùng mảng đã được sắp xếp
       })
       .catch((err) => {
         console.error("Lỗi khi lấy danh sách thuốc sắp hết:", err);
@@ -67,7 +74,7 @@ export default function DashboardLowStockTable() {
         </tbody>
       </table>
 
-      {/* ✅ Thêm Pagination */}
+      {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={Math.ceil(items.length / itemsPerPage)}

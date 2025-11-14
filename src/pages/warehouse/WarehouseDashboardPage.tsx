@@ -3,9 +3,11 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { FaUser } from "react-icons/fa";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import LowStockChart from "../../components/admin/LowStockChart";
+// import LowStockChart from "../../components/admin/LowStockChart"; // Bạn không dùng
 import DashboardLowStockTable from "../../components/warehouse/DashboardLowStockTable";
 import DashboardNearExpiryTable from "../../components/warehouse/DashboardNearExpiryTable";
+// ✅ 1. Import component biểu đồ mới
+import ExpiryDonutChart from "../../components/warehouse/ExpiryDonutChart";
 
 const menu = [
   { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
@@ -20,29 +22,37 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ 2. CẬP NHẬT STATE
+  // Bạn CẦN cập nhật backend để trả về 'safeLots'
   const [summary, setSummary] = useState<{
     totalMedicineTypes: number;
     lowStockMedicines: number;
     expiredMedicines: number;
     nearExpiryMedicines: number;
+    safeLots: number; // <-- Giả sử backend trả về thêm trường này
   } | null>(null);
 
   useEffect(() => {
     axios
       .get("/api/warehouse/dashboard-summary")
       .then((res) => {
-        console.log("DEBUG - Dashboard summary data:", res.data); // ✅ Thêm dòng này
+        console.log("DEBUG - Dashboard summary data:", res.data);
+        // GIẢ LẬP DỮ LIỆU (Xóa dòng này khi backend của bạn đã cập nhật)
+        // const mockData = { ...res.data, safeLots: 150 }; // Ví dụ 150 lô an toàn
+        // setSummary(mockData);
+
+        // DÙNG DÒNG NÀY KHI BACKEND ĐÃ CẬP NHẬT
         setSummary(res.data);
       })
       .catch((err) => {
-        console.error("Lỗi lấy dashboard summary:", err); // ✅ In lỗi cụ thể
+        console.error("Lỗi lấy dashboard summary:", err);
         setSummary(null);
       });
   }, []);
 
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar (Giữ nguyên) */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {menu.map((item, idx) => {
@@ -65,7 +75,7 @@ export default function DashboardPage() {
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
+        {/* Header (Giữ nguyên) */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/warehouse/account">
@@ -86,21 +96,9 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-semibold text-gray-800">
               Bảng điều khiển
             </h2>
-            {/* <div className="flex items-center gap-2 text-xs">
-              <select className="border rounded px-2 py-1 z-10 relative">
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1}>{`Tháng ${i + 1}`}</option>
-                ))}
-              </select>
-              <select className="border rounded px-2 py-1 z-10 relative">
-                {[2024, 2025].map((year) => (
-                  <option key={year}>{`Năm ${year}`}</option>
-                ))}
-              </select>
-            </div> */}
           </div>
 
-          {/* Stats */}
+          {/* Stats (Giữ nguyên) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {summary ? (
               [
@@ -134,18 +132,45 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Chart */}
-          <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
+          {/* Chart Sắp hết hàng (Giữ nguyên) */}
+          <div className="bg-white rounded-xl shadow p-6 overflow-x-auto mb-6">
             <div className="min-w-[1000px]">
               <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hàng</h2>
-              {/* <LowStockChart /> */}
               <DashboardLowStockTable />
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
-            <div className="min-w-[1000px]">
-              <h2 className="text-lg font-semibold mb-4">Thuốc sắp hết hạn</h2>
-              <DashboardNearExpiryTable />
+
+          {/* ✅ 3. CẬP NHẬT LAYOUT (Biểu đồ + Bảng Hết hạn) */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Phân bổ Hạn sử dụng</h2>
+            {/* Chia grid cho biểu đồ và bảng */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              {/* Cột Biểu đồ */}
+              <div className="md:col-span-1 h-64">
+                {summary ? (
+                  <ExpiryDonutChart
+                    expired={summary.expiredMedicines}
+                    nearExpiry={summary.nearExpiryMedicines}
+                    safe={summary.safeLots} // <-- Truyền dữ liệu mới
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p>Đang tải biểu đồ...</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Cột Bảng */}
+              <div className="md:col-span-2 overflow-x-auto">
+                <h3 className="text-md font-semibold mb-2 text-gray-700">
+                  Chi tiết Lô thuốc sắp hết hạn
+                </h3>
+                <div className="min-w-[700px]">
+                  {" "}
+                  {/* Đặt min-width ở đây */}
+                  <DashboardNearExpiryTable />
+                </div>
+              </div>
             </div>
           </div>
         </main>
