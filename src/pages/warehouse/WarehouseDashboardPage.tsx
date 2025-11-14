@@ -109,15 +109,15 @@ export default function DashboardPage() {
                   value: summary.totalMedicineTypes,
                 },
                 {
-                  title: "Loại thuốc sắp hết hàng",
+                  title: "Lô thuốc sắp hết hàng",
                   value: summary.lowStockMedicines,
                 },
                 {
-                  title: "Loại thuốc hết hạn",
+                  title: "Lô thuốc hết hạn",
                   value: summary.expiredMedicines,
                 },
                 {
-                  title: "Loại thuốc sắp hết hạn",
+                  title: "Lô thuốc sắp hết hạn",
                   value: summary.nearExpiryMedicines,
                 },
               ].map((item, index) => (
