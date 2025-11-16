@@ -153,7 +153,9 @@ export default function CategoryManagementPage() {
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
-              items={[{ label: "Danh sách danh mục", path: "/admin/categories" }]}
+              items={[
+                { label: "Danh sách danh mục", path: "/admin/categories" },
+              ]}
             />
           </div>
 
@@ -193,7 +195,9 @@ export default function CategoryManagementPage() {
                 <tr className="border-b text-gray-600">
                   <th className="px-4 py-2 font-semibold">STT</th>
                   <th className="px-4 py-2 font-semibold">TÊN DANH MỤC</th>
-                  <th className="px-4 py-2 font-semibold text-center">HÀNH ĐỘNG</th>
+                  <th className="px-4 py-2 font-semibold text-center">
+                    HÀNH ĐỘNG
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -207,9 +211,9 @@ export default function CategoryManagementPage() {
                       <button
                         title="Sửa"
                         onClick={() => {
-                            setEditCategory(cat);
-                            setIsEditModalOpen(true);
-                          }}
+                          setEditCategory(cat);
+                          setIsEditModalOpen(true);
+                        }}
                         className="text-yellow-600 hover:text-yellow-800"
                       >
                         ✏️
@@ -276,7 +280,9 @@ export default function CategoryManagementPage() {
       {isEditModalOpen && editCategory && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 className="text-lg font-semibold mb-4 text-center">Chỉnh sửa danh mục</h2>
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              Chỉnh sửa danh mục
+            </h2>
             <input
               type="text"
               placeholder="Nhập tên danh mục..."

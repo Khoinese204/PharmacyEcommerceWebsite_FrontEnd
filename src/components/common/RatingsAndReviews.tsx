@@ -510,15 +510,29 @@ const RatingsAndReviews = ({
 
   return (
     <section className="max-w-6xl mx-auto px-4 md:col-span-3 mt-8">
+      {/* ===== Tiêu đề ===== */}
+      <div className="mb-3 flex items-baseline gap-2">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+          Đánh giá sản phẩm
+        </h2>
+        <span className="text-sm text-gray-500">
+          ({summary?.total ?? 0} đánh giá)
+        </span>
+      </div>
       {/* ===== Tổng quan & Biểu đồ sao ===== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center border rounded-lg p-4">
         <div className="flex flex-col items-center">
-          <div className="text-4xl font-bold">
-            {summary ? summary.average.toFixed(1) : "-"}
-          </div>
-          <StarsRow value={summary?.average ?? 0} />
-          <div className="text-xs text-gray-500 mt-1">
-            {summary?.total ?? 0} đánh giá
+          <div className="flex flex-col items-center">
+            <div className="text-4xl font-bold">
+              {summary ? summary.average.toFixed(1) : "-"}
+            </div>
+            {/* Hiển thị cố định 1 sao */}
+            <div className="flex items-center gap-1 text-yellow-500">
+              <StarIcon size={20} />
+            </div>
+            <div className="text-sm font-medium text-gray-600 mt-1">
+              Trung bình
+            </div>
           </div>
         </div>
         <div className="md:col-span-2 space-y-2">

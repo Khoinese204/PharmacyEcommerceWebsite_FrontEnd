@@ -8,6 +8,7 @@ import { fetchInventoryQuantity, fetchMedicineById } from "../../common/api";
 import BreadcrumbBack from "../../components/common/BreadcrumbBack";
 import { getCategoryNameById } from "../../utils/getCategoryNameById";
 import { BASE_IMAGE_URL } from "../../helper/constants";
+import RatingsAndReviews from "../../components/common/RatingsAndReviews";
 
 const allProducts = [
   {
@@ -120,6 +121,8 @@ const RandomProductDetailPage = () => {
   const [inventoryQuantity, setInventoryQuantity] = useState<number | null>(
     null
   );
+  const storedUser = localStorage.getItem("user");
+  const userId = storedUser ? JSON.parse(storedUser).id : null;
 
   // const getDetailContent = (type: string): string => {
   //   return (
@@ -293,6 +296,7 @@ const RandomProductDetailPage = () => {
             ))}
         </div>
       </div>
+      <RatingsAndReviews medicineId={product.id} viewerId={userId} />
     </div>
   );
 };
