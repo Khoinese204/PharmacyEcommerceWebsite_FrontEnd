@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
@@ -17,6 +17,8 @@ const menu = [
 interface Category {
   id: number;
   name: string;
+  imageUrl: string;
+  slug: string;
 }
 
 export default function CategoryManagementPage() {
@@ -26,8 +28,14 @@ export default function CategoryManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategorySlug, setNewCategorySlug] = useState("");
+  const [newCategoryFile, setNewCategoryFile] = useState<File | null>(null);
+
   const [editCategory, setEditCategory] = useState<Category | null>(null);
+  const [editCategoryFile, setEditCategoryFile] = useState<File | null>(null);
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
     null
@@ -35,7 +43,8 @@ export default function CategoryManagementPage() {
 
   const navigate = useNavigate();
   const itemsPerPage = 8;
-  const BASE_URL = "http://localhost:8080/api/categories"; // ✅ chỉnh theo port Spring Boot của bạn
+  const BASE_URL = "http://localhost:8080/api/categories";
+  const IMAGE_BASE_URL = "http://localhost:8080/uploads/categories/";
 
   // ===========================
   // Load dữ liệu từ backend
@@ -55,16 +64,47 @@ export default function CategoryManagementPage() {
     fetchCategories();
   }, [searchTerm]);
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewCategoryFile(e.target.files[0]);
+    }
+  };
+
+  const handleEditFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditCategoryFile(e.target.files[0]);
+    }
+  };
+
   // ===========================
-  // Thêm danh mục mới
+  // Thêm danh mục
   // ===========================
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
+    if (
+      !newCategoryName.trim() ||
+      !newCategorySlug.trim() ||
+      !newCategoryFile
+    ) {
+      alert("Vui lòng điền đầy đủ tên, slug và chọn ảnh.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", newCategoryName.trim());
+    formData.append("slug", newCategorySlug.trim());
+    formData.append("file", newCategoryFile);
+
     try {
-      await axios.post(BASE_URL, { name: newCategoryName.trim() });
+      await axios.post(BASE_URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setIsAddModalOpen(false);
       setNewCategoryName("");
-      fetchCategories(); // cập nhật lại danh sách
+      setNewCategorySlug("");
+      setNewCategoryFile(null);
+      fetchCategories();
     } catch (error) {
       console.error("Lỗi khi thêm danh mục:", error);
     }
@@ -74,13 +114,32 @@ export default function CategoryManagementPage() {
   // Sửa danh mục
   // ===========================
   const handleEditCategory = async () => {
-    if (!editCategory || !editCategory.name.trim()) return;
+    if (
+      !editCategory ||
+      !editCategory.name.trim() ||
+      !editCategory.slug.trim()
+    ) {
+      alert("Tên và slug không được rỗng.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", editCategory.name.trim());
+    formData.append("slug", editCategory.slug.trim());
+
+    if (editCategoryFile) {
+      formData.append("file", editCategoryFile);
+    }
+
     try {
-      await axios.put(`${BASE_URL}/${editCategory.id}`, {
-        name: editCategory.name.trim(),
+      await axios.put(`${BASE_URL}/${editCategory.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       setIsEditModalOpen(false);
       setEditCategory(null);
+      setEditCategoryFile(null);
       fetchCategories();
     } catch (error) {
       console.error("Lỗi khi sửa danh mục:", error);
@@ -102,17 +161,6 @@ export default function CategoryManagementPage() {
     }
   };
 
-  // ===========================
-  // Reset bộ lọc
-  // ===========================
-  const handleReset = () => {
-    setSearchTerm("");
-    fetchCategories();
-  };
-
-  // ===========================
-  // Phân trang
-  // ===========================
   const paginated = categories.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -153,11 +201,12 @@ export default function CategoryManagementPage() {
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
             <Breadcrumb
-              items={[{ label: "Danh sách danh mục", path: "/admin/categories" }]}
+              items={[
+                { label: "Danh sách danh mục", path: "/admin/categories" },
+              ]}
             />
           </div>
 
-          {/* Search + Filter */}
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div className="p-6">
               <SearchBar
@@ -167,15 +216,8 @@ export default function CategoryManagementPage() {
                 placeholder="Tìm kiếm theo tên danh mục..."
               />
             </div>
-            {/* <button
-              onClick={handleReset}
-              className="text-sm px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 mr-4"
-            >
-              Đặt lại mặc định
-            </button> */}
           </div>
 
-          {/* Add button */}
           <div className="flex justify-between items-center px-6 mb-4">
             <div></div>
             <button
@@ -191,9 +233,14 @@ export default function CategoryManagementPage() {
             <table className="w-full text-left text-sm table-fixed border-collapse">
               <thead>
                 <tr className="border-b text-gray-600">
-                  <th className="px-4 py-2 font-semibold">STT</th>
+                  <th className="px-4 py-2 font-semibold w-16">STT</th>
+                  <th className="px-4 py-2 font-semibold w-24">ẢNH</th>
                   <th className="px-4 py-2 font-semibold">TÊN DANH MỤC</th>
-                  <th className="px-4 py-2 font-semibold text-center">HÀNH ĐỘNG</th>
+                  <th className="px-4 py-2 font-semibold">SLUG (PATH)</th>
+                  {/* ✅ SỬA Ở ĐÂY: Thêm 'whitespace-nowrap' và tăng 'w-32' */}
+                  <th className="px-4 py-2 font-semibold text-center w-32 whitespace-nowrap">
+                    HÀNH ĐỘNG
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -202,17 +249,32 @@ export default function CategoryManagementPage() {
                     <td className="px-4 py-2">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
+                    <td className="px-4 py-2">
+                      <img
+                        src={`${IMAGE_BASE_URL}${cat.imageUrl}`}
+                        alt={cat.name}
+                        className="w-12 h-12 object-cover rounded"
+                        onError={(e) =>
+                          (e.currentTarget.src =
+                            "https://placehold.co/48x48/e0f2fe/0284c7?text=?")
+                        }
+                      />
+                    </td>
                     <td className="px-4 py-2">{cat.name}</td>
-                    <td className="px-4 py-2 text-center space-x-2">
+                    <td className="px-4 py-2">{cat.slug}</td>
+                    {/* ✅ SỬA Ở ĐÂY: Thêm 'flex items-center justify-center' */}
+                    <td className="px-4 py-2 text-center space-x-2 flex items-center justify-center">
                       <button
                         title="Sửa"
                         onClick={() => {
-                            setEditCategory(cat);
-                            setIsEditModalOpen(true);
-                          }}
+                          setEditCategory(cat);
+                          setEditCategoryFile(null);
+                          setIsEditModalOpen(true);
+                        }}
                         className="text-yellow-600 hover:text-yellow-800"
                       >
-                        ✏️
+                        {" "}
+                        ✏️{" "}
                       </button>
                       <button
                         title="Xoá"
@@ -222,7 +284,8 @@ export default function CategoryManagementPage() {
                         }}
                         className="text-red-600 hover:text-red-800"
                       >
-                        🗑️
+                        {" "}
+                        🗑️{" "}
                       </button>
                     </td>
                   </tr>
@@ -231,7 +294,6 @@ export default function CategoryManagementPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           <Pagination
             currentPage={currentPage}
             totalPages={Math.ceil(categories.length / itemsPerPage)}
@@ -243,7 +305,7 @@ export default function CategoryManagementPage() {
       {/* Add Category Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+          <div className="bg-white rounded-lg shadow-2xl p-6 w-96">
             <h2 className="text-lg font-semibold mb-4 text-center">
               Thêm danh mục mới
             </h2>
@@ -254,18 +316,36 @@ export default function CategoryManagementPage() {
               onChange={(e) => setNewCategoryName(e.target.value)}
               className="w-full border border-gray-300 rounded p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+            <input
+              type="text"
+              placeholder="Nhập slug (ví dụ: thuoc-ho)"
+              value={newCategorySlug}
+              onChange={(e) => setNewCategorySlug(e.target.value)}
+              className="w-full border border-gray-300 rounded p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <label className="block text-gray-700 text-sm mb-2">
+              Ảnh đại diện
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full border border-gray-300 rounded p-2 mb-4"
+            />
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
-                Hủy
+                {" "}
+                Hủy{" "}
               </button>
               <button
                 onClick={handleAddCategory}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
-                Lưu
+                {" "}
+                Lưu{" "}
               </button>
             </div>
           </div>
@@ -275,29 +355,67 @@ export default function CategoryManagementPage() {
       {/* Edit Category Modal */}
       {isEditModalOpen && editCategory && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 className="text-lg font-semibold mb-4 text-center">Chỉnh sửa danh mục</h2>
+          <div className="bg-white rounded-lg shadow-2xl p-6 w-96">
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              Chỉnh sửa danh mục
+            </h2>
+            <label className="block text-gray-700 text-sm mb-2">
+              Tên danh mục
+            </label>
             <input
               type="text"
-              placeholder="Nhập tên danh mục..."
               value={editCategory.name}
               onChange={(e) =>
                 setEditCategory({ ...editCategory, name: e.target.value })
               }
-              className="w-full border border-gray-300 rounded p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-gray-300 rounded p-2 mb-4"
+            />
+            <label className="block text-gray-700 text-sm mb-2">
+              Slug (Đường dẫn)
+            </label>
+            <input
+              type="text"
+              value={editCategory.slug}
+              onChange={(e) =>
+                setEditCategory({ ...editCategory, slug: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded p-2 mb-4"
+            />
+            <label className="block text-gray-700 text-sm mb-2">
+              Ảnh hiện tại
+            </label>
+            <img
+              src={`${IMAGE_BASE_URL}${editCategory.imageUrl}`}
+              alt="Ảnh cũ"
+              className="w-20 h-20 object-cover rounded mb-4"
+              onError={(e) =>
+                (e.currentTarget.src =
+                  "https://placehold.co/80x80/e0f2fe/0284c7?text=?")
+              }
+            />
+            <label className="block text-gray-700 text-sm mb-2">
+              Tải lên ảnh mới (nếu muốn đổi)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleEditFileChange}
+              className="w-full border border-gray-300 rounded p-2 mb-4"
             />
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
-                Hủy
+                {" "}
+                Hủy{" "}
               </button>
               <button
                 onClick={handleEditCategory}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
-                Lưu
+                {" "}
+                Lưu{" "}
               </button>
             </div>
           </div>
@@ -307,7 +425,7 @@ export default function CategoryManagementPage() {
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && categoryToDelete && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+          <div className="bg-white rounded-lg shadow-2xl p-6 w-96">
             <h2 className="text-lg font-semibold mb-4 text-center text-red-600">
               Xác nhận xoá
             </h2>
