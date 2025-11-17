@@ -1,21 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-// 1. Import Link
 import { Link } from "react-router-dom";
 import Product from "../../components/common/Product";
 import RandomProduct from "../../components/common/RandomProduct";
 import { BASE_IMAGE_URL } from "../../helper/constants";
-
-// 2. Import cho useRef và icons
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-// Import một số icon mẫu, bạn có thể thay thế bằng icon của riêng bạn
-import {
-  FaPills,
-  FaLeaf,
-  FaUserMd,
-  FaFirstAid,
-  FaHeartbeat,
-  FaQuestionCircle, // Icon này không còn là mặc định
-} from "react-icons/fa";
+// ✅ Không cần import icon (FaPills, v.v.) nữa
 
 // Interface cho Product (giữ nguyên)
 interface ProductDto {
@@ -27,65 +16,25 @@ interface ProductDto {
   unit: string;
 }
 
-// Interface cho Category từ API (giữ nguyên)
+// ✅ 1. Cập nhật Interface
 interface ApiCategoryDto {
   id: number;
   name: string;
+  imageUrl: string; // ✅ Thêm
+  slug: string; // ✅ Thêm
 }
 
-// 3. Interface mới cho Category sẽ hiển thị (thêm icon VÀ path)
-interface DisplayCategory {
-  id: number;
-  name: string;
-  icon: React.ElementType; // Kiểu dữ liệu cho một component Icon
-  path: string; // <-- Thêm đường dẫn
-}
-
-// 4. "Từ điển" được nâng cấp
-// Chứa cả icon và path
-// BẠN PHẢI CẬP NHẬT KEY VÀ PATH CHO KHỚP VỚI DỰ ÁN CỦA BẠN
-const categoryDataMap: {
-  [key: string]: { icon: React.ElementType; path: string };
-} = {
-  Thuốc: {
-    icon: FaPills,
-    path: "/drugs", // <-- Cập nhật path này
-  },
-  "Thực phẩm chức năng": {
-    icon: FaLeaf,
-    path: "/functional-foods", // <-- Cập nhật path này
-  },
-  "Chăm sóc cá nhân": {
-    icon: FaUserMd,
-    path: "/personal-care", // <-- Cập nhật path này
-  },
-  "Thiết bị y tế": {
-    icon: FaFirstAid,
-    path: "/medical-devices",
-  },
-  "Kiểm tra sức khỏe": {
-    icon: FaHeartbeat,
-    path: "/health-check",
-  },
-};
-
-// Dữ liệu mặc định nếu không tìm thấy
-const defaultCategoryData = {
-  // ✅ ĐÃ THAY ĐỔI: Icon mặc định giờ là FaPills
-  icon: FaPills,
-  path: "/products", // Đường dẫn mặc định cho danh mục mới
-};
+// ✅ 2. Định nghĩa URL cơ sở cho ảnh
+const IMAGE_BASE_URL = "http://localhost:8080/uploads/categories/";
 
 export default function HomePage() {
   const [products, setProducts] = useState<ProductDto[]>([]);
-  const [categories, setCategories] = useState<DisplayCategory[]>([]);
+  const [categories, setCategories] = useState<ApiCategoryDto[]>([]); // ✅ Dùng interface mới
   const [visibleCount, setVisibleCount] = useState(8);
-
-  // Thêm useRef để tham chiếu đến container cuộn
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fetch products
+    // Fetch products (giữ nguyên)
     fetch("/api/medicines/best-selling")
       .then((res) => res.json())
       .then((data) => setProducts(data))
@@ -95,22 +44,11 @@ export default function HomePage() {
     fetch("/api/categories")
       .then((res) => res.json())
       .then((apiCategories: ApiCategoryDto[]) => {
-        // 5. Cập nhật logic map để lấy cả icon và path
-        const displayCategories = apiCategories.map((apiCat) => {
-          // Dòng này sẽ tự động gán defaultCategoryData (với icon FaPills)
-          // nếu apiCat.name không tìm thấy trong categoryDataMap
-          const data = categoryDataMap[apiCat.name] ?? defaultCategoryData;
-          return {
-            id: apiCat.id,
-            name: apiCat.name,
-            icon: data.icon, // Lấy icon
-            path: data.path, // Lấy path
-          };
-        });
-        setCategories(displayCategories);
+        // ✅ 3. Không cần map hay từ điển nữa!
+        setCategories(apiCategories);
       })
       .catch(() => console.error("Không thể tải danh mục sản phẩm"));
-  }, []); // Rỗng để chỉ chạy 1 lần
+  }, []);
 
   // Hàm xử lý "Xem thêm"
   const handleShowMore = () => {
@@ -133,7 +71,7 @@ export default function HomePage() {
 
   return (
     <div className="bg-white">
-      {/* Banner section */}
+      {/* Banner section (giữ nguyên) */}
       <div
         className="relative h-[400px] bg-center bg-cover max-w-screen-xl mx-auto"
         style={{ backgroundImage: "url(/images/Banner.jpg)" }}
@@ -173,27 +111,30 @@ export default function HomePage() {
             ref={scrollContainerRef}
             className="flex items-start space-x-6 overflow-x-auto scroll-smooth scrollbar-hide py-4 px-12" // px-12 để chừa chỗ cho mũi tên
           >
-            {/* Render danh mục từ state */}
-            {categories.map((cat) => {
-              const IconComponent = cat.icon; // Lấy component Icon
-              return (
-                // Thay thế 'div' bằng 'Link'
-                <Link
-                  key={cat.id}
-                  to={cat.path} // <-- Sử dụng path từ state
-                  className="flex flex-col items-center flex-shrink-0 w-28 cursor-pointer group"
-                >
-                  {/* Khối chứa Icon (giống trong hình) */}
-                  <div className="w-16 h-16 rounded-lg bg-blue-100 flex items-center justify-center transition group-hover:bg-blue-200">
-                    <IconComponent className="text-blue-600 text-3xl" />
-                  </div>
-                  {/* Tên danh mục */}
-                  <p className="mt-2 text-sm font-medium text-gray-700 text-center break-words">
-                    {cat.name}
-                  </p>
-                </Link> // <-- Đóng thẻ Link
-              );
-            })}
+            {/* ✅ 4. Cập nhật logic render */}
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={cat.slug} // ✅ Dùng slug từ API
+                className="flex flex-col items-center flex-shrink-0 w-28 cursor-pointer group"
+              >
+                {/* Khối chứa Icon giờ là <img> */}
+                <img
+                  src={`${IMAGE_BASE_URL}${cat.imageUrl}`}
+                  alt={cat.name}
+                  className="w-16 h-16 rounded-lg object-cover bg-gray-100 transition group-hover:opacity-90 shadow-sm"
+                  // Thêm fallback
+                  onError={(e) =>
+                    (e.currentTarget.src =
+                      "https://placehold.co/64x64/e0f2fe/0284c7?text=?")
+                  }
+                />
+                {/* Tên danh mục */}
+                <p className="mt-2 text-sm font-medium text-gray-700 text-center break-words">
+                  {cat.name}
+                </p>
+              </Link>
+            ))}
           </div>
 
           {/* Mũi tên Phải */}
@@ -207,7 +148,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Best Selling Products */}
+      {/* Best Selling Products (giữ nguyên) */}
       <section className="py-12 px-4">
         <h2 className="text-2xl font-bold text-center text-blue-700 mb-8">
           Best Selling Products
