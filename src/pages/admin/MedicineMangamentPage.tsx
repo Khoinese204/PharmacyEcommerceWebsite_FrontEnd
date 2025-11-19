@@ -7,7 +7,25 @@ import Pagination from "../../components/admin/TablePagination";
 import SearchBar from "../../components/admin/SearchBar";
 import MedicineTable from "../../components/admin/MedicineTable";
 import MedicineFilterBar from "../../components/admin/MedicineFilterBar";
-import type { Medicine } from "../../components/admin/MedicineTable";
+
+export interface Medicine {
+  id: number;
+  name: string;
+  price?: number;
+  originalPrice?: number;
+  imageUrl?: string;
+  unit: string;
+  categoryId: number;
+  category?: { id: number; name: string };
+  expiryDate?: string;
+  stock?: number;
+  description?: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
 
 const menu = [
   { label: "Bảng điều khiển", path: "/admin/dashboard" },
@@ -15,14 +33,12 @@ const menu = [
   { label: "Thuốc", path: "/admin/medicines" },
   { label: "Danh mục thuốc", path: "/admin/categories" },
   { label: "Mã giảm giá", path: "/admin/coupons" },
-//   { label: "Kho", path: "/admin/warehouse" },
-//   { label: "Doanh thu", path: "/admin/revenue" },
-//   { label: "Khách hàng", path: "/admin/customers" },
-//   { label: "Lịch sử giá", path: "/admin/price-history" },
 ];
 
 export default function MedicineManagementPage() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
   const [selectedMenu, setSelectedMenu] = useState("Thuốc");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
@@ -32,6 +48,27 @@ export default function MedicineManagementPage() {
   const itemsPerPage = 8;
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [resMed, resCat] = await Promise.all([
+          fetch("/api/medicines"),
+          fetch("/api/categories"),
+        ]);
+
+        const dataMed = await resMed.json();
+        const dataCat = await resCat.json();
+
+        setMedicines(dataMed);
+        setCategories(dataCat);
+      } catch (err) {
+        console.error("Lỗi khi tải dữ liệu:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const onReset = () => {
     setCategoryFilter("");
@@ -44,22 +81,31 @@ export default function MedicineManagementPage() {
   };
 
   const filteredMedicines = medicines.filter((med) => {
-    const matchCategory =
-      categoryFilter === "" ||
-      (categoryFilter === "Thuốc" && med.categoryId === 1) ||
-      (categoryFilter === "Thực phẩm chức năng" && med.categoryId === 2) ||
-      (categoryFilter === "Chăm sóc cá nhân" && med.categoryId === 3);
+    let matchCategory = true;
+    if (categoryFilter !== "") {
+      const targetCat = categories.find((c) => c.name === categoryFilter);
+      if (targetCat) {
+        const medCatId = med.categoryId || med.category?.id;
+        matchCategory = medCatId === targetCat.id;
+      } else {
+        matchCategory = false;
+      }
+    }
+
+    // ✅ 2. SỬA LỖI Ở ĐÂY: Sử dụng (med.price ?? 0)
+    // Toán tử ?? 0 nghĩa là: nếu med.price là null/undefined thì lấy giá trị 0
+    const currentPrice = med.price ?? 0;
 
     const matchPrice =
       priceFilter === "" ||
-      (priceFilter === "Dưới 100.000đ" && med.price < 100000) ||
+      (priceFilter === "Dưới 100.000đ" && currentPrice < 100000) ||
       (priceFilter === "100.000đ - 300.000đ" &&
-        med.price >= 100000 &&
-        med.price <= 300000) ||
+        currentPrice >= 100000 &&
+        currentPrice <= 300000) ||
       (priceFilter === "300.000đ - 500.000đ" &&
-        med.price > 300000 &&
-        med.price <= 500000) ||
-      (priceFilter === "Trên 500.000đ" && med.price > 500000);
+        currentPrice > 300000 &&
+        currentPrice <= 500000) ||
+      (priceFilter === "Trên 500.000đ" && currentPrice > 500000);
 
     const matchSearch =
       searchKeyword.trim() === "" ||
@@ -73,20 +119,6 @@ export default function MedicineManagementPage() {
     currentPage * itemsPerPage
   );
 
-  useEffect(() => {
-    const fetchMedicines = async () => {
-      try {
-        const res = await fetch("/api/medicines");
-        const data = await res.json();
-        setMedicines(data);
-      } catch (err) {
-        console.error("Lỗi khi tải danh sách thuốc:", err);
-      }
-    };
-
-    fetchMedicines();
-  }, []);
-
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
       {/* Sidebar */}
@@ -95,7 +127,7 @@ export default function MedicineManagementPage() {
         {menu.map((item, idx) => (
           <button
             key={idx}
-            onClick={() => navigate(item.path)} // chuyển trang
+            onClick={() => navigate(item.path)}
             className={`block w-full text-left px-3 py-2 rounded transition ${
               selectedMenu === item.label
                 ? "bg-blue-500 text-white"
@@ -140,7 +172,7 @@ export default function MedicineManagementPage() {
             </div>
           </div>
 
-          {/* Filter + Thêm người dùng */}
+          {/* Filter + Thêm thuốc */}
           <div className="flex justify-between items-center px-6 mb-4">
             <MedicineFilterBar
               categoryFilter={categoryFilter}

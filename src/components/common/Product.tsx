@@ -1,103 +1,71 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../../pages/customer/CartContext"; // Đường dẫn tùy vị trí file
-import { toast } from "react-toastify";
+import React from "react";
+import { Link } from "react-router-dom";
 
-type ProductType = {
-  id: number;
+// ✅ CẬP NHẬT INTERFACE TẠI ĐÂY
+export interface ProductProps {
+  id: number; // <-- ⚠️ QUAN TRỌNG: Phải thêm dòng này
   name: string;
   image: string;
-  originalPrice: number;
   price: number;
+  originalPrice?: number;
   unit: string;
-};
-
-type ProductProps = {
-  products: ProductType[];
-  categoryPath: string; // <-- thêm dòng này
-};
-
-export default function Product({ products, categoryPath }: ProductProps) {
-  const { addToCart, isInCart } = useCart();
-  const navigate = useNavigate();
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-      {products.map((product) => {
-        const isDiscounted = product.originalPrice > product.price;
-        const discountPercent = isDiscounted
-          ? Math.round(
-              ((product.originalPrice - product.price) /
-                product.originalPrice) *
-                100
-            )
-          : 0;
-
-        return (
-          <div
-            key={product.id}
-            className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col justify-between h-[360px] text-left hover:shadow-md transition"
-          >
-            {/* ⛳ Phần click để xem chi tiết */}
-            <div
-              onClick={() => navigate(`/${categoryPath}/${product.id}`)}
-              className="cursor-pointer"
-            >
-              <div className="relative mb-3">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="h-40 w-full object-contain"
-                />
-                {isDiscounted && (
-                  <span className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-br-md">
-                    Khuyến mãi
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm font-medium text-gray-800 mb-1 line-clamp-2">
-                {product.name}
-              </p>
-
-              <div className="min-h-[1.25rem]">
-                {isDiscounted && (
-                  <p className="text-gray-400 text-sm line-through mb-0">
-                    {product.originalPrice.toLocaleString()}đ
-                  </p>
-                )}
-              </div>
-
-              <p className="text-blue-700 font-bold text-base mb-2">
-                {product.price.toLocaleString()}đ/{product.unit}
-              </p>
-            </div>
-
-            {/* ✅ Nút thêm vào giỏ hàng – không nằm trong Link */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isInCart(product.id)) {
-                  toast.error("Sản phẩm đã tồn tại trong giỏ hàng!", {
-                    position: "top-center",
-                  });
-                  return;
-                }
-                addToCart({
-                  id: product.id,
-                  name: product.name,
-                  image: product.image,
-                  unit: product.unit,
-                  originalPrice: product.originalPrice,
-                  price: product.price,
-                });
-                toast.success("Đã thêm vào giỏ hàng!");
-              }}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white text-sm py-1 px-4 rounded-full mt-auto"
-            >
-              Thêm vào giỏ hàng
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
+
+const Product: React.FC<ProductProps> = ({
+  id, // <-- Nhận id vào đây
+  name,
+  image,
+  price,
+  originalPrice,
+  unit,
+}) => {
+  return (
+    // Ví dụ: Link tới trang chi tiết sản phẩm
+    <Link
+      to={`/medicines/${id}`}
+      className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100"
+    >
+      <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
+        <img
+          src={image}
+          alt={name}
+          className="max-h-full max-w-full object-contain p-4"
+          onError={(e) =>
+            (e.currentTarget.src = "https://placehold.co/150x150?text=No+Image")
+          }
+        />
+        {originalPrice && originalPrice > price && (
+          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            -{Math.round(((originalPrice - price) / originalPrice) * 100)}%
+          </span>
+        )}
+      </div>
+
+      <div className="p-4">
+        <h3
+          className="text-gray-800 font-medium text-sm line-clamp-2 h-10 mb-2"
+          title={name}
+        >
+          {name}
+        </h3>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-600 font-bold text-lg">
+              {price.toLocaleString("vi-VN")} đ
+            </span>
+            <span className="text-gray-500 text-xs">/ {unit}</span>
+          </div>
+
+          {originalPrice && originalPrice > price && (
+            <span className="text-gray-400 text-xs line-through">
+              {originalPrice.toLocaleString("vi-VN")} đ
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+export default Product;

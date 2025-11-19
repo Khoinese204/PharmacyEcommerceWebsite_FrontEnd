@@ -4,9 +4,8 @@ import Product from "../../components/common/Product";
 import RandomProduct from "../../components/common/RandomProduct";
 import { BASE_IMAGE_URL } from "../../helper/constants";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-// ✅ Không cần import icon (FaPills, v.v.) nữa
 
-// Interface cho Product (giữ nguyên)
+// Interface cho Product
 interface ProductDto {
   id: number;
   name: string;
@@ -16,25 +15,25 @@ interface ProductDto {
   unit: string;
 }
 
-// ✅ 1. Cập nhật Interface
+// Interface cho Category từ API
 interface ApiCategoryDto {
   id: number;
   name: string;
-  imageUrl: string; // ✅ Thêm
-  slug: string; // ✅ Thêm
+  imageUrl: string;
+  slug: string;
 }
 
-// ✅ 2. Định nghĩa URL cơ sở cho ảnh
+// Định nghĩa URL cơ sở cho ảnh category
 const IMAGE_BASE_URL = "http://localhost:8080/uploads/categories/";
 
 export default function HomePage() {
   const [products, setProducts] = useState<ProductDto[]>([]);
-  const [categories, setCategories] = useState<ApiCategoryDto[]>([]); // ✅ Dùng interface mới
+  const [categories, setCategories] = useState<ApiCategoryDto[]>([]);
   const [visibleCount, setVisibleCount] = useState(8);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fetch products (giữ nguyên)
+    // Fetch products
     fetch("/api/medicines/best-selling")
       .then((res) => res.json())
       .then((data) => setProducts(data))
@@ -44,13 +43,11 @@ export default function HomePage() {
     fetch("/api/categories")
       .then((res) => res.json())
       .then((apiCategories: ApiCategoryDto[]) => {
-        // ✅ 3. Không cần map hay từ điển nữa!
         setCategories(apiCategories);
       })
       .catch(() => console.error("Không thể tải danh mục sản phẩm"));
   }, []);
 
-  // Hàm xử lý "Xem thêm"
   const handleShowMore = () => {
     if (visibleCount < products.length) {
       setVisibleCount((prev) => prev + 4);
@@ -59,7 +56,6 @@ export default function HomePage() {
 
   const visibleProducts = products.slice(0, visibleCount);
 
-  // Hàm xử lý cuộn
   const handleScroll = (scrollOffset: number) => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
@@ -71,7 +67,7 @@ export default function HomePage() {
 
   return (
     <div className="bg-white">
-      {/* Banner section (giữ nguyên) */}
+      {/* Banner section */}
       <div
         className="relative h-[400px] bg-center bg-cover max-w-screen-xl mx-auto"
         style={{ backgroundImage: "url(/images/Banner.jpg)" }}
@@ -88,18 +84,17 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Danh mục sản phẩm (Kiểu cuộn ngang) */}
+      {/* Danh mục sản phẩm */}
       <section className="py-12 px-4 text-center">
         <h2 className="text-2xl font-bold text-blue-700">Danh Mục Sản Phẩm</h2>
         <p className="text-gray-600 mt-2">
           Giải pháp chăm sóc sức khỏe toàn diện cho bạn và gia đình.
         </p>
 
-        {/* Container tương đối để chứa các mũi tên tuyệt đối */}
         <div className="relative max-w-screen-xl mx-auto mt-8">
           {/* Mũi tên Trái */}
           <button
-            onClick={() => handleScroll(-300)} // Cuộn 300px sang trái
+            onClick={() => handleScroll(-300)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition"
             aria-label="Cuộn sang trái"
           >
@@ -109,27 +104,25 @@ export default function HomePage() {
           {/* Container cuộn */}
           <div
             ref={scrollContainerRef}
-            className="flex items-start space-x-6 overflow-x-auto scroll-smooth scrollbar-hide py-4 px-12" // px-12 để chừa chỗ cho mũi tên
+            className="flex items-start space-x-6 overflow-x-auto scroll-smooth scrollbar-hide py-4 px-12"
           >
-            {/* ✅ 4. Cập nhật logic render */}
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                to={cat.slug} // ✅ Dùng slug từ API
+                // ✅ SỬA Ở ĐÂY: Thêm tiền tố "/category/" vào trước slug
+                // Ví dụ: slug là "thuoc" -> link sẽ là "/category/thuoc"
+                to={`/category/${cat.slug}`}
                 className="flex flex-col items-center flex-shrink-0 w-28 cursor-pointer group"
               >
-                {/* Khối chứa Icon giờ là <img> */}
                 <img
                   src={`${IMAGE_BASE_URL}${cat.imageUrl}`}
                   alt={cat.name}
                   className="w-16 h-16 rounded-lg object-cover bg-gray-100 transition group-hover:opacity-90 shadow-sm"
-                  // Thêm fallback
                   onError={(e) =>
                     (e.currentTarget.src =
                       "https://placehold.co/64x64/e0f2fe/0284c7?text=?")
                   }
                 />
-                {/* Tên danh mục */}
                 <p className="mt-2 text-sm font-medium text-gray-700 text-center break-words">
                   {cat.name}
                 </p>
@@ -139,7 +132,7 @@ export default function HomePage() {
 
           {/* Mũi tên Phải */}
           <button
-            onClick={() => handleScroll(300)} // Cuộn 300px sang phải
+            onClick={() => handleScroll(300)}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition"
             aria-label="Cuộn sang phải"
           >
@@ -148,7 +141,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Best Selling Products (giữ nguyên) */}
+      {/* Best Selling Products */}
       <section className="py-12 px-4">
         <h2 className="text-2xl font-bold text-center text-blue-700 mb-8">
           Best Selling Products

@@ -5,14 +5,15 @@ import { toast } from "react-toastify";
 export default function MedicineActionButtons({
   medicineId,
 }: {
-  medicineId: string;
+  medicineId: number; // ✅ Đã sửa: Đổi từ string sang number để khớp với cha
 }) {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleDelete = async () => {
     try {
-      const res = await fetch(`/api/medicines/${Number(medicineId)}`, {
+      // medicineId đã là number nên không cần Number() nữa, nhưng giữ cũng không sao
+      const res = await fetch(`/api/medicines/${medicineId}`, {
         method: "DELETE",
       });
 
