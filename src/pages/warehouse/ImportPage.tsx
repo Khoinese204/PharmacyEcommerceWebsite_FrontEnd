@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import ImportTable, { ImportOrder } from "../../components/warehouse/ImportTable";
+import ImportTable, {
+  ImportOrder,
+} from "../../components/warehouse/ImportTable";
 import ImportFilterBar from "../../components/warehouse/ImportFilterBar";
 import Pagination from "../../components/admin/TablePagination";
 import Breadcrumb from "../../components/admin/Breadcrumb";
@@ -44,7 +46,9 @@ export default function ImportPage() {
 
   // ✅ Lọc dữ liệu
   const filteredImports = imports.filter((imp) => {
-    const matchesSupplier = imp.supplier.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSupplier = imp.supplier
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesSupplier;
   });
 
@@ -89,11 +93,15 @@ export default function ImportPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-4">
           <div className="mb-2">
-            <Breadcrumb items={[{ label: "Nhập kho", path: "/warehouse/import" }]} />
+            <Breadcrumb
+              items={[{ label: "Nhập kho", path: "/warehouse/import" }]}
+            />
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Quản lý nhập kho</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Quản lý nhập kho
+            </h2>
           </div>
 
           <div className="flex justify-between items-center mb-4">
@@ -129,4 +137,3 @@ export default function ImportPage() {
     </div>
   );
 }
-

@@ -1,133 +1,165 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Breadcrumb from "../../components/admin/Breadcrumb";
-import { FaUser } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { FaTrash, FaPlus, FaSave, FaUser } from "react-icons/fa";
+import { toast } from "react-toastify";
 
+// Interface cho dữ liệu thuốc hiển thị trong dropdown
+interface MedicineOption {
+  id: number;
+  name: string;
+  unit: string;
+  originalPrice: number; // Thêm giá gốc để gợi ý
+}
+
+// Interface cho Supplier
+interface SupplierOption {
+  id: number;
+  name: string;
+}
+
+// Interface cho từng dòng trong giỏ hàng nhập
+interface CartItem {
+  medicineId: number;
+  medicineName: string; // Để hiển thị
+  unit: string; // Để hiển thị
+  quantity: number;
+  unitPrice: number;
+  expiredAt: string; // YYYY-MM-DD
+}
+
+const menu = [
+  { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
+  { label: "Kho", path: "/warehouse/inventory" },
+  { label: "Nhập kho", path: "/warehouse/import" },
+  { label: "Xuất kho", path: "/warehouse/export" },
+  { label: "Nhà cung cấp", path: "/warehouse/supplier" },
+  { label: "Vận chuyển", path: "/warehouse/shipment" },
+];
 
 export default function AddImportPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const selectedProductName = location.state?.selectedProductName || "";
+  const [selectedMenu, setSelectedMenu] = useState("Nhập kho"); // State để highlight sidebar
 
-  const [selectedMenu, setSelectedMenu] = useState("Nhập kho");
+  // --- Data Sources ---
+  const [medicines, setMedicines] = useState<MedicineOption[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierOption[]>([]);
 
-  type Product = { id: number; name: string; originalPrice: number };
-  type Supplier = { id: number; name: string };
+  // --- Form States ---
+  const [supplierId, setSupplierId] = useState<number | "">("");
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  // State cho dòng đang nhập liệu
+  const [selectedMedId, setSelectedMedId] = useState<number | "">("");
+  const [quantity, setQuantity] = useState<number>(1);
+  const [unitPrice, setUnitPrice] = useState<number>(0);
+  const [expiredAt, setExpiredAt] = useState<string>("");
 
-  const [formData, setFormData] = useState({
-    productId: "",
-    supplierId: "",
-    importDate: new Date().toISOString().split("T")[0],
-    quantity: 1,
-    unitPrice: 0,
-    expiredAt: "",
-  });
+  // State danh sách chờ nhập (Quan trọng nhất)
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-//   useEffect(() => {
-//     axios
-//       .get("/api/medicines")
-//       .then((res) => setProducts(res.data))
-//       .catch((err) => console.error("Lỗi load thuốc:", err));
-
-//     axios
-//       .get("/api/suppliers")
-//       .then((res) => setSuppliers(res.data))
-//       .catch((err) => console.error("Lỗi load nhà cung cấp:", err));
-//   }, []);
-
+  // --- 1. Load dữ liệu ban đầu ---
   useEffect(() => {
-    const fetchData = async () => {
-        try {
-        const [productRes, supplierRes] = await Promise.all([
-            axios.get("/api/medicines"),
-            axios.get("/api/suppliers"),
-        ]);
+    // Load Suppliers
+    axios
+      .get("/api/suppliers")
+      .then((res) => setSuppliers(res.data))
+      .catch(console.error);
+    // Load Medicines
+    axios
+      .get("/api/medicines")
+      .then((res) => setMedicines(res.data))
+      .catch(console.error);
+  }, []);
 
-        setProducts(productRes.data);
-        setSuppliers(supplierRes.data);
+  // --- 2. Xử lý khi chọn thuốc (tự động điền giá gợi ý) ---
+  const handleMedicineChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const medId = Number(e.target.value);
+    setSelectedMedId(medId);
 
-        // ✅ Nếu có selectedProductName thì tự động set vào form
-        if (selectedProductName) {
-            const foundProduct = productRes.data.find(
-            (p: any) =>
-                p.name.toLowerCase() === selectedProductName.toLowerCase()
-            );
-            if (foundProduct) {
-            setFormData((prev) => ({
-                ...prev,
-                productId: String(foundProduct.id),
-                unitPrice: foundProduct.originalPrice,
-            }));
-            }
-        }
-        } catch (err) {
-        console.error("❌ Lỗi tải dữ liệu:", err);
-        }
-    };
-
-    fetchData();
-    }, [selectedProductName]);
-
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    if (name === "productId") {
-      const selected = products.find((p) => p.id === Number(value));
-      setFormData((prev) => ({
-        ...prev,
-        productId: value,
-        unitPrice: selected ? selected.originalPrice : 0,
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+    // Tìm thuốc để lấy giá gốc gợi ý
+    const selectedMed = medicines.find((m) => m.id === medId);
+    if (selectedMed) {
+      setUnitPrice(selectedMed.originalPrice || 0);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // --- 3. Xử lý thêm vào danh sách tạm ---
+  const handleAddToCart = () => {
+    if (!selectedMedId || quantity <= 0 || unitPrice < 0 || !expiredAt) {
+      toast.warning("Vui lòng điền đầy đủ thông tin thuốc!");
+      return;
+    }
 
-    const requestBody = {
-      supplierId: Number(formData.supplierId),
-      items: [
-        {
-          medicineId: Number(formData.productId),
-          quantity: Number(formData.quantity),
-          unitPrice: Number(formData.unitPrice),
-          expiredAt: formData.expiredAt,
-        },
-      ],
+    const selectedMed = medicines.find((m) => m.id === Number(selectedMedId));
+    if (!selectedMed) return;
+
+    const newItem: CartItem = {
+      medicineId: selectedMed.id,
+      medicineName: selectedMed.name,
+      unit: selectedMed.unit,
+      quantity: Number(quantity),
+      unitPrice: Number(unitPrice),
+      expiredAt: expiredAt,
+    };
+
+    // Thêm vào danh sách
+    setCart([...cart, newItem]);
+
+    // Reset form nhập liệu (giữ lại ngày hết hạn cho tiện nếu nhập nhiều lô cùng date)
+    setSelectedMedId("");
+    setQuantity(1);
+    setUnitPrice(0);
+    // setExpiredAt(""); // Có thể giữ lại hoặc reset tùy trải nghiệm
+  };
+
+  // --- 4. Xóa khỏi danh sách tạm ---
+  const handleRemoveFromCart = (index: number) => {
+    const newCart = [...cart];
+    newCart.splice(index, 1);
+    setCart(newCart);
+  };
+
+  // --- 5. Tính tổng tiền ---
+  const totalAmount = cart.reduce(
+    (acc, item) => acc + item.quantity * item.unitPrice,
+    0
+  );
+
+  // --- 6. Gửi API (Lưu phiếu nhập) ---
+  const handleSubmit = async () => {
+    if (supplierId === "") {
+      toast.error("Vui lòng chọn nhà cung cấp!");
+      return;
+    }
+    if (cart.length === 0) {
+      toast.error("Danh sách nhập đang trống!");
+      return;
+    }
+
+    const payload = {
+      supplierId: Number(supplierId),
+      items: cart.map((item) => ({
+        medicineId: item.medicineId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        expiredAt: item.expiredAt,
+      })),
     };
 
     try {
-      await axios.post("/api/import", requestBody);
-      alert("Tạo đơn nhập thành công!");
+      await axios.post("/api/import", payload);
+      toast.success("Nhập kho thành công!");
       navigate("/warehouse/import");
     } catch (error) {
-      console.error("Lỗi tạo đơn nhập:", error);
-      alert("Tạo đơn nhập thất bại.");
+      console.error(error);
+      toast.error("Có lỗi xảy ra khi nhập kho.");
     }
   };
 
-  const menu = [
-    { label: "Bảng điều khiển", path: "/warehouse/dashboard" },
-    { label: "Kho", path: "/warehouse/inventory" },
-    { label: "Nhập kho", path: "/warehouse/import" },
-    { label: "Xuất kho", path: "/warehouse/export" },
-    { label: "Nhà cung cấp", path: "/warehouse/supplier" },
-    { label: "Vận chuyển", path: "/warehouse/shipment" },
-  ];
-
   return (
     <div className="h-full w-full fixed inset-0 flex bg-gray-50 text-sm overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar (Giống AddSupplierPage) */}
       <aside className="w-60 bg-white shadow-md px-4 py-6 space-y-4">
         <div className="font-bold text-lg text-blue-600 mb-6">PrimeCare</div>
         {menu.map((item, idx) => (
@@ -145,10 +177,9 @@ export default function AddImportPage() {
         ))}
       </aside>
 
-      {/* Main Content */}
+      {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        {/* Header */}
+        {/* Header (Giống AddSupplierPage) */}
         <header className="flex items-center px-6 py-4 bg-white shadow-sm shrink-0">
           <div className="ml-auto flex items-center gap-4 text-black text-lg">
             <Link to="/warehouse/account">
@@ -157,135 +188,226 @@ export default function AddImportPage() {
           </div>
         </header>
 
-        {/* Main Form */}
+        {/* Main Content (Phần logic nhập hàng loạt) */}
         <main className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="mb-2">
+          <div className="mb-4">
             <Breadcrumb
               items={[
                 { label: "Nhập kho", path: "/warehouse/import" },
-                { label: "Tạo đơn nhập hàng" },
+                { label: "Tạo phiếu nhập", path: "#" },
               ]}
             />
           </div>
 
           <h2 className="text-left text-xl font-semibold mb-4">
-            Tạo đơn nhập hàng
+            Tạo phiếu nhập hàng loạt
           </h2>
 
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-xl shadow w-full max-w-xl"
-          >
-            {/* Thuốc */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Thuốc</label>
-              <select
-                name="productId"
-                value={formData.productId}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
-              >
-                <option value="">-- Chọn thuốc --</option>
-                {products.map((p, index) => (
-                  <option key={p.id} value={p.id}>
-                    {`B${index + 1} - ${p.name}`}
-                  </option>
-                ))}
-              </select>
+          <div className="flex gap-6 flex-col lg:flex-row">
+            {/* CỘT TRÁI: FORM NHẬP LIỆU */}
+            <div className="w-full lg:w-1/3 space-y-6">
+              {/* 1. Chọn Nhà Cung Cấp */}
+              <div className="bg-white p-5 rounded-xl shadow">
+                <h3 className="font-bold text-gray-700 mb-3 border-b pb-2">
+                  Thông tin phiếu
+                </h3>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Nhà cung cấp
+                </label>
+                <select
+                  className="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50"
+                  value={supplierId}
+                  onChange={(e) => setSupplierId(Number(e.target.value))}
+                >
+                  <option value="">-- Chọn nhà cung cấp --</option>
+                  {suppliers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 2. Form thêm thuốc */}
+              <div className="bg-white p-5 rounded-xl shadow">
+                <h3 className="font-bold text-gray-700 mb-3 border-b pb-2">
+                  Thêm chi tiết
+                </h3>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Chọn thuốc
+                    </label>
+                    <select
+                      className="w-full border p-2 rounded bg-gray-50"
+                      value={selectedMedId}
+                      onChange={handleMedicineChange}
+                    >
+                      <option value="">-- Chọn thuốc --</option>
+                      {medicines.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.unit})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">
+                        Số lượng
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="w-full border p-2 rounded bg-gray-50"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">
+                        Giá nhập (đ)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full border p-2 rounded bg-gray-50"
+                        value={unitPrice}
+                        onChange={(e) => setUnitPrice(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Hạn sử dụng
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full border p-2 rounded bg-gray-50"
+                      value={expiredAt}
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(e) => setExpiredAt(e.target.value)}
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleAddToCart}
+                    className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2 mt-2 transition"
+                  >
+                    <FaPlus /> Thêm vào danh sách
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Nhà cung cấp */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Nhà cung cấp
-              </label>
-              <select
-                name="supplierId"
-                value={formData.supplierId}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
-              >
-                <option value="">-- Chọn nhà cung cấp --</option>
-                {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* CỘT PHẢI: DANH SÁCH CHỜ & TỔNG KẾT */}
+            <div className="w-full lg:w-2/3 flex flex-col gap-6">
+              <div className="bg-white p-5 rounded-xl shadow flex-1">
+                <h3 className="font-bold text-gray-700 mb-4 flex justify-between items-center">
+                  <span>Danh sách thuốc chờ nhập</span>
+                  <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    {cart.length} sản phẩm
+                  </span>
+                </h3>
 
-            {/* Ngày tạo đơn */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Ngày tạo đơn
-              </label>
-              <input
-                type="date"
-                name="importDate"
-                value={formData.importDate}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                disabled
-              />
-            </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left border-collapse">
+                    <thead className="bg-gray-100 text-gray-700">
+                      <tr>
+                        <th className="p-3 rounded-tl-lg">STT</th>
+                        <th className="p-3">Tên thuốc</th>
+                        <th className="p-3 text-center">ĐVT</th>
+                        <th className="p-3 text-right">SL</th>
+                        <th className="p-3 text-right">Đơn giá</th>
+                        <th className="p-3 text-right">Thành tiền</th>
+                        <th className="p-3">Hạn SD</th>
+                        <th className="p-3 text-center rounded-tr-lg">Xóa</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cart.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={8}
+                            className="text-center py-8 text-gray-400 italic"
+                          >
+                            Chưa có sản phẩm nào trong phiếu nhập.
+                          </td>
+                        </tr>
+                      ) : (
+                        cart.map((item, index) => (
+                          <tr
+                            key={index}
+                            className="border-b hover:bg-gray-50 transition"
+                          >
+                            <td className="p-3">{index + 1}</td>
+                            <td className="p-3 font-medium text-blue-600">
+                              {item.medicineName}
+                            </td>
+                            <td className="p-3 text-center">{item.unit}</td>
+                            <td className="p-3 text-right font-mono">
+                              {item.quantity}
+                            </td>
+                            <td className="p-3 text-right font-mono">
+                              {item.unitPrice.toLocaleString("vi-VN")}
+                            </td>
+                            <td className="p-3 text-right font-bold font-mono text-gray-800">
+                              {(item.quantity * item.unitPrice).toLocaleString(
+                                "vi-VN"
+                              )}
+                            </td>
+                            <td className="p-3 text-gray-600">
+                              {new Date(item.expiredAt).toLocaleDateString(
+                                "vi-VN"
+                              )}
+                            </td>
+                            <td className="p-3 text-center">
+                              <button
+                                onClick={() => handleRemoveFromCart(index)}
+                                className="text-red-500 hover:text-red-700 transition p-1 hover:bg-red-50 rounded"
+                                title="Xóa dòng này"
+                              >
+                                <FaTrash />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-            {/* Số lượng */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Số lượng</label>
-              <input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                min={1}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
-              />
+              {/* TỔNG KẾT & ACTIONS */}
+              <div className="bg-white p-5 rounded-xl shadow">
+                <div className="flex justify-between items-center mb-4 text-lg border-b pb-4">
+                  <span className="font-bold text-gray-700">
+                    Tổng giá trị phiếu nhập:
+                  </span>
+                  <span className="font-bold text-red-600 text-2xl">
+                    {totalAmount.toLocaleString("vi-VN")} đ
+                  </span>
+                </div>
+                <div className="flex justify-end gap-4">
+                  <button
+                    onClick={() => navigate("/warehouse/import")}
+                    className="px-6 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 transition"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="px-8 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-200 transition transform active:scale-95"
+                  >
+                    <FaSave /> Xác nhận nhập kho
+                  </button>
+                </div>
+              </div>
             </div>
-
-            {/* Đơn giá */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Giá nhập (VNĐ)
-              </label>
-              <input
-                type="number"
-                name="unitPrice"
-                value={formData.unitPrice}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                min={0}
-                required
-              />
-            </div>
-
-            {/* Ngày hết hạn */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Ngày hết hạn
-              </label>
-              <input
-                type="date"
-                name="expiredAt"
-                value={formData.expiredAt}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 bg-gray-50"
-                required
-                min={new Date().toISOString().split("T")[0]}
-              />
-            </div>
-
-            <div className="text-center">
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded"
-              >
-                Xác nhận nhập hàng
-              </button>
-            </div>
-          </form>
+          </div>
         </main>
       </div>
     </div>
