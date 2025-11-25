@@ -7,6 +7,7 @@ import AdminRoutes from "./routes/AdminRoutes";
 import SalesRoutes from "./routes/SalesRoutes";
 import WarehouseRoutes from "./routes/WarehouseRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
+import PharmacistRoutes from "./routes/PharmacistRoutes";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -22,8 +23,9 @@ function App() {
       case "Warehouse":
         return "/warehouse/dashboard";
       case "Customer":
-      case "Pharmacist":
         return "/";
+      case "Pharmacist":
+        return "/pharmacist/support-chat";
       default:
         return "/auth";
     }
@@ -48,8 +50,11 @@ function App() {
             {role === "Warehouse" && (
               <Route path="/warehouse/*" element={<WarehouseRoutes />} />
             )}
-            {(role === "Customer" || role === "Pharmacist") && (
+            {role === "Customer" && (
               <Route path="/*" element={<CustomerRoutes />} />
+            )}
+            {role === "Pharmacist" && (
+              <Route path="/pharmacist/*" element={<PharmacistRoutes />} />
             )}
 
             {/* Catch-all: nếu vào path không đúng thì tự động chuyển đúng trang theo role */}

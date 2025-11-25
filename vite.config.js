@@ -6,6 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 // vite.config.ts
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    global: "window",
+  },
   server: {
     port: 3000,
     proxy: {

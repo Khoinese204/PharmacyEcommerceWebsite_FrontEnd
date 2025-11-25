@@ -4,6 +4,7 @@ import Product from "../../components/common/Product";
 import RandomProduct from "../../components/common/RandomProduct";
 import { BASE_IMAGE_URL } from "../../helper/constants";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import CustomerChatWidget from "../../components/common/CustomerChatWidget";
 
 // Interface cho Product
 interface ProductDto {
@@ -68,6 +69,7 @@ export default function HomePage() {
   return (
     <div className="bg-white">
       {/* Banner section */}
+
       <div
         className="relative h-[400px] bg-center bg-cover max-w-screen-xl mx-auto"
         style={{ backgroundImage: "url(/images/Banner.jpg)" }}
@@ -86,6 +88,7 @@ export default function HomePage() {
 
       {/* Danh mục sản phẩm */}
       <section className="py-12 px-4 text-center">
+        <CustomerChatWidget />
         <h2 className="text-2xl font-bold text-blue-700">Danh Mục Sản Phẩm</h2>
         <p className="text-gray-600 mt-2">
           Giải pháp chăm sóc sức khỏe toàn diện cho bạn và gia đình.
