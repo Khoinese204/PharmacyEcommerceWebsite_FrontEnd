@@ -31,6 +31,9 @@ const CustomerChatWidget: React.FC = () => {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 👇 state mới: đóng/mở khung chat
+  const [isOpen, setIsOpen] = useState(false);
+
   const stompClientRef = useRef<Stomp.Client | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,7 +46,7 @@ const CustomerChatWidget: React.FC = () => {
     }
   }, [messages]);
 
-  // 1) Khi mở widget → tạo / lấy room + load lịch sử + connect WS
+  // Khởi tạo phòng chat + WS (vẫn giữ như cũ, chỉ chạy 1 lần khi component mount)
   useEffect(() => {
     if (!token) {
       setError("Bạn cần đăng nhập để sử dụng chat hỗ trợ.");
@@ -158,157 +161,255 @@ const CustomerChatWidget: React.FC = () => {
     setInput("");
   };
 
-  if (!token) {
-    return (
-      <div className="chat-widget">
-        <p>Hãy đăng nhập để trò chuyện với dược sĩ.</p>
-      </div>
-    );
-  }
-
+  // ====================== RENDER ======================
   return (
-    <div
-      className="chat-widget"
-      style={{
-        position: "fixed",
-        bottom: 20,
-        right: 20,
-        width: 320,
-        height: 420,
-        background: "#fff",
-        borderRadius: 12,
-        boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        zIndex: 9999,
-      }}
-    >
-      {/* Header */}
+    <>
+      {/* Nút tròn "Tư vấn" cố định góc dưới bên phải */}
       <div
         style={{
-          padding: "8px 12px",
-          background: "#0f766e",
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          fontSize: 14,
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          zIndex: 40,
         }}
       >
-        <div>
-          <div style={{ fontWeight: 600 }}>Tư vấn cùng dược sĩ</div>
-          {/* <div style={{ fontSize: 12, opacity: 0.9 }}>
-            {room?.pharmacistName
-              ? `Đang kết nối: ${room.pharmacistName}`
-              : "Đang tìm dược sĩ hỗ trợ..."}
-          </div> */}
-        </div>
-        <div
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: connected ? "#22c55e" : "#9ca3af",
-          }}
-        />
-      </div>
-
-      {/* Body messages */}
-      <div
-        style={{
-          flex: 1,
-          padding: "8px 10px",
-          overflowY: "auto",
-          fontSize: 13,
-          background: "#f9fafb",
-        }}
-      >
-        {connecting && <div>Đang khởi tạo phòng chat...</div>}
-        {error && (
-          <div style={{ color: "red", marginBottom: 8 }}>
-            {error}
-            <br />
-          </div>
-        )}
-
-        {messages.map((m) => {
-          const isMe = m.senderRole === "CUSTOMER"; // phía khách
-          return (
+        {!isOpen && (
+          <button
+            onClick={() => {
+              if (!token) {
+                alert(
+                  "Bạn cần đăng nhập để sử dụng tính năng chat với dược sĩ."
+                );
+                return;
+              }
+              setIsOpen(true);
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#0000FF",
+              color: "#fff",
+              borderRadius: 999,
+              padding: "6px 10px",
+              border: "none",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+              cursor: "pointer",
+            }}
+          >
             <div
-              key={m.id}
               style={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: "2px solid #fff",
+                background: "#fff",
                 display: "flex",
-                justifyContent: isMe ? "flex-end" : "flex-start",
-                marginBottom: 6,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <div
-                style={{
-                  maxWidth: "75%",
-                  padding: "6px 8px",
-                  borderRadius: 8,
-                  background: isMe ? "#0ea5e9" : "#e5e7eb",
-                  color: isMe ? "#fff" : "#111827",
-                  fontSize: 13,
-                  whiteSpace: "pre-wrap",
-                  textAlign: "left", // 👈 THÊM DÒNG NÀY
-                  wordBreak: "break-word", // (tuỳ chọn) để không tràn dòng
+              <img
+                src="/images/pharmacist.png"
+                alt="Tư vấn"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "";
                 }}
-              >
-                <div>{m.content}</div>
-              </div>
+              />
             </div>
-          );
-        })}
-
-        <div ref={messagesEndRef} />
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Tư vấn cùng dược sĩ
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* Input */}
-      <div
-        style={{
-          borderTop: "1px solid #e5e7eb",
-          padding: "6px",
-          display: "flex",
-          gap: 6,
-        }}
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          placeholder="Nhập câu hỏi của bạn..."
+      {/* Khung chat – chỉ mở khi isOpen = true */}
+      {isOpen && (
+        <div
           style={{
-            flex: 1,
-            fontSize: 13,
-            padding: "6px 8px",
-            borderRadius: 8,
-            border: "1px solid #d1d5db",
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={!input.trim()}
-          style={{
-            padding: "6px 10px",
-            borderRadius: 8,
-            border: "none",
-            background: "#0f766e",
-            color: "#fff",
-            fontSize: 13,
-            cursor: input.trim() ? "pointer" : "not-allowed",
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            width: 320,
+            height: 420,
+            background: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            zIndex: 50,
           }}
         >
-          Gửi
-        </button>
-      </div>
-    </div>
+          {/* Header */}
+          <div
+            style={{
+              padding: "8px 12px",
+              background: "#0611dbff",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: 14,
+            }}
+          >
+            {/* LEFT SIDE */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontWeight: 600 }}>Tư vấn cùng dược sĩ</div>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: connected ? "#22c55e" : "#9ca3af",
+                }}
+              />
+            </div>
+
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                border: "none",
+                background: "rgba(255,255,255,0.25)",
+                color: "#fff",
+                fontSize: 16,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 0,
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Nếu chưa đăng nhập */}
+          {!token ? (
+            <div
+              style={{
+                flex: 1,
+                padding: 16,
+                fontSize: 13,
+                background: "#f9fafb",
+              }}
+            >
+              Bạn cần đăng nhập để trò chuyện với dược sĩ.
+            </div>
+          ) : (
+            <>
+              {/* Body messages */}
+              <div
+                style={{
+                  flex: 1,
+                  padding: "8px 10px",
+                  overflowY: "auto",
+                  fontSize: 13,
+                  background: "#f9fafb",
+                }}
+              >
+                {connecting && <div>Đang khởi tạo phòng chat...</div>}
+                {error && (
+                  <div style={{ color: "red", marginBottom: 8 }}>
+                    {error}
+                    <br />
+                  </div>
+                )}
+
+                {messages.map((m) => {
+                  const isMe = m.senderRole === "CUSTOMER"; // phía khách
+                  return (
+                    <div
+                      key={m.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: isMe ? "flex-end" : "flex-start",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <div
+                        style={{
+                          maxWidth: "75%",
+                          padding: "6px 8px",
+                          borderRadius: 8,
+                          background: isMe ? "#0ea5e9" : "#e5e7eb",
+                          color: isMe ? "#fff" : "#111827",
+                          fontSize: 13,
+                          whiteSpace: "pre-wrap",
+                          textAlign: "left",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        <div>{m.content}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div
+                style={{
+                  borderTop: "1px solid #e5e7eb",
+                  padding: "6px",
+                  display: "flex",
+                  gap: 6,
+                }}
+              >
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder="Nhập câu hỏi của bạn..."
+                  style={{
+                    flex: 1,
+                    fontSize: 13,
+                    padding: "6px 8px",
+                    borderRadius: 8,
+                    border: "1px solid #d1d5db",
+                  }}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#0000FF",
+                    color: "#fff",
+                    fontSize: 13,
+                    cursor: input.trim() ? "pointer" : "not-allowed",
+                  }}
+                >
+                  Gửi
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </>
   );
 };
 

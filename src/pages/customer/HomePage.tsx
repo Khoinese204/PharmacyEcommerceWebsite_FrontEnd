@@ -5,6 +5,7 @@ import RandomProduct from "../../components/common/RandomProduct";
 import { BASE_IMAGE_URL } from "../../helper/constants";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import CustomerChatWidget from "../../components/common/CustomerChatWidget";
+import AiAssistantWidget from "../../components/common/AiAssistantWidget";
 
 // Interface cho Product
 interface ProductDto {
@@ -88,6 +89,7 @@ export default function HomePage() {
 
       {/* Danh mục sản phẩm */}
       <section className="py-12 px-4 text-center">
+        <AiAssistantWidget />
         <CustomerChatWidget />
         <h2 className="text-2xl font-bold text-blue-700">Danh Mục Sản Phẩm</h2>
         <p className="text-gray-600 mt-2">
