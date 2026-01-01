@@ -7,6 +7,7 @@ import OrderChart from "../../components/admin/OrderChart";
 const menu = [
   { label: "Bảng điều khiển", path: "/sales/dashboard" },
   { label: "Đơn hàng", path: "/sales/orders" },
+  { label: "Chat", path: "/sales/chat" },
 ];
 
 export default function DashboardPage() {
